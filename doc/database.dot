@@ -2,8 +2,9 @@ graph train{
 	node[shape=box]; station; line; 近郊区間;
 	node[shape=diamond]; 駅リスト; 所属;
 	node[shape=ellipse];
+	station -- id;
 	station -- 駅名;
-	station -- 駅名コード;
+	station -- 電略;
 	station -- 所属[label="N"];
 	所属 -- 近郊区間[label="1"];
 	line -- 路線名;
@@ -12,7 +13,9 @@ graph train{
 	line -- 所属会社;
 	駅リスト -- station[label="M"];
 	駅リスト -- 営業キロ;
+	駅リスト -- 所属会社;
 	近郊区間名前[label="名前"];
+	近郊区間 -- id;
 	近郊区間 -- 近郊区間名前;
-	近郊区間 -- 有効距離;
+	近郊区間 -- 中心駅;
 }
