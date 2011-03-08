@@ -103,3 +103,7 @@ class Route{
 特定の条件で折り返す区間に乗車する時には運賃を払わなくてもよい。
 このうち特定の特急に乗車する場合に限り発動するものもある。
 ただ、発券時には問題にならないのでスルー。
+
+*使用するSELECT文
+あまりにも複雑なのでメモする。
+SELECT * FROM kilo,station,line,company where line.id=kilo.line AND kilo.station = station.id AND (line.company = company.id AND line.company != 0 OR line.company=0 AND kilo.company=company.id);
