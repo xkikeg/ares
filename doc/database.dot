@@ -5,6 +5,7 @@ graph train{
 	station -- id;
 	station -- 駅名;
 	station -- 電略;
+	station -- 電車特定区間;
 	station -- 所属[label="N"];
 	所属 -- 近郊区間[label="1"];
 	line -- 路線名;
