@@ -44,7 +44,8 @@ def mktable_from_csv(db, tablename, filename = None):
     # Third one means 'other' column is integer and
     # 'foo' table's 'name' column value is written.
     # This program will find foo(name) and insert foo(id) value.
-    headline = [i.split(':') for i in csv.readline()[:-1].split(',')]
+    parse_csv = lambda x: (string.strip(i, '"') for i in x[:-1].split(','))
+    headline = [i.split(':') for i in parse_csv(csv.readline())]
     names = tuple(i[0] for i in headline)
     types = tuple(i[1] for i in headline)
     constraint = tuple(i[2] if len(i) > 2 else None for i in headline)
@@ -58,10 +59,11 @@ def mktable_from_csv(db, tablename, filename = None):
                     for opt in constraint)
 
     # Read rows.
-    rawrows = [tuple(i[:-1].split(',')) for i in csv.readlines()]
+    rawrows = [tuple(parse_csv(i)) for i in csv.readlines()]
     rows = []
     if DEBUG: print names, types, constraint, foreignkey, options
     for row in rawrows:
+        if row[0] == "": continue
         cols = []
         for i, col in enumerate(row):
             if foreignkey[i] is None:
@@ -128,7 +130,10 @@ def mktable_from_csv(db, tablename, filename = None):
         try:
             db.execute(sql, row)
         except:
-            print >>sys.stderr, "Error occurred: ", row
+            print >>sys.stderr, "Error occurred: ",
+            for i in row:
+                print i, "@",
+            print ""
             raise
 
 
@@ -141,8 +146,10 @@ def mksqldb():
     db.commit()
     db.close()
 
+
 def main():
     mksqldb()
+
 
 if(__name__ == "__main__"):
     main()
