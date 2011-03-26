@@ -12,7 +12,7 @@ DEBUG = False
 #DEBUG = True
 DEBUG_ALLROWS = False
 #DEBUG_ALLROWS = True
-TARGETS = ("company", "densha", "station", "line", "city", "kilo")
+TARGETS = ("company", "densha", "urban", "station", "line", "city", "kilo")
 
 class CSVParseException(Exception):
     pass
@@ -29,23 +29,21 @@ def typechange(x, typestring, isnull):
         return x
 
 
-def mktable_from_csv(db, tablename, filename = None):
-    if DEBUG: print "Start Table: ", tablename
-    if filename is None: filename = DATA_DIR + tablename + ".csv"
-    # Open CSV file.
-    csv = open(filename, 'r')
+def parse_csv(line):
+    return tuple(string.strip(i, '"') for i in line[:-1].split(','))
 
-    # Read header.
-    # Header format is like that shown below.
-    # id:integer:p, name:text:un, other:integer::foo[name]
-    # Header is separated with comma.
-    # First one means 'id' column is integer and primary key.
-    # Second one means 'name' column is text and UNIQUE NOT NULL.
-    # Third one means 'other' column is integer and
-    # 'foo' table's 'name' column value is written.
-    # This program will find foo(name) and insert foo(id) value.
-    parse_csv = lambda x: (string.strip(i, '"') for i in x[:-1].split(','))
-    headline = [i.split(':') for i in parse_csv(csv.readline())]
+
+# Read header.
+# Header format is like that shown below.
+# id:integer:p, name:text:un, other:integer::foo[name]
+# Header is separated with comma.
+# First one means 'id' column is integer and primary key.
+# Second one means 'name' column is text and UNIQUE NOT NULL.
+# Third one means 'other' column is integer and
+# 'foo' table's 'name' column value is written.
+# This program will find foo(name) and insert foo(id) value.
+def parse_header(line):
+    headline = [i.split(':') for i in parse_csv(line)]
     names = tuple(i[0] for i in headline)
     types = tuple(i[1] for i in headline)
     constraint = tuple(i[2] if len(i) > 2 else None for i in headline)
@@ -57,11 +55,26 @@ def mktable_from_csv(db, tablename, filename = None):
                      (" UNIQUE"   if string.find(opt, 'u') >= 0 else " "))
                     if opt is not None else " "
                     for opt in constraint)
+    return (names, types, constraint, foreignkey, primarykey, options)
+
+
+def mktable_from_csv(db, tablename, filename = None):
+    if DEBUG: print "Start Table: ", tablename
+    if filename is None: filename = DATA_DIR + tablename + ".csv"
+    # Open CSV file.
+    csv = open(filename, 'r')
+    # Read header.
+    (names,
+     types,
+     constraint,
+     foreignkey,
+     primarykey,
+     options) = parse_header(csv.readline())
+    if DEBUG: print names, types, constraint, foreignkey, options
 
     # Read rows.
-    rawrows = [tuple(parse_csv(i)) for i in csv.readlines()]
+    rawrows = [parse_csv(i) for i in csv.readlines()]
     rows = []
-    if DEBUG: print names, types, constraint, foreignkey, options
     for row in rawrows:
         if row[0] == "": continue
         cols = []
