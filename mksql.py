@@ -12,7 +12,7 @@ DEBUG = False
 #DEBUG = True
 DEBUG_ALLROWS = False
 #DEBUG_ALLROWS = True
-
+TARGETS = ("company", "densha", "station", "line", "city", "kilo")
 
 class CSVParseException(Exception):
     pass
@@ -141,7 +141,7 @@ def mksqldb():
     if os.path.exists(DB_NAME): os.unlink(DB_NAME)
     db = sqlite3.connect(DB_NAME)
     db.execute("PRAGMA foreign_keys = ON;")
-    for i in ("company", "station", "line", "urban", "kilo"):
+    for i in TARGETS:
         mktable_from_csv(db, i)
     db.commit()
     db.close()
