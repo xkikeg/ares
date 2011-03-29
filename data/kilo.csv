@@ -1,4 +1,4 @@
-"line:integer:p:line[name]","station:integer:p:station[name]","realkilo:integer","fakekilo:integer","company:integer::company[name]"
+"lineid:integer:p:line[linename]","stationid:integer:p:station[stationname]","realkilo:integer","fakekilo:integer","kilocompanyid:integer::company[companyname]"
 "江差","江差",0,0,
 "江差","上ノ国",61,67,
 "江差","中須田",93,102,

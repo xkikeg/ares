@@ -1,4 +1,4 @@
-"name:text:u","yomi:text","denryaku:text:u","urban:integer::urban[name]","city:integer","yamanote:integer","densha:integer::densha[name]","comment:trash"
+"stationname:text:u","stationyomi:text","stationdenryaku:text:u","urbanid:integer::urban[urbanname]","cityid:integer","yamanote:integer","denshaid:integer::densha[denshaname]","comment:trash"
 "江差","えさし","セカエシ",,,,,"江差"
 "上ノ国","かみのくに","セカカニ",,,,,
 "中須田","なかすだ","セカスタ",,,,,

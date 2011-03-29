@@ -1,4 +1,4 @@
-"name:text:u","yomi:text:u","code:integer:u","is_main:integer","company:integer::company[name]","comment:trash"
+"linename:text:u","lineyomi:text:u","linecode:integer:u","is_main:integer","linecompanyid:integer::company[companyname]","comment:trash"
 "東北新幹線","とうほくしんかんせん",35,1,"本州",
 "上越新幹線","じょうえつしんかんせん",50,1,"本州",
 "北陸新幹線","ほくりくしんかんせん",4,1,"本州",

@@ -1,4 +1,4 @@
-id:integer:p,name:text:n
+denshaid:integer:p,denshaname:text:n
 1,東京
 2,大阪
 3,山手

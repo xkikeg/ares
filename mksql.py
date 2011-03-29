@@ -86,8 +86,9 @@ def mktable_from_csv(db, tablename, filename = None):
             elif string.upper(col) == "NULL" or col == "":
                 x = "NULL"
             else:
-                cur = db.execute("SELECT id FROM %s WHERE %s='%s'" %
-                                 (foreignkey[i][0], foreignkey[i][1], col)
+                cur = db.execute("SELECT %sid FROM %s WHERE %s='%s'" %
+                                 (foreignkey[i][0], foreignkey[i][0],
+                                  foreignkey[i][1], col)
                                  ).fetchone()
                 if cur is not None and len(cur) > 0: x = cur[0]
                 else:
@@ -113,7 +114,7 @@ def mktable_from_csv(db, tablename, filename = None):
 
     # Add primary key 'id' if there is not any primary key.
     if len(primarykey) == 0:
-        names = ("id", ) + names
+        names = (tablename+"id", ) + names
         types = ("INTEGER", ) + types
         constraint = ("p", ) + constraint
         foreignkey = (None, ) + foreignkey
@@ -124,8 +125,8 @@ def mktable_from_csv(db, tablename, filename = None):
            ",".join(i+" "+j+" "+k for i,j,k in zip(names, types, options)) +
            (", PRIMARY KEY (%s)" % ",".join(i for i in primarykey)
             if len(primarykey) > 0 else "") +
-           "".join(", FOREIGN KEY(%s) REFERENCES %s(id)" %
-                   (names[i], fkey[0])
+           "".join(", FOREIGN KEY(%s) REFERENCES %s(%sid)" %
+                   (names[i], fkey[0], fkey[0])
                    for i, fkey in enumerate(foreignkey)
                    if fkey is not None) +
            ");")

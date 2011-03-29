@@ -1,4 +1,4 @@
-id:integer:p,name:text,central:integer::station[name]
+cityid:integer:p,cityname:text,central:integer::station[stationname]
 1,札幌,札幌
 2,仙台,仙台
 3,東京,東京
