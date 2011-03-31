@@ -1,0 +1,35 @@
+# .PHONY: all install clean
+
+# .SUBDIRS:
+
+# CXXFLAGS +=
+# ASFLAGS +=
+LDFLAGS += -lsqlite3
+# INCLUDES +=
+
+################################################
+# Uncomment the following section if you want
+# to build a C program in the current directory.
+#
+
+CFILES[] =
+   cdatabase
+   croute
+   test
+
+MAIN = test
+
+.DEFAULT: $(CXXProgram $(MAIN), $(CFILES))
+
+################################################
+# Uncomment the following section if you want to build a C library
+# in the current directory.
+#
+
+# LIBFILES[] =
+#    file1
+#    file2
+#
+# LIB = libxxx
+#
+# .DEFAULT: $(StaticCLibrary $(LIB), $(LIBFILES))
