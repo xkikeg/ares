@@ -1,15 +1,11 @@
 #include <string>
-#include <exception>
+#include <boost/tr1/memory.hpp>
 #include <boost/utility.hpp>
-#include <sqlite3.h>
+#include "sqlite3_wrapper.h"
 #include "ares.h"
 
 namespace ares
 {
-  class IOException : public std::exception
-  {
-  };
-
   enum SearchMode {
     SEARCH_PREFIX,
     SEARCH_SUFFIX,
@@ -21,20 +17,19 @@ namespace ares
    * With this object, you can search station or line name,
    * get connections of lines and so on.
    */
+  using sqlite3_wrapper::SQLite;
+  typedef sqlite3_wrapper::IOException IOException;
   class CDatabase : boost::noncopyable
   {
   private:
-    sqlite3 *db;
+    std::tr1::shared_ptr<SQLite> db;
   public:
     /**
      * Constructor.
      * Construct a CDatabase object with database filename.
      * @param[in] dbname The filename of SQLite database.
      */
-    CDatabase(const char * dbname);
-
-    /// Destructor
-    ~CDatabase();
+    CDatabase(const char * dbname) : db(new SQLite(dbname, SQLITE_OPEN_READONLY)){}
 
     /**
      * Convert function from line id to name.

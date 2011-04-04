@@ -16,24 +16,6 @@ namespace ares
     }
   }
 
-  CDatabase::CDatabase(const char * dbname)
-  {
-    int rc;
-    rc = sqlite3_open_v2(dbname, &db, SQLITE_OPEN_READONLY, NULL);
-    if(rc != SQLITE_OK)
-      {
-	const char * errmsg = sqlite3_errmsg(db);
-	std::cerr << errmsg << std::endl;
-	sqlite3_close(db);
-	throw IOException();
-      }
-  }
-
-  CDatabase::~CDatabase()
-  {
-    sqlite3_close(db);
-  }
-
   std::string CDatabase::get_line_name(line_id_t line) const
   {
     return "";
@@ -101,14 +83,14 @@ namespace ares
     //        OR name LIKE '%name%' (if not forward)
     //        ;
     // SQL Injection can cause.
-    int ret;
+    int rc;
     char * query = sqlite3_mprintf("SELECT id FROM station WHERE name LIKE"
 				   "'%s%%' OR name LIKE '（%%）%s%%';",
 				   name, name);
-    ret = sqlite3_exec(db, query, callback_pushstation, &list, NULL);
-    if(ret != SQLITE_OK)
+    rc = sqlite3_exec(db->ptr(), query, callback_pushstation, &list, NULL);
+    if(rc != SQLITE_OK)
       {
-	std::cerr << sqlite3_errmsg(db) << std::endl;
+	std::cerr << db->errmsg() << std::endl;
 	return false;
       }
     sqlite3_free(query);
@@ -120,22 +102,19 @@ namespace ares
 					   station_vector & list) const
   {
     // SELECT id FROM station WHERE yomi LIKE 'name%';
-    int ret;
-    sqlite3_stmt * station_yomi_stmt = NULL;
+    int rc;
     std::string name_ = name;
     name_ += "%";
     const char * sql = "SELECT id FROM station WHERE yomi LIKE ?;";
-    sqlite3_prepare(db, sql, std::strlen(sql), &station_yomi_stmt, NULL);
-    sqlite3_reset(station_yomi_stmt);
-    char * name__ = sqlite3_mprintf("%Q", name_.c_str());
-    sqlite3_bind_text(station_yomi_stmt, 1, name__, std::strlen(name__), sqlite3_free);
-    while((ret = sqlite3_step(station_yomi_stmt)) == SQLITE_ROW)
+    sqlite3_wrapper::SQLiteStmt station_yomi_stmt(*db, sql, std::strlen(sql));
+    station_yomi_stmt.reset();
+    station_yomi_stmt.bind(1, name_);
+    while((rc = station_yomi_stmt.step()) == SQLITE_ROW)
       {
-	list.push_back(sqlite3_column_int(station_yomi_stmt, 0));
+	list.push_back(station_yomi_stmt.column(0));
       }
-    if (ret != SQLITE_DONE)
-      std::cerr << sqlite3_errmsg(db) << std::endl;
-    sqlite3_finalize(station_yomi_stmt);
+    if (rc != SQLITE_DONE)
+      std::cerr << db->errmsg() << std::endl;
   }
 
   bool CDatabase::search_station_with_denryaku(const char * name,
