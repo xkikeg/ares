@@ -6,7 +6,8 @@
 
 namespace ares
 {
-  enum SearchMode {
+  enum search_mode {
+    SEARCH_PARTIAL,
     SEARCH_PREFIX,
     SEARCH_SUFFIX,
     SEARCH_EXACT,
@@ -68,37 +69,37 @@ namespace ares
      * @param[out] list vector to add found line id's.
      */
     bool search_line(const char * name,
-		     const SearchMode mode,
+		     const search_mode mode,
 		     line_vector & list) const;
 
     //! Seach lines from line name with kanji.
     bool search_line_with_name(const char * name,
-			       const SearchMode mode,
+			       const search_mode mode,
 			       line_vector & list) const;
     //! Seach lines from line name with yomi.
     bool search_line_with_yomi(const char * name,
-			       const SearchMode mode,
+			       const search_mode mode,
 			       line_vector & list) const;
     //! Seach lines from line name with denryaku.
     bool search_line_with_denryaku(const char * name,
-				   const SearchMode mode,
+				   const search_mode mode,
 				   line_vector & list) const;
     //! Search stations from station name.
     bool search_station(const char * name,
-			const SearchMode mode,
+			const search_mode mode,
 			station_vector & list) const;
     //! Seach stations from station name with kanji.
     bool search_station_with_name(const char * name,
-			       const SearchMode mode,
-			       station_vector & list) const;
+				  const search_mode mode,
+				  station_vector & list) const;
     //! Seach stations from station name with yomi.
     bool search_station_with_yomi(const char * name,
-			       const SearchMode mode,
-			       station_vector & list) const;
+				  const search_mode mode,
+				  station_vector & list) const;
     //! Seach stations from station name with denryaku.
     bool search_station_with_denryaku(const char * name,
-				   const SearchMode mode,
-				   station_vector & list) const;
+				      const search_mode mode,
+				      station_vector & list) const;
     //! Search lines connecting with.
     int search_connect_line(line_id_t line,
 			    line_vector & list) const;
