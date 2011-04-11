@@ -1,4 +1,4 @@
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "cdatabase.h"
 
 namespace ares
@@ -12,7 +12,7 @@ namespace ares
   private:
     station_id_t start;
     std::vector<std::pair<line_id_t, station_id_t> > way;
-    boost::shared_ptr<CDatabase> db;
+    std::shared_ptr<CDatabase> db;
   public:
     /**
      * Constructor.

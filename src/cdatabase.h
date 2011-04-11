@@ -1,5 +1,5 @@
 #include <string>
-#include <boost/tr1/memory.hpp>
+#include <memory>
 #include <boost/utility.hpp>
 #include "sqlite3_wrapper.h"
 #include "ares.h"
@@ -23,7 +23,7 @@ namespace ares
   class CDatabase : boost::noncopyable
   {
   private:
-    std::tr1::shared_ptr<SQLite> db;
+    std::unique_ptr<SQLite> db;
   public:
     /**
      * Constructor.
