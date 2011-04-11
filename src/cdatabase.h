@@ -80,10 +80,11 @@ namespace ares
     bool search_line_with_yomi(const char * name,
 			       const search_mode mode,
 			       line_vector & list) const;
-    //! Seach lines from line name with denryaku.
-    bool search_line_with_denryaku(const char * name,
-				   const search_mode mode,
-				   line_vector & list) const;
+    //! Seach lines from line name with alias.
+    bool search_line_with_alias(const char * name,
+				const search_mode mode,
+				line_vector & list) const;
+
     //! Search stations from station name.
     bool search_station(const char * name,
 			const search_mode mode,
@@ -101,7 +102,7 @@ namespace ares
 				      const search_mode mode,
 				      station_vector & list) const;
     //! Search lines connecting with.
-    int search_connect_line(line_id_t line,
-			    line_vector & list) const;
+    bool search_connect_line(line_id_t line,
+			     line_vector & list) const;
   };
 }

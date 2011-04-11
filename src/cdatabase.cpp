@@ -37,7 +37,18 @@ namespace ares
 
   std::string CDatabase::get_line_name(line_id_t line) const
   {
-    return "";
+    const char * sql = "SELECT name FROM line WHERE id = ?";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.reset();
+    stmt.bind(1, line);
+    int rc = stmt.step();
+    if(rc != SQLITE_ROW && rc != SQLITE_DONE)
+      {
+	std::cerr << "such a line id not found: " << line << std::endl;
+	return "";
+      }
+    const char * name = stmt.column(0);
+    return std::string(name);
   }
 
   std::string CDatabase::get_station_name(station_id_t station) const
@@ -79,19 +90,51 @@ namespace ares
 					const search_mode mode,
 					line_vector & list) const
   {
-    return false;
+    int rc;
+    std::string name_(name);
+    add_percent(name_, mode);
+    const char * sql = "SELECT id FROM line WHERE name LIKE ?;";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.reset();
+    stmt.bind(1, name_);
+    while((rc = stmt.step()) == SQLITE_ROW)
+      {
+	list.push_back(stmt.column(0));
+      }
+    if (rc != SQLITE_DONE)
+      {
+	std::cerr << db->errmsg() << std::endl;
+	return false;
+      }
+    return true;
   }
 
   bool CDatabase::search_line_with_yomi(const char * name,
 					const search_mode mode,
 					line_vector & list) const
   {
-    return false;
+    int rc;
+    std::string name_(name);
+    add_percent(name_, mode);
+    const char * sql = "SELECT id FROM line WHERE yomi LIKE ?;";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.reset();
+    stmt.bind(1, name_);
+    while((rc = stmt.step()) == SQLITE_ROW)
+      {
+	list.push_back(stmt.column(0));
+      }
+    if (rc != SQLITE_DONE)
+      {
+	std::cerr << db->errmsg() << std::endl;
+	return false;
+      }
+    return true;
   }
 
-  bool CDatabase::search_line_with_denryaku(const char * name,
-					    const search_mode mode,
-					    line_vector & list) const
+  bool CDatabase::search_line_with_alias(const char * name,
+					 const search_mode mode,
+					 line_vector & list) const
   {
     return false;
   }
@@ -196,10 +239,34 @@ namespace ares
     return true;
   }
 
-  int CDatabase::search_connect_line(line_id_t line,
-				     line_vector & list) const
+  bool CDatabase::search_connect_line(line_id_t line,
+				      line_vector & list) const
   {
-    return 0;
+    int rc;
+    const char * sql =
+      "SELECT line.id FROM line WHERE EXISTS("
+      " SELECT 'X' FROM station WHERE"
+      " EXISTS("
+      "  SELECT 'X' FROM kilo WHERE kilo.line=? AND station.id=kilo.station"
+      " )"
+      " AND"
+      " EXISTS("
+      "  SELECT 'X' FROM kilo WHERE kilo.line=line.id AND station.id=kilo.station"
+      " )"
+      ")";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.reset();
+    stmt.bind(1, line);
+    while((rc = stmt.step()) == SQLITE_ROW)
+      {
+	list.push_back(stmt.column(0));
+      }
+    if(rc != SQLITE_DONE)
+      {
+	std::cerr << db->errmsg() << std::endl;
+	return false;
+      }
+    return true;
   }
 
 }
