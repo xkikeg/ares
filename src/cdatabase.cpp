@@ -164,7 +164,6 @@ namespace ares
     add_percent(name_, mode);
     const char * sql = "SELECT id FROM station WHERE denryaku LIKE ?;";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
-    std::cerr << "name:" << name << ",name_:" << name_ << std::endl;
     std::wstring wname_;
     liquid::multi2wide(name_, wname_);
     if(wname_.length() <= 2)
