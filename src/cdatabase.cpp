@@ -9,13 +9,6 @@ namespace ares
 {
   namespace
   {
-    int callback_pushstation(void * _array, int argc, char ** argv, char ** column)
-    {
-      station_vector * array = static_cast<station_vector*>(_array);
-      array->push_back(std::atoi(argv[0]));
-      return 0;
-    }
-
     bool add_percent(std::string & str, const search_mode mode)
     {
       switch(mode)
