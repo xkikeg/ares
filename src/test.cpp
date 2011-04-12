@@ -6,6 +6,15 @@
 #include <boost/foreach.hpp>
 #include "cdatabase.h"
 
+#define teststation(str, col, mode)					\
+  std::cout << #col << ':' << #mode << ':' << str << '\n';		\
+  db->search_station_with_ ## col(str, ares::SEARCH_##mode, sresult);	\
+  BOOST_FOREACH(ares::station_id_t & e, sresult)			\
+  {									\
+    std::cout << e << '\t' << db->get_station_name(e) << '\n';		\
+  }									\
+  sresult.clear();
+
 void testdb(const char * filename)
 {
   std::unique_ptr<ares::CDatabase> db;
@@ -18,33 +27,11 @@ void testdb(const char * filename)
       exit(EXIT_FAILURE);
     }
   ares::station_vector sresult;
-  std::cout << "name:PREFIX:鹿児島" << std::endl;
-  db->search_station_with_name("鹿児島", ares::SEARCH_PREFIX, sresult);
-  BOOST_FOREACH(ares::station_id_t & e, sresult)
-    {
-      std::cout << e << '\t' << db->get_station_name(e) << std::endl;
-    }
-  sresult.clear();
-  std::cout << "yomi:PREFIX:はっさむ" << std::endl;
-  db->search_station_with_yomi("はっさむ", ares::SEARCH_PREFIX, sresult);
-  BOOST_FOREACH(ares::station_id_t & e, sresult)
-    {
-      std::cout << e << '\t' << db->get_station_name(e) << std::endl;
-    }
-  sresult.clear();
-  std::cout << "denryaku:EXACT:ミフ" << std::endl;
-  db->search_station_with_denryaku("ミフ", ares::SEARCH_EXACT, sresult);
-  BOOST_FOREACH(ares::station_id_t & e, sresult)
-    {
-      std::cout << e << '\t' << db->get_station_name(e) << std::endl;
-    }
-  sresult.clear();
-  std::cout << "denryaku:PREFIX:セカオ" << std::endl;
-  db->search_station_with_denryaku("セカオ", ares::SEARCH_PREFIX, sresult);
-  BOOST_FOREACH(ares::station_id_t & e, sresult)
-    {
-      std::cout << e << '\t' << db->get_station_name(e) << std::endl;
-    }
+  teststation("鹿児島", name, PREFIX);
+  teststation("はっさむ", yomi, PREFIX);
+  teststation("ミフ", denryaku, EXACT);
+  teststation("セカオ", denryaku, PREFIX);
+
   ares::station_vector lresult;
   std::cout << "connect:東海道\n";
   db->search_line_with_name("東海道", ares::SEARCH_EXACT, lresult);
