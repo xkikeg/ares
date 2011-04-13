@@ -67,6 +67,38 @@ namespace ares
     return std::string(name);
   }
 
+  std::string CDatabase::get_station_yomi(station_id_t station) const
+  {
+    const char * sql = "SELECT stationyomi FROM station WHERE stationid = ?";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.reset();
+    stmt.bind(1, station);
+    int rc = stmt.step();
+    if(rc != SQLITE_ROW && rc != SQLITE_DONE)
+      {
+	std::cerr << "such a station id not found: " << station << std::endl;
+	return "";
+      }
+    const char * yomi = stmt.column(0);
+    return std::string(yomi);
+  }
+
+  std::string CDatabase::get_station_denryaku(station_id_t station) const
+  {
+    const char * sql = "SELECT stationdenryaku FROM station WHERE stationid = ?";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.reset();
+    stmt.bind(1, station);
+    int rc = stmt.step();
+    if(rc != SQLITE_ROW && rc != SQLITE_DONE)
+      {
+	std::cerr << "such a station id not found: " << station << std::endl;
+	return "";
+      }
+    const char * denryaku = stmt.column(0);
+    return std::string(denryaku);
+  }
+
   int CDatabase::get_line_name(const line_vector & lines,
 			       std::vector<std::string> & names) const
   {

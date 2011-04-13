@@ -11,7 +11,10 @@
   db->search_station_with_ ## col(str, ares::SEARCH_##mode, sresult);	\
   BOOST_FOREACH(ares::station_id_t & e, sresult)			\
   {									\
-    std::cout << e << '\t' << db->get_station_name(e) << '\n';		\
+    std::cout << e << '\t'						\
+	      << db->get_station_name(e) << '\t'			\
+	      << db->get_station_yomi(e) << '\t'			\
+	      << db->get_station_denryaku(e) << '\n';			\
   }									\
   sresult.clear();
 

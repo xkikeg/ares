@@ -47,6 +47,20 @@ namespace ares
     std::string get_station_name(station_id_t station) const;
 
     /**
+     * Convert function from station id to yomi.
+     * @param[in] station The desired station id.
+     * @return The station yomi corresponding specified station id.
+     */
+    std::string get_station_yomi(station_id_t station) const;
+
+    /**
+     * Convert function from station id to denryaku.
+     * @param[in] station The desired station id.
+     * @return The station denryaku corresponding specified station id.
+     */
+    std::string get_station_denryaku(station_id_t station) const;
+
+    /**
      * Convert function from a list of line id to the one of name.
      * @param[in]  lines The desired line ids.
      * @param[out] names The line names corresponding specified line ids.
