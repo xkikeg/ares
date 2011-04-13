@@ -4,6 +4,7 @@ import re
 import sys
 import string
 import sqlite3
+from optparse import OptionParser
 
 DATA_DIR = "data/"
 #DB_NAME = ":memory:"
@@ -151,9 +152,9 @@ def mktable_from_csv(db, tablename, filename = None):
             raise
 
 
-def mksqldb():
-    if os.path.exists(DB_NAME): os.unlink(DB_NAME)
-    db = sqlite3.connect(DB_NAME)
+def mksqldb(db_name=DB_NAME):
+    if os.path.exists(db_name): os.unlink(db_name)
+    db = sqlite3.connect(db_name)
     db.execute("PRAGMA foreign_keys = ON;")
     for i in TARGETS:
         mktable_from_csv(db, i)
@@ -162,7 +163,11 @@ def mksqldb():
 
 
 def main():
-    mksqldb()
+    usage = "usage: %prog [-d database]"
+    parser = OptionParser(usage)
+    parser.add_option("-d", "--database", default=DB_NAME)
+    (option, args) = parser.parse_args()
+    mksqldb(option.database)
 
 
 if(__name__ == "__main__"):
