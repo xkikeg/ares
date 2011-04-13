@@ -244,16 +244,10 @@ namespace ares
   {
     int rc;
     const char * sql =
-      "SELECT line.lineid FROM line WHERE EXISTS("
-      " SELECT 'X' FROM station WHERE"
-      " EXISTS("
-      "  SELECT 'X' FROM kilo WHERE kilo.lineid=? AND station.stationid=kilo.stationid"
-      " )"
-      " AND"
-      " EXISTS("
-      "  SELECT 'X' FROM kilo WHERE kilo.lineid=line.lineid AND station.stationid=kilo.stationid"
-      " )"
-      ")";
+      "SELECT kilo.lineid FROM kilo NATURAL JOIN station"
+      " WHERE kilo.stationid IN ("
+      "  SELECT kilo.stationid FROM kilo WHERE lineid=?1"
+      " ) AND kilo.lineid != ?1";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.reset();
     stmt.bind(1, line);
