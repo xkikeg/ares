@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <exception>
 #include <boost/tr1/memory.hpp>
