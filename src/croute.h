@@ -36,5 +36,10 @@ namespace ares
      * while its execution.
      */
     int calc_fare_inplace();
+
+    /**
+     * Function to calc fare of Honshu main line from kilo.
+     */
+    static int calc_honshu_main(int kilo);
   };
 }
