@@ -63,7 +63,13 @@ int main(int argc, char ** argv)
       std::exit(EXIT_FAILURE);
     }
 
-  const char * locale = std::setlocale(LC_ALL, "");
-  std::cerr << "Locale: " << locale << std::endl;
+  std::locale loc("");
+  std::locale::global(loc);
+  std::cin.imbue(loc);
+  std::wcin.imbue(loc);
+  std::cout.imbue(loc);
+  std::wcout.imbue(loc);
+  std::cerr.imbue(loc);
+  std::wcerr.imbue(loc);
   testdb(argv[1]);
 }
