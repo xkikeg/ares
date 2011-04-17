@@ -63,22 +63,6 @@ namespace ares
     std::string get_station_denryaku(station_id_t station) const;
 
     /**
-     * Convert function from a list of line id to the one of name.
-     * @param[in]  lines The desired line ids.
-     * @param[out] names The line names corresponding specified line ids.
-     */
-    int get_line_name(const line_vector & lines,
-		      std::vector<std::string> & names) const;
-
-    /**
-     * Convert function from a list of station id to the one of name.
-     * @param[in]  stations The desired station ids.
-     * @param[out] names    The station names corresponding specified station ids.
-     */
-    int get_station_name(const station_vector & stations,
-			 std::vector<std::string> & names) const;
-
-    /**
      * Seach lines from line name.
      * @param[in]  name Specify string to find.
      * @param[in]  mode Specify searching mode.

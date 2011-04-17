@@ -99,23 +99,14 @@ namespace ares
     return std::string(denryaku);
   }
 
-  int CDatabase::get_line_name(const line_vector & lines,
-			       std::vector<std::string> & names) const
-  {
-    return 0;
-  }
-
-  int CDatabase::get_station_name(const station_vector & stations,
-				  std::vector<std::string> & names) const
-  {
-    return 0;
-  }
-
   bool CDatabase::search_line(const char * name,
 			      const search_mode mode,
 			      line_vector & list) const
   {
-    return false;
+    bool ret_name = this->search_line_with_name(name, mode, list);
+    bool ret_yomi = this->search_line_with_yomi(name, mode, list);
+    bool ret_alias = this->search_line_with_alias(name, mode, list);
+    return (ret_name & ret_yomi & ret_alias);
   }
 
   bool CDatabase::search_line_with_name(const char * name,
@@ -168,14 +159,17 @@ namespace ares
 					 const search_mode mode,
 					 line_vector & list) const
   {
-    return false;
+    return true;
   }
 
   bool CDatabase::search_station(const char * name,
 				 const search_mode mode,
 				 station_vector & list) const
   {
-    return false;
+    bool ret_name = this->search_station_with_name(name, mode, list);
+    bool ret_yomi = this->search_station_with_yomi(name, mode, list);
+    bool ret_denryaku = this->search_station_with_denryaku(name, mode, list);
+    return (ret_name & ret_yomi & ret_denryaku);
   }
 
   bool CDatabase::search_station_with_name(const char * name,
