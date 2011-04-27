@@ -8,7 +8,7 @@ from optparse import OptionParser
 
 DATA_DIR = "data/"
 #DB_NAME = ":memory:"
-DB_NAME = "ares.db"
+DB_NAME = "ares.sqlite"
 DEBUG = False
 #DEBUG = True
 DEBUG_ALLROWS = False
