@@ -13,7 +13,17 @@ DEBUG = False
 #DEBUG = True
 DEBUG_ALLROWS = False
 #DEBUG_ALLROWS = True
-TARGETS = ("company", "densha", "urban", "station", "line", "city", "kilo")
+TARGETS = (
+    "company",
+    "fare",
+    "fare_country",
+    "densha",
+    "urban",
+    "station",
+    "line",
+    "city",
+    "kilo"
+    )
 
 class CSVParseException(Exception):
     pass

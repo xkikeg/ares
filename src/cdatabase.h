@@ -104,5 +104,13 @@ namespace ares
     //! Search lines connecting with.
     bool search_connect_line(line_id_t line,
 			     line_vector & list) const;
+
+    //! Get company id from company name.
+    company_id_t get_company_id(const char * name);
+
+    //! Get fare value from table.
+    int get_fare_table(const char * table,
+		       company_id_t company,
+		       int kilo);
   };
 }

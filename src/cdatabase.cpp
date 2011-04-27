@@ -272,7 +272,7 @@ namespace ares
     const char * sql =
       "SELECT kilo.lineid FROM kilo NATURAL JOIN station"
       " WHERE kilo.stationid IN ("
-      "  SELECT kilo.stationid FROM kilo WHERE lineid=?1"
+      "  SELECT kilo.stationid FROM kilo WHERE lineid = ?1"
       " ) AND kilo.lineid != ?1";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.reset();
@@ -289,4 +289,42 @@ namespace ares
     return true;
   }
 
+  company_id_t CDatabase::get_company_id(const char * name)
+  {
+    const char * sql =
+      "SELECT companyid FROM company WHERE companyname LIKE ?";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.reset();
+    stmt.bind(1, name);
+    int rc = stmt.step();
+    if (rc == SQLITE_ROW)
+      {
+	return stmt.column(0);
+      }
+    if(rc != SQLITE_DONE)
+      {
+	std::cerr << db->errmsg() << std::endl;
+      }
+    return -1;
+  }
+
+  int CDatabase::get_fare_table(const char * table,
+				company_id_t company,
+				int kilo)
+  {
+    const char * sql =
+      "SELECT fare.fare FROM fare WHERE type = ?1 AND companyid = ?2"
+      " AND minkilo <= ?3"
+      " AND maxkilo >= ?3";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, table);
+    stmt.bind(2, company);
+    stmt.bind(3, kilo);
+    int rc = stmt.step();
+    if (rc == SQLITE_ROW)
+      return stmt.column(0);
+    if(rc != SQLITE_DONE)
+      std::cerr << db->errmsg() << std::endl;
+    return -1;
+  }
 }

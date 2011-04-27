@@ -52,10 +52,12 @@ namespace sqlite3_wrapper
     SQLiteStmt(SQLite & db, const char * query, size_t qlength)
     {
       sqlite3_prepare_v2(db.ptr(), query, qlength, &stmt, NULL);
+      this->reset();
     }
     SQLiteStmt(SQLite & db, const std::string & query)
     {
       sqlite3_prepare_v2(db.ptr(), query.c_str(), query.size(), &stmt, NULL);
+      this->reset();
     }
     ~SQLiteStmt()
     {
