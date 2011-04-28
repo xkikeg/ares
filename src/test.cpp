@@ -35,17 +35,21 @@ void testdb(const char * filename)
   teststation("ミフ", denryaku, EXACT);
   teststation("セカオ", denryaku, PREFIX);
 
-  ares::station_vector lresult;
+  ares::line_vector lresult;
+  ares::route_vector rresult;
   std::cout << "connect:東海道\n";
   db->search_line_with_name("東海道", ares::SEARCH_EXACT, lresult);
   try
     {
       ares::line_id_t l = lresult.at(0);
       lresult.clear();
-      db->search_connect_line(l, lresult);
-      BOOST_FOREACH(ares::line_id_t & e, lresult)
+      db->search_connect_line(l, rresult);
+      BOOST_FOREACH(ares::route_pair & r, rresult)
 	{
-	  std::cout << e << '\t' << db->get_line_name(e) << std::endl;
+	  std::cout << r.first << '\t'
+		    << db->get_line_name(r.first) << '\t'
+		    << r.second << '\t'
+		    << db->get_station_name(r.second) << '\n';
 	}
     }
   catch(const std::out_of_range & e)

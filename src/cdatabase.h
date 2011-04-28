@@ -103,7 +103,7 @@ namespace ares
 				      station_vector & list) const;
     //! Search lines connecting with.
     bool search_connect_line(line_id_t line,
-			     line_vector & list) const;
+			     route_vector & list) const;
 
     //! Get company id from company name.
     company_id_t get_company_id(const char * name);

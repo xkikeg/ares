@@ -257,20 +257,20 @@ namespace ares
   }
 
   bool CDatabase::search_connect_line(line_id_t line,
-				      line_vector & list) const
+				      route_vector & list) const
   {
     int rc;
     const char * sql =
-      "SELECT kilo.lineid FROM kilo NATURAL JOIN station"
+      "SELECT kilo.lineid, kilo.stationid FROM kilo NATURAL JOIN station"
       " WHERE kilo.stationid IN ("
       "  SELECT kilo.stationid FROM kilo WHERE lineid = ?1"
       " ) AND kilo.lineid != ?1";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
-    stmt.reset();
     stmt.bind(1, line);
     while((rc = stmt.step()) == SQLITE_ROW)
       {
-	list.push_back(stmt.column(0));
+	list.push_back(route_pair(stmt.column(0),
+				  stmt.column(1)));
       }
     if(rc != SQLITE_DONE)
       {
