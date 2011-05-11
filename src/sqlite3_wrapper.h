@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <exception>
-#include <boost/tr1/memory.hpp>
 #include <boost/utility.hpp>
 #include <sqlite3.h>
 

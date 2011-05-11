@@ -1,10 +1,12 @@
 #pragma once
 
 #include <memory>
-#include "cdatabase.h"
+#include "ares.h"
 
 namespace ares
 {
+  class CDatabase;
+
   /**
    * Class represents a route.
    * With this class, you can calc its fare.
