@@ -15,13 +15,14 @@ namespace ares
     SEARCH_EXACT,
   };
 
+  using sqlite3_wrapper::SQLite;
+  typedef sqlite3_wrapper::IOException IOException;
+
   /**
    * Database object of ares wrapping sqlite3 object.
    * With this object, you can search station or line name,
    * get connections of lines and so on.
    */
-  using sqlite3_wrapper::SQLite;
-  typedef sqlite3_wrapper::IOException IOException;
   class CDatabase : boost::noncopyable
   {
   private:
