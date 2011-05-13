@@ -6,6 +6,7 @@
 #include <boost/foreach.hpp>
 #include "cdatabase.h"
 #include "croute.h"
+#include "sqlite3_wrapper.h"
 
 #define teststation(str, col, mode)                                 \
   std::cout << #col << ':' << #mode << ':' << str << '\n';          \

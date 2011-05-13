@@ -5,8 +5,13 @@
 #include <stdexcept>
 #include <boost/utility.hpp>
 #include <boost/lexical_cast.hpp>
-#include "sqlite3_wrapper.h"
 #include "ares.h"
+
+namespace sqlite3_wrapper
+{
+  class SQLite;
+  class IOException;
+}
 
 namespace ares
 {
@@ -61,7 +66,7 @@ namespace ares
      * Construct a CDatabase object with database filename.
      * @param[in] dbname The filename of SQLite database.
      */
-    CDatabase(const char * dbname) : db(new SQLite(dbname, SQLITE_OPEN_READONLY)){}
+    CDatabase(const char * dbname);
 
     /**
      * Convert function from line id to name.

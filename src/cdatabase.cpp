@@ -4,6 +4,7 @@
 #include <cstring>
 #include "cdatabase.h"
 #include "util.hpp"
+#include "sqlite3_wrapper.h"
 
 namespace ares
 {
@@ -33,6 +34,11 @@ namespace ares
       }
       return true;
     }
+  }
+
+  CDatabase::CDatabase(const char * dbname)
+  : db(new SQLite(dbname, SQLITE_OPEN_READONLY))
+  {
   }
 
   std::string CDatabase::get_line_name(line_id_t line) const
