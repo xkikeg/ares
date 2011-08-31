@@ -12,4 +12,5 @@ namespace ares
   typedef std::vector<station_id_t> station_vector;
   typedef std::pair<line_id_t, station_id_t> route_pair;
   typedef std::vector<route_pair> route_vector;
+  typedef route_vector connect_vector;
 }

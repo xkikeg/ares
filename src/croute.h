@@ -22,7 +22,8 @@ namespace ares
      * Constructor.
      * Constructor with existing CDatabase object.
      */
-    CRoute(station_id_t station, CDatabase & db) : start(station), db(&db){}
+    CRoute(station_id_t station, std::shared_ptr<CDatabase> db)
+      : start(station), db(db){}
 
     /**
      * Function to append a new part to the route.

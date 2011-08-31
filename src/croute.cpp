@@ -21,6 +21,11 @@ namespace ares
     way.push_back(std::pair<line_id_t, station_id_t>(line, station));
   }
 
+  int CRoute::calc_fare_inplace()
+  {
+    return 0;
+  }
+
   int CRoute::calc_honshu_main(int kilo)
   {
     // hard-coded.
@@ -58,13 +63,13 @@ namespace ares
 
     const double totalsum = sum[0] + sum[1] + sum[2];
     if(kilo < 100)
-      {
-	return round(static_cast<int>(std::ceil(totalsum/10)*10));
-      }
+    {
+      return round(static_cast<int>(std::ceil(totalsum/10)*10));
+    }
     else
-      {
-	const int isum = static_cast<int>(totalsum) + 50;
-	return round(isum - isum % 100);
-      }
+    {
+      const int isum = static_cast<int>(totalsum) + 50;
+      return round(isum - isum % 100);
+    }
   }
 }

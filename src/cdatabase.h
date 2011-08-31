@@ -8,11 +8,11 @@
 
 namespace ares
 {
-  enum search_mode {
-    SEARCH_PARTIAL,
-    SEARCH_PREFIX,
-    SEARCH_SUFFIX,
-    SEARCH_EXACT,
+  enum find_mode {
+    FIND_PARTIAL,
+    FIND_PREFIX,
+    FIND_SUFFIX,
+    FIND_EXACT,
   };
 
   using sqlite3_wrapper::SQLite;
@@ -64,54 +64,54 @@ namespace ares
     std::string get_station_denryaku(station_id_t station) const;
 
     /**
-     * Seach lines from line name.
+     * Find lines' id from line name.
      * @param[in]  name Specify string to find.
      * @param[in]  mode Specify searching mode.
      * @param[out] list vector to add found line id's.
      */
-    bool search_line(const char * name,
-		     const search_mode mode,
-		     line_vector & list) const;
+    bool find_lineid(const char * name,
+                     const find_mode mode,
+                     line_vector & list) const;
 
-    //! Seach lines from line name with kanji.
-    bool search_line_with_name(const char * name,
-			       const search_mode mode,
-			       line_vector & list) const;
-    //! Seach lines from line name with yomi.
-    bool search_line_with_yomi(const char * name,
-			       const search_mode mode,
-			       line_vector & list) const;
-    //! Seach lines from line name with alias.
-    bool search_line_with_alias(const char * name,
-				const search_mode mode,
-				line_vector & list) const;
+    //! Find lines from line name with kanji.
+    bool find_lineid_with_name(const char * name,
+                               const find_mode mode,
+                               line_vector & list) const;
+    //! Find lines from line name with yomi.
+    bool find_lineid_with_yomi(const char * name,
+                               const find_mode mode,
+                               line_vector & list) const;
+    //! Find lines from line name with alias.
+    bool find_lineid_with_alias(const char * name,
+                                const find_mode mode,
+                                line_vector & list) const;
 
-    //! Search stations from station name.
-    bool search_station(const char * name,
-			const search_mode mode,
-			station_vector & list) const;
-    //! Seach stations from station name with kanji.
-    bool search_station_with_name(const char * name,
-				  const search_mode mode,
-				  station_vector & list) const;
-    //! Seach stations from station name with yomi.
-    bool search_station_with_yomi(const char * name,
-				  const search_mode mode,
-				  station_vector & list) const;
-    //! Seach stations from station name with denryaku.
-    bool search_station_with_denryaku(const char * name,
-				      const search_mode mode,
-				      station_vector & list) const;
-    //! Search lines connecting with.
-    bool search_connect_line(line_id_t line,
-			     route_vector & list) const;
+    //! Find stations' id from station name.
+    bool find_stationid(const char * name,
+                        const find_mode mode,
+                        station_vector & list) const;
+    //! Find stations' id from station name with kanji.
+    bool find_stationid_with_name(const char * name,
+                                  const find_mode mode,
+                                  station_vector & list) const;
+    //! Find stations' id from station name with yomi.
+    bool find_stationid_with_yomi(const char * name,
+                                  const find_mode mode,
+                                  station_vector & list) const;
+    //! Find stations' id from station name with denryaku.
+    bool find_stationid_with_denryaku(const char * name,
+                                      const find_mode mode,
+                                      station_vector & list) const;
+    //! Find lines' id connecting with.
+    bool find_connect_line(line_id_t line,
+                           connect_vector & list) const;
 
     //! Get company id from company name.
     company_id_t get_company_id(const char * name);
 
     //! Get fare value from table.
     int get_fare_table(const char * table,
-		       company_id_t company,
-		       int kilo);
+                       company_id_t company,
+                       int kilo);
   };
 }
