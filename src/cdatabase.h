@@ -2,7 +2,9 @@
 
 #include <string>
 #include <memory>
+#include <stdexcept>
 #include <boost/utility.hpp>
+#include <boost/lexical_cast.hpp>
 #include "sqlite3_wrapper.h"
 #include "ares.h"
 
@@ -17,6 +19,20 @@ namespace ares
 
   using sqlite3_wrapper::SQLite;
   typedef sqlite3_wrapper::IOException IOException;
+
+  class DoesNotExist : public std::logic_error
+  {
+  public:
+    DoesNotExist() : std::logic_error("Object does not exist.") {}
+  };
+
+  class MultipleObjectReturned : public std::logic_error
+  {
+  public:
+    MultipleObjectReturned(const char * query, size_t num)
+      : std::logic_error(std::string("query '") + query + "' returned"
+                           + boost::lexical_cast<std::string>(num) + " objects.") {}
+  };
 
   /**
    * Database object of ares wrapping sqlite3 object.
@@ -86,6 +102,15 @@ namespace ares
                                 const find_mode mode,
                                 line_vector & list) const;
 
+    /**
+     * Get the line's id from line name.
+     * @param[in]  name Specify string to get.
+     * @param[in]  mode Specify searching mode.
+     * @return line id if exists only one, otherwise zero.
+     */
+    line_id_t get_lineid(const char * name,
+                         const find_mode mode = FIND_EXACT) const;
+
     //! Find stations' id from station name.
     bool find_stationid(const char * name,
                         const find_mode mode,
@@ -102,6 +127,16 @@ namespace ares
     bool find_stationid_with_denryaku(const char * name,
                                       const find_mode mode,
                                       station_vector & list) const;
+
+    /**
+     * Get the station's id from station name.
+     * @param[in] name Specify string to get.
+     * @param[in] mode Specify searching mode.
+     * @return station id if exists only one station, otherwise zero.
+     */
+    station_id_t get_stationid(const char * name,
+                               const find_mode mode = FIND_EXACT) const;
+
     //! Find lines' id connecting with.
     bool find_connect_line(line_id_t line,
                            connect_vector & list) const;

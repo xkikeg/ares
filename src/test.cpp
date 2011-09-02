@@ -27,43 +27,26 @@ void testdb(std::shared_ptr<ares::CDatabase> db)
   teststation("ミフ", denryaku, EXACT);
   teststation("セカオ", denryaku, PREFIX);
 
-  ares::line_vector lresult;
   ares::route_vector rresult;
-  std::cout << "connect:東海道\n";
-  db->find_lineid_with_name("東海道", ares::FIND_EXACT, lresult);
-  try
+  std::cout << "connect:鹿児島1\n";
+  ares::line_id_t l = db->get_lineid("鹿児島1");
+  db->find_connect_line(l, rresult);
+  BOOST_FOREACH(ares::route_pair & r, rresult)
   {
-    ares::line_id_t l = lresult.at(0);
-    lresult.clear();
-    db->find_connect_line(l, rresult);
-    BOOST_FOREACH(ares::route_pair & r, rresult)
-	{
-	  std::cout << r.first << '\t'
-                << db->get_line_name(r.first) << '\t'
-                << r.second << '\t'
-                << db->get_station_name(r.second) << '\n';
-	}
-  }
-  catch(const std::out_of_range & e)
-  {
-    std::cerr << "Line not found.\n";
+    std::cout << r.first << '\t'
+              << db->get_line_name(r.first) << '\t'
+              << r.second << '\t'
+              << db->get_station_name(r.second) << '\n';
   }
 }
 
 void testroute(std::shared_ptr<ares::CDatabase> db)
 {
-  ares::line_vector lines;
-  ares::station_vector stations;
-  db->find_stationid_with_name("東京", ares::FIND_EXACT, stations);
-  ares::CRoute route(stations.at(0), db);
-  stations.clear();
-  db->find_lineid_with_name("東海道", ares::FIND_EXACT, lines);
-  db->find_stationid_with_name("神戸", ares::FIND_EXACT, stations);
-  route.append_route(lines.at(0), stations.at(0));
-  lines.clear(); stations.clear();
-  db->find_lineid_with_name("山陽", ares::FIND_EXACT, lines);
-  db->find_stationid_with_name("岡山", ares::FIND_EXACT, stations);
-  route.append_route(lines.at(0), stations.at(0));
+  ares::CRoute route(db->get_stationid("東京"), db);
+  route.append_route(db->get_lineid   ("東海道"),
+                     db->get_stationid("神戸"));
+  route.append_route(db->get_lineid   ("山陽"),
+                     db->get_stationid("岡山"));
   route.calc_fare_inplace();
 }
 

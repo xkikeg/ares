@@ -73,6 +73,7 @@ namespace sqlite3_wrapper
   {
   private:
     sqlite3_stmt * stmt;
+    SQLite & db;
   public:
     /**
      * Constructor with SQL statement string of char*.
@@ -81,6 +82,7 @@ namespace sqlite3_wrapper
      * @param qlength[in] size of query in bytes.
      */
     SQLiteStmt(SQLite & db, const char * query, size_t qlength)
+      : db(db)
     {
       sqlite3_prepare_v2(db.ptr(), query, qlength, &stmt, NULL);
       this->reset();
@@ -92,6 +94,7 @@ namespace sqlite3_wrapper
      * @param query[in] query string of std::string.
      */
     SQLiteStmt(SQLite & db, const std::string & query)
+      : db(db)
     {
       sqlite3_prepare_v2(db.ptr(), query.c_str(), query.size(), &stmt, NULL);
       this->reset();
@@ -182,7 +185,7 @@ namespace sqlite3_wrapper
       const SQLiteStmt * t;
       int _icol;
     public:
-      column_value(const SQLiteStmt * t, int icol) : _icol(icol), t(t){}
+      column_value(const SQLiteStmt * t, int icol) : t(t), _icol(icol){}
       operator int()
       {
 	return sqlite3_column_int(t->stmt, _icol);
@@ -217,6 +220,39 @@ namespace sqlite3_wrapper
     int reset()
     {
       return sqlite3_reset(stmt);
+    }
+
+    template <class T>
+    bool fill_column(T & vec, int icol)
+    {
+      int rc;
+      while((rc = this->step()) == SQLITE_ROW)
+      {
+        vec.push_back(this->column(icol));
+      }
+      if(rc != SQLITE_DONE)
+      {
+        std::cerr << db.errmsg() << std::endl;
+        return false;
+      }
+      return true;
+    }
+
+    template <class T>
+    bool fill_column(T & vec, int icol, int jcol)
+    {
+      int rc;
+      while((rc = this->step()) == SQLITE_ROW)
+      {
+        vec.push_back(std::make_pair(this->column(icol),
+                                     this->column(jcol)));
+      }
+      if(rc != SQLITE_DONE)
+      {
+        std::cerr << db.errmsg() << std::endl;
+        return false;
+      }
+      return true;
     }
   };
 }

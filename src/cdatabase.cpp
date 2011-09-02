@@ -109,44 +109,24 @@ namespace ares
                                         const find_mode mode,
                                         line_vector & list) const
   {
-    int rc;
     std::string name_(name);
     add_percent(name_, mode);
     const char * sql = "SELECT lineid FROM line WHERE linename LIKE ?;";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, name_);
-    while((rc = stmt.step()) == SQLITE_ROW)
-    {
-      list.push_back(stmt.column(0));
-    }
-    if (rc != SQLITE_DONE)
-    {
-      std::cerr << db->errmsg() << std::endl;
-      return false;
-    }
-    return true;
+    return stmt.fill_column(list, 0);
   }
 
   bool CDatabase::find_lineid_with_yomi(const char * name,
                                         const find_mode mode,
                                         line_vector & list) const
   {
-    int rc;
     std::string name_(name);
     add_percent(name_, mode);
     const char * sql = "SELECT lineid FROM line WHERE lineyomi LIKE ?;";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, name_);
-    while((rc = stmt.step()) == SQLITE_ROW)
-    {
-      list.push_back(stmt.column(0));
-    }
-    if (rc != SQLITE_DONE)
-    {
-      std::cerr << db->errmsg() << std::endl;
-      return false;
-    }
-    return true;
+    return stmt.fill_column(list, 0);
   }
 
   bool CDatabase::find_lineid_with_alias(const char * name,
@@ -154,6 +134,22 @@ namespace ares
                                          line_vector & list) const
   {
     return true;
+  }
+
+  line_id_t CDatabase::get_lineid(const char * name,
+                                  const find_mode mode) const
+  {
+    line_vector v;
+    find_lineid(name, mode, v);
+    if(v.empty())
+    {
+      throw DoesNotExist();
+    }
+    if(v.size() > 1)
+    {
+      throw MultipleObjectReturned(name, v.size());
+    }
+    return v[0];
   }
 
   bool CDatabase::find_stationid(const char * name,
@@ -179,17 +175,7 @@ namespace ares
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, name_norm);
     stmt.bind(2, name_paren);
-    int rc;
-    while((rc = stmt.step()) == SQLITE_ROW)
-    {
-      list.push_back(stmt.column(0));
-    }
-    if(rc != SQLITE_DONE)
-    {
-      std::cerr << db->errmsg() << std::endl;
-      return false;
-    }
-    return true;
+    return stmt.fill_column(list, 0);
   }
 
   bool CDatabase::find_stationid_with_yomi(const char * name,
@@ -197,22 +183,12 @@ namespace ares
                                            station_vector & list) const
   {
     // SELECT id FROM station WHERE yomi LIKE 'name%';
-    int rc;
     std::string name_(name);
     add_percent(name_, mode);
     const char * sql = "SELECT stationid FROM station WHERE stationyomi LIKE ?;";
     sqlite3_wrapper::SQLiteStmt station_yomi_stmt(*db, sql, std::strlen(sql));
     station_yomi_stmt.bind(1, name_);
-    while((rc = station_yomi_stmt.step()) == SQLITE_ROW)
-    {
-      list.push_back(station_yomi_stmt.column(0));
-    }
-    if (rc != SQLITE_DONE)
-    {
-      std::cerr << db->errmsg() << std::endl;
-      return false;
-    }
-    return true;
+    return station_yomi_stmt.fill_column(list, 0);
   }
 
   bool CDatabase::find_stationid_with_denryaku(const char * name,
@@ -220,7 +196,6 @@ namespace ares
                                                station_vector & list) const
   {
     // SELECT id FROM station WHERE denryaku LIKE 'name%' OR denryaku LIKE '__name%';
-    int rc;
     std::string name_(name);
     add_percent(name_, mode);
     const char * sql = "SELECT stationid FROM station WHERE stationdenryaku LIKE ?;";
@@ -232,34 +207,33 @@ namespace ares
       std::string name_onlystation("__");
       name_onlystation += name_;
       stmt.bind(1, name_onlystation);
-      while((rc = stmt.step()) == SQLITE_ROW)
-	  {
-	    list.push_back(stmt.column(0));
-	  }
-      if (rc != SQLITE_DONE)
-	  {
-	    std::cerr << db->errmsg() << std::endl;
-	    return false;
-	  }
+      bool ret = stmt.fill_column(list, 0);
+      if(!ret) return ret;
       stmt.reset();
     }
     stmt.bind(1, name_);
-    while((rc = stmt.step()) == SQLITE_ROW)
+    return stmt.fill_column(list, 0);
+  }
+
+  station_id_t CDatabase::get_stationid(const char * name,
+                                        const find_mode mode) const
+  {
+    station_vector v;
+    find_stationid(name, mode, v);
+    if(v.empty())
     {
-      list.push_back(stmt.column(0));
+      throw DoesNotExist();
     }
-    if (rc != SQLITE_DONE)
+    if(v.size() > 1)
     {
-      std::cerr << db->errmsg() << std::endl;
-      return false;
+      throw MultipleObjectReturned(name, v.size());
     }
-    return true;
+    return v[0];
   }
 
   bool CDatabase::find_connect_line(line_id_t line,
                                     route_vector & list) const
   {
-    int rc;
     const char * sql =
       "SELECT kilo.lineid, kilo.stationid FROM kilo NATURAL JOIN station"
       " WHERE kilo.stationid IN ("
@@ -267,17 +241,7 @@ namespace ares
       " ) AND kilo.lineid != ?1";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, line);
-    while((rc = stmt.step()) == SQLITE_ROW)
-    {
-      list.push_back(route_pair(stmt.column(0),
-                                stmt.column(1)));
-    }
-    if(rc != SQLITE_DONE)
-    {
-      std::cerr << db->errmsg() << std::endl;
-      return false;
-    }
-    return true;
+    return stmt.fill_column(list, 0, 1);
   }
 
   company_id_t CDatabase::get_company_id(const char * name)

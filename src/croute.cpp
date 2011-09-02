@@ -21,6 +21,16 @@ namespace ares
     way.push_back(std::pair<line_id_t, station_id_t>(line, station));
   }
 
+  bool CRoute::is_valid() const
+  {
+    // check way[ i ].second in way[i].first AND
+    // check way[i-1].second in way[i].first
+    for(size_t i = 1; i < way.size(); ++i)
+    {
+      way[i].second;
+    }
+  }
+
   int CRoute::calc_fare_inplace()
   {
     return 0;
