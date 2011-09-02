@@ -2,7 +2,7 @@
 
 # .SUBDIRS:
 
-CXXFLAGS += -std=c++0x -g
+CXXFLAGS += -std=c++0x -g -Wall
 # ASFLAGS +=
 LDFLAGS += -lsqlite3
 # INCLUDES +=
