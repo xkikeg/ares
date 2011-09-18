@@ -20,15 +20,27 @@ namespace ares
   using sqlite3_wrapper::SQLite;
   typedef sqlite3_wrapper::IOException IOException;
 
+  /**
+   * Exception to represent that no object has found.
+   */
   class DoesNotExist : public std::logic_error
   {
   public:
     DoesNotExist() : std::logic_error("Object does not exist.") {}
   };
 
+  /**
+   * Exception to represent that multiple object returned though
+   * only one object is required.
+   */
   class MultipleObjectReturned : public std::logic_error
   {
   public:
+    /**
+     * Constructor.
+     * @param[in] query      Query string that raise multiple object error.
+     * @param[in] num        The number of result returned to query.
+     */
     MultipleObjectReturned(const char * query, size_t num)
       : std::logic_error(std::string("query '") + query + "' returned"
                            + boost::lexical_cast<std::string>(num) + " objects.") {}
