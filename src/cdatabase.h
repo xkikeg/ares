@@ -142,11 +142,14 @@ namespace ares
                            connect_vector & list) const;
 
     //! Get company id from company name.
-    company_id_t get_company_id(const char * name);
+    company_id_t get_company_id(const char * name) const;
 
     //! Get fare value from table.
     int get_fare_table(const char * table,
                        company_id_t company,
-                       int kilo);
+                       int kilo) const;
+
+    //! Check if the station is in the line.
+    bool is_belong_to_line(line_id_t line, station_id_t station) const;
   };
 }

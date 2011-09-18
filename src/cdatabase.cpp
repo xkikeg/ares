@@ -244,7 +244,7 @@ namespace ares
     return stmt.fill_column(list, 0, 1);
   }
 
-  company_id_t CDatabase::get_company_id(const char * name)
+  company_id_t CDatabase::get_company_id(const char * name) const
   {
     const char * sql =
       "SELECT companyid FROM company WHERE companyname LIKE ?";
@@ -264,7 +264,7 @@ namespace ares
 
   int CDatabase::get_fare_table(const char * table,
                                 company_id_t company,
-                                int kilo)
+                                int kilo) const
   {
     const char * sql =
       "SELECT fare.fare FROM fare WHERE type = ?1 AND companyid = ?2"
@@ -280,5 +280,19 @@ namespace ares
     if(rc != SQLITE_DONE)
       std::cerr << db->errmsg() << std::endl;
     return -1;
+  }
+
+  bool CDatabase::is_belong_to_line(line_id_t line, station_id_t station) const
+  {
+    const std::string sql =
+      "SELECT * FROM kilo WHERE lineid = ? AND stationid = ?";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql);
+    stmt.bind(1, line);
+    stmt.bind(2, station);
+    int rc = stmt.step();
+    if (rc == SQLITE_ROW) return true;
+    if (rc == SQLITE_DONE) return false;
+    std::cerr << db->errmsg() << std::endl;
+    return false;
   }
 }
