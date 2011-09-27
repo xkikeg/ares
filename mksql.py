@@ -162,12 +162,19 @@ def mktable_from_csv(db, tablename, filename = None):
             raise
 
 
+def create_view(db):
+    sql = "CREATE VIEW junction AS SELECT station.* FROM kilo NATURAL JOIN station GROUP BY kilo.stationid HAVING count(*) > 1;"
+    if DEBUG: print sql
+    db.execute(sql)
+
+
 def mksqldb(db_name=DB_NAME):
     if os.path.exists(db_name): os.unlink(db_name)
     db = sqlite3.connect(db_name)
     db.execute("PRAGMA foreign_keys = ON;")
     for i in TARGETS:
         mktable_from_csv(db, i)
+    create_view(db)
     db.commit()
     db.close()
 
