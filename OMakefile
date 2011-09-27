@@ -1,2 +1,4 @@
-ares.sqlite: mksql.py data/*.csv
+.DEFAULT: ares.sqlite
+
+ares.sqlite: mksql.py $(glob data/*.csv)
 	./mksql.py
