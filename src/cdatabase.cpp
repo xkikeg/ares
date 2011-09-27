@@ -10,29 +10,20 @@ namespace ares
 {
   namespace
   {
-    bool add_percent(std::string & str, const find_mode mode)
+    std::string add_percent(std::string str, const find_mode mode)
     {
       switch(mode)
       {
-      case FIND_PARTIAL:
-        str = "%" + str + "%";
-        break;
+      case FIND_PARTIAL: return std::move("%" + str + "%");
 
-      case FIND_PREFIX:
-        str += "%";
-        break;
+      case FIND_PREFIX: return std::move(str + "%");
 
-      case FIND_SUFFIX:
-        str = "%" + str;
-        break;
+      case FIND_SUFFIX: return std::move("%" + str);
 
-      case FIND_EXACT:
-        break;
+      case FIND_EXACT: return std::move(str);
 
-      default:
-        return false;
+      default: return str;
       }
-      return true;
     }
   }
 
@@ -116,7 +107,7 @@ namespace ares
                                         line_vector & list) const
   {
     std::string name_(name);
-    add_percent(name_, mode);
+    name_ = add_percent(std::move(name_), mode);
     const char * sql = "SELECT lineid FROM line WHERE linename LIKE ?;";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, name_);
@@ -128,7 +119,7 @@ namespace ares
                                         line_vector & list) const
   {
     std::string name_(name);
-    add_percent(name_, mode);
+    name_ = add_percent(std::move(name_), mode);
     const char * sql = "SELECT lineid FROM line WHERE lineyomi LIKE ?;";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, name_);
@@ -175,8 +166,7 @@ namespace ares
     const char * sql = "SELECT stationid FROM station WHERE stationname LIKE ? OR stationname LIKE ?";
     std::string name_norm(name);
     std::string name_paren("（%）");
-    if(!add_percent(name_norm, mode))
-      return false;
+    name_norm = add_percent(std::move(name_norm), mode);
     name_paren += name_norm;
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, name_norm);
@@ -190,7 +180,7 @@ namespace ares
   {
     // SELECT id FROM station WHERE yomi LIKE 'name%';
     std::string name_(name);
-    add_percent(name_, mode);
+    name_ = add_percent(std::move(name_), mode);
     const char * sql = "SELECT stationid FROM station WHERE stationyomi LIKE ?;";
     sqlite3_wrapper::SQLiteStmt station_yomi_stmt(*db, sql, std::strlen(sql));
     station_yomi_stmt.bind(1, name_);
@@ -203,7 +193,7 @@ namespace ares
   {
     // SELECT id FROM station WHERE denryaku LIKE 'name%' OR denryaku LIKE '__name%';
     std::string name_(name);
-    add_percent(name_, mode);
+    name_ = add_percent(std::move(name_), mode);
     const char * sql = "SELECT stationid FROM station WHERE stationdenryaku LIKE ?;";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     std::wstring wname_;
