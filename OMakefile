@@ -1,0 +1,2 @@
+ares.sqlite: mksql.py data/*.csv
+	./mksql.py
