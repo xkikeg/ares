@@ -4,4 +4,9 @@ open build/LaTeX
 
 DefineCommandVars()
 
+CXXFLAGS += -std=c++0x -g -Wall
+# ASFLAGS +=
+LDFLAGS += -lsqlite3
+INCLUDES += $(dir src)
+
 .SUBDIRS: . src
