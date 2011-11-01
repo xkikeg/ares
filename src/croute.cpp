@@ -18,17 +18,19 @@ namespace ares
 
   void CRoute::append_route(line_id_t line, station_id_t station)
   {
-    way.push_back(std::pair<line_id_t, station_id_t>(line, station));
+    if(way.back().is_begin())
+    {
+      way.back().line = line;
+      way.back().end = station;
+    }
+    else {
+      way.push_back(CSegment(way.back().end, line, station));
+    }
   }
 
   bool CRoute::is_valid() const
   {
-    // check way[ i ].second in way[i].first AND
-    // check way[i-1].second in way[i].first
-    for(size_t i = 1; i < way.size(); ++i)
-    {
-      way[i].second;
-    }
+    return true;
   }
 
   int CRoute::calc_fare_inplace()

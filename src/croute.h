@@ -13,18 +13,44 @@ namespace ares
    */
   class CRoute
   {
+  public:
+    struct CSegment
+    {
+      station_id_t begin, end;
+      line_id_t line;
+
+      CSegment(station_id_t begin)
+        : begin(begin),
+          end(0),
+          line(0) {}
+
+      CSegment(station_id_t begin,
+               line_id_t line,
+               station_id_t end)
+        : begin(begin),
+          end(end),
+          line(line) {}
+
+      /**
+       * Check whether this segment is begin.
+       */
+      bool is_begin() {
+        return line == 0 && end == 0;
+      }
+    };
   private:
-    std::vector<std::pair<line_id_t, station_id_t> > way;
     std::shared_ptr<CDatabase> db;
+    std::vector<CSegment> way;
   public:
     /**
      * Constructor.
      * Constructor with existing CDatabase object.
      */
-    CRoute(station_id_t station, std::shared_ptr<CDatabase> db)
-      : db(db) {
-      way.push_back(std::make_pair(0, station));
-    }
+    CRoute(std::shared_ptr<CDatabase> db)
+      : db(db) {}
+
+    CRoute(std::shared_ptr<CDatabase> db, station_id_t begin)
+      : db(db), way(1, CSegment(begin)) {}
 
     /**
      * Function to append a new part to the route.

@@ -43,7 +43,7 @@ void testdb(std::shared_ptr<ares::CDatabase> db)
 
 void testroute(std::shared_ptr<ares::CDatabase> db)
 {
-  ares::CRoute route(db->get_stationid("東京"), db);
+  ares::CRoute route(db, db->get_stationid("東京"));
   route.append_route(db->get_lineid   ("東海道"),
                      db->get_stationid("神戸"));
   route.append_route(db->get_lineid   ("山陽"),
