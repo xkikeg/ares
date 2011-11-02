@@ -47,6 +47,9 @@ namespace ares
     std::shared_ptr<CDatabase> db;
     std::vector<CSegment> way;
   public:
+    typedef std::vector<CSegment>::iterator iterator;
+    typedef std::vector<CSegment>::const_iterator const_iterator;
+
     /**
      * Constructor.
      * Constructor with existing CDatabase object.
@@ -60,6 +63,11 @@ namespace ares
     friend std::ostream & operator<<(std::ostream & ost, const CRoute & route);
 
     bool operator==(const CRoute & b) const;
+
+    iterator begin() { return way.begin(); }
+    iterator end() { return way.end(); }
+    const_iterator begin() const { return way.begin(); }
+    const_iterator end() const{ return way.end(); }
 
     // /**
     //  * Set begin station. (does it fail with non-empty way?)
