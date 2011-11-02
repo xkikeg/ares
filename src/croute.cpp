@@ -56,6 +56,7 @@ namespace ares
 
   void CRoute::append_route(line_id_t line, station_id_t begin, station_id_t end)
   {
+    way.push_back(CSegment(begin, line, end));
   }
 
   bool CRoute::is_contains(station_id_t station) const
