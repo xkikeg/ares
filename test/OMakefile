@@ -11,4 +11,7 @@ CXXFILES[] =
 
 MAIN = test
 
-.DEFAULT: $(CXXProgram $(MAIN), $(CXXFILES))
+test.sqlite:
+	ln -s ../ares.sqlite
+
+.DEFAULT: $(CXXProgram $(MAIN), $(CXXFILES)) test.sqlite
