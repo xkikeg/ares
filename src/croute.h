@@ -34,8 +34,13 @@ namespace ares
       /**
        * Check whether this segment is begin.
        */
-      bool is_begin() {
+      bool is_begin() const {
         return line == 0 && end == 0;
+      }
+
+      bool operator==(const CSegment & b) const {
+        const CSegment & a = *this;
+        return a.begin == b.begin && a.end == b.end && a.line == b.line;
       }
     };
   private:
@@ -52,12 +57,34 @@ namespace ares
     CRoute(std::shared_ptr<CDatabase> db, station_id_t begin)
       : db(db), way(1, CSegment(begin)) {}
 
+    friend std::ostream & operator<<(std::ostream & ost, const CRoute & route);
+
+    bool operator==(const CRoute & b) const;
+
+    // /**
+    //  * Set begin station. (does it fail with non-empty way?)
+    //  */
+    // bool set_begin(station_id_t station);
+
     /**
      * Function to append a new part to the route.
      * @param[in] line    line id of route
      * @param[in] station station id of route
      */
     void append_route(line_id_t line, station_id_t station);
+
+    /**
+     * Function to append a new part to the route.
+     * @param[in] line    line id of route
+     * @param[in] begin   begin station id of route
+     * @param[in] end     end station id of route
+     */
+    void append_route(line_id_t line, station_id_t begin, station_id_t end);
+
+    /**
+     * Function to check contains.
+     */
+    bool is_contains(station_id_t station) const;
 
     /**
      * Function to validate route.

@@ -1,5 +1,6 @@
 #include <cmath>
 #include "croute.h"
+#include "cdatabase.h"
 
 namespace ares
 {
@@ -16,6 +17,31 @@ namespace ares
     }
   }
 
+  std::ostream & operator<<(std::ostream & ost, const ares::CRoute & route)
+  {
+    if(route.way.empty()) return ost;
+    for(size_t i=0; i<route.way.size(); ++i)
+    {
+      if(i==0)
+      {
+        ost << route.db->get_station_name(route.way[i].begin);
+      }
+      else
+      {
+        ost << "[" << route.db->get_station_name(route.way[i].begin) << "]";
+      }
+      ost << ",";
+      ost << route.db->get_line_name(route.way[i].line) << ",";
+    }
+    ost << route.db->get_station_name(route.way.back().end);
+    return ost;
+  }
+
+  bool CRoute::operator==(const CRoute & b) const {
+    const CRoute & a = *this;
+    return a.way == b.way;
+  }
+
   void CRoute::append_route(line_id_t line, station_id_t station)
   {
     if(way.back().is_begin())
@@ -26,6 +52,15 @@ namespace ares
     else {
       way.push_back(CSegment(way.back().end, line, station));
     }
+  }
+
+  void CRoute::append_route(line_id_t line, station_id_t begin, station_id_t end)
+  {
+  }
+
+  bool CRoute::is_contains(station_id_t station) const
+  {
+    return true;
   }
 
   bool CRoute::is_valid() const
