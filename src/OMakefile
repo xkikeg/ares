@@ -2,24 +2,11 @@
 
 # .SUBDIRS:
 
-CXXFILES[] =
-   cdatabase
-   croute
-   test
-
 MAIN = test
+LIB  = libares
+MAINSRC = $(MAIN)
 
-.DEFAULT: $(CXXProgram $(MAIN), $(CXXFILES))
+CXXFILES[] = $(filter-out $(MAINSRC), $(removesuffix $(ls *.cpp)))
 
-################################################
-# Uncomment the following section if you want to build a C library
-# in the current directory.
-#
-
-# LIBFILES[] =
-#    file1
-#    file2
-#
-# LIB = libxxx
-#
-# .DEFAULT: $(StaticCLibrary $(LIB), $(LIBFILES))
+.DEFAULT: $(CXXProgram $(MAIN), $(CXXFILES) $(MAINSRC)) \
+$(StaticCXXLibrary $(LIB), $(CXXFILES))

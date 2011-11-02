@@ -1,0 +1,14 @@
+# .PHONY: all install clean
+
+# .SUBDIRS:
+
+CXXFLAGS += $(shell cppunit-config --cflags)
+LDFLAGS += $(shell cppunit-config --libs) -L$(SRCDIR) -lares
+
+CXXFILES[] =
+   cdatabase_test
+   testmain
+
+MAIN = test
+
+.DEFAULT: $(CXXProgram $(MAIN), $(CXXFILES))

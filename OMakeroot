@@ -4,9 +4,12 @@ open build/LaTeX
 
 DefineCommandVars()
 
+SRCDIR = $(dir src)
+TESTDIR = $(dir test)
+
 CXXFLAGS += -std=c++0x -g -Wall
 # ASFLAGS +=
 LDFLAGS += -lsqlite3
-INCLUDES += $(dir src)
+INCLUDES += $(SRCDIR)
 
-.SUBDIRS: . src
+.SUBDIRS: . $(SRCDIR) $(TESTDIR)
