@@ -32,7 +32,7 @@ void testdb(std::shared_ptr<ares::CDatabase> db)
   std::cout << "connect:鹿児島1\n";
   ares::line_id_t l = db->get_lineid("鹿児島1");
   db->find_connect_line(l, rresult);
-  BOOST_FOREACH(ares::route_pair & r, rresult)
+  BOOST_FOREACH(ares::station_fqdn_t & r, rresult)
   {
     std::cout << r.first << '\t'
               << db->get_line_name(r.first) << '\t'
