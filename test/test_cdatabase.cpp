@@ -21,8 +21,9 @@ class CDatabaseTest : public CPPUNIT_NS::TestFixture
   typedef std::vector<std::string> u8vec_t;
   typedef std::vector<u8pair_t> u8pvec_t;
 
-protected:
   std::shared_ptr<ares::CDatabase> db;
+
+protected:
 
   void diffStringVector(u8vec_t expected, u8vec_t actual) {
     CPPUNIT_ASSERT_EQUAL(expected.size(), actual.size());
@@ -146,6 +147,7 @@ protected:
   }
 
 public:
+
   virtual void setUp() {
     db.reset(new ares::CDatabase("test.sqlite"));
   }
@@ -153,8 +155,6 @@ public:
   virtual void tearDown() {
     db.reset();
   }
-
-protected:
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(CDatabaseTest);
