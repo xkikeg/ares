@@ -3,10 +3,11 @@
 # .SUBDIRS:
 
 CXXFLAGS += $(shell cppunit-config --cflags)
-LDFLAGS += $(shell cppunit-config --libs) -L$(SRCDIR) -lares
+LDFLAGS += $(shell cppunit-config --libs)
+LIBS += $(SRCDIR)/libares
 
 CXXFILES[] =
-   test_cdatabase
+   $(removesuffix $(ls test_*.cpp))
    testmain
 
 MAIN = test
