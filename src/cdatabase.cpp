@@ -228,7 +228,7 @@ namespace ares
   }
 
   bool CDatabase::find_connect_line(line_id_t line,
-                                    route_vector & list) const
+                                    connect_vector & list) const
   {
     const char * sql =
       "SELECT kilo.lineid, kilo.stationid FROM kilo NATURAL JOIN station"

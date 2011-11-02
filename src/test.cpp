@@ -28,7 +28,7 @@ void testdb(std::shared_ptr<ares::CDatabase> db)
   teststation("ミフ", denryaku, EXACT);
   teststation("セカオ", denryaku, PREFIX);
 
-  ares::route_vector rresult;
+  ares::connect_vector rresult;
   std::cout << "connect:鹿児島1\n";
   ares::line_id_t l = db->get_lineid("鹿児島1");
   db->find_connect_line(l, rresult);
