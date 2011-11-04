@@ -2,9 +2,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-#include "cdatabase.h"
+
 #include "util.hpp"
 #include "sqlite3_wrapper.h"
+#include "cdatabase.h"
+#include "csegment.h"
 
 namespace ares
 {
@@ -288,6 +290,29 @@ namespace ares
     int rc = stmt.step();
     if (rc == SQLITE_ROW) return true;
     if (rc == SQLITE_DONE) return false;
+    std::cerr << db->errmsg() << std::endl;
+    return false;
+  }
+
+  bool CDatabase::is_contains(const CSegment & range,
+                              const station_id_t station) const
+  {
+    const char * sql =
+      "SELECT kilo FROM kilo WHERE lineid = ?1 AND stationid = ?2"
+      " AND kilo BETWEEN"
+      "  (SELECT min(kilo) FROM kilo"
+      "    WHERE lineid = ?1 AND stationid IN (?3, ?4))"
+      "  AND"
+      "  (SELECT max(kilo) FROM kilo"
+      "    WHERE lineid = ?1 AND stationid IN (?3, ?4))";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql);
+    stmt.bind(1, range.line);
+    stmt.bind(2, station);
+    stmt.bind(3, range.begin);
+    stmt.bind(4, range.end);
+    int rc = stmt.step();
+    if(rc == SQLITE_ROW) return true;
+    if(rc == SQLITE_DONE) return false;
     std::cerr << db->errmsg() << std::endl;
     return false;
   }

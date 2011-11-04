@@ -1,4 +1,5 @@
 #include <cmath>
+#include "util.hpp"
 #include "croute.h"
 #include "cdatabase.h"
 
@@ -61,7 +62,11 @@ namespace ares
 
   bool CRoute::is_contains(station_id_t station) const
   {
-    return true;
+    for(auto itr = $.begin(); itr != $.end(); ++itr)
+    {
+      if($.db->is_contains(*itr, station)) return true;
+    }
+    return false;
   }
 
   bool CRoute::is_valid() const

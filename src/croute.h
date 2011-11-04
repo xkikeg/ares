@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "ares.h"
+#include "csegment.h"
 
 namespace ares
 {
@@ -13,36 +14,6 @@ namespace ares
    */
   class CRoute
   {
-  public:
-    struct CSegment
-    {
-      station_id_t begin, end;
-      line_id_t line;
-
-      CSegment(station_id_t begin)
-        : begin(begin),
-          end(0),
-          line(0) {}
-
-      CSegment(station_id_t begin,
-               line_id_t line,
-               station_id_t end)
-        : begin(begin),
-          end(end),
-          line(line) {}
-
-      /**
-       * Check whether this segment is begin.
-       */
-      bool is_begin() const {
-        return line == 0 && end == 0;
-      }
-
-      bool operator==(const CSegment & b) const {
-        const CSegment & a = *this;
-        return a.begin == b.begin && a.end == b.end && a.line == b.line;
-      }
-    };
   private:
     std::shared_ptr<CDatabase> db;
     std::vector<CSegment> way;

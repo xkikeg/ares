@@ -25,6 +25,8 @@ namespace ares
   using sqlite3_wrapper::SQLite;
   typedef sqlite3_wrapper::IOException IOException;
 
+  class CSegment;
+
   /**
    * Exception to represent that no object has found.
    */
@@ -168,5 +170,8 @@ namespace ares
 
     //! Check if the station is in the line.
     bool is_belong_to_line(line_id_t line, station_id_t station) const;
+
+    //! Check station is in the segment.
+    bool is_contains(const CSegment & range, const station_id_t station) const;
   };
 }

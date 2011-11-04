@@ -6,6 +6,9 @@
 
 #include "sqlite3_wrapper.h"
 #include "cdatabase.h"
+#include "csegment.h"
+
+#define DB_NAME "test.sqlite"
 
 using namespace std::placeholders;
 class CDatabaseTest : public CPPUNIT_NS::TestFixture
@@ -15,6 +18,8 @@ class CDatabaseTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST(testGetStationNameYomi);
   CPPUNIT_TEST(testGetStationNameDenryaku);
   CPPUNIT_TEST(testLineConnection);
+  CPPUNIT_TEST(testBelongToLine);
+  CPPUNIT_TEST(testContains);
   CPPUNIT_TEST_SUITE_END();
 
   typedef std::pair<std::string, std::string> u8pair_t;
@@ -22,6 +27,10 @@ class CDatabaseTest : public CPPUNIT_NS::TestFixture
   typedef std::vector<u8pair_t> u8pvec_t;
 
   std::shared_ptr<ares::CDatabase> db;
+
+public:
+  CDatabaseTest() : CPPUNIT_NS::TestFixture(),
+                    db(new ares::CDatabase(DB_NAME)) {}
 
 protected:
 
@@ -146,14 +155,38 @@ protected:
     checkLineConnection("鹿児島1", std::move(kagoshima1));
   }
 
+  void testBelongToLine() {
+    CPPUNIT_ASSERT_EQUAL(true, db->is_belong_to_line(db->get_lineid("鹿児島1"),
+                                                     db->get_stationid("鳥栖")));
+    CPPUNIT_ASSERT_EQUAL(true, db->is_belong_to_line(db->get_lineid("東海道"),
+                                                     db->get_stationid("東京")));
+    CPPUNIT_ASSERT_EQUAL(false, db->is_belong_to_line(db->get_lineid("山陽"),
+                                                      db->get_stationid("東京")));
+  }
+
+  void testContains() {
+    ares::CSegment seg1 = ares::CSegment(db->get_stationid("東京"),
+                                         db->get_lineid("東海道"),
+                                         db->get_stationid("大阪"));
+    CPPUNIT_ASSERT_EQUAL(true, db->is_contains(seg1, db->get_stationid("東京")));
+    CPPUNIT_ASSERT_EQUAL(true, db->is_contains(seg1, db->get_stationid("京都")));
+    CPPUNIT_ASSERT_EQUAL(true, db->is_contains(seg1, db->get_stationid("大阪")));
+    CPPUNIT_ASSERT_EQUAL(false, db->is_contains(seg1, db->get_stationid("神戸")));
+    CPPUNIT_ASSERT_EQUAL(false, db->is_contains(seg1, db->get_stationid("仙台")));
+    seg1.reverse();
+    CPPUNIT_ASSERT_EQUAL(true, db->is_contains(seg1, db->get_stationid("東京")));
+    CPPUNIT_ASSERT_EQUAL(true, db->is_contains(seg1, db->get_stationid("京都")));
+    CPPUNIT_ASSERT_EQUAL(true, db->is_contains(seg1, db->get_stationid("大阪")));
+    CPPUNIT_ASSERT_EQUAL(false, db->is_contains(seg1, db->get_stationid("神戸")));
+    CPPUNIT_ASSERT_EQUAL(false, db->is_contains(seg1, db->get_stationid("仙台")));
+  }
+
 public:
 
   virtual void setUp() {
-    db.reset(new ares::CDatabase("test.sqlite"));
   }
 
   virtual void tearDown() {
-    db.reset();
   }
 };
 
