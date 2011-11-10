@@ -12,6 +12,9 @@ class CRouteTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST(testContainStation);
   CPPUNIT_TEST(testValidRoute);
   CPPUNIT_TEST(testInvalidRoute);
+  CPPUNIT_TEST(calcHonshuMain);
+  CPPUNIT_TEST(calcHonshuMainMiddle);
+  CPPUNIT_TEST(calcHonshuMain2Lines);
   CPPUNIT_TEST_SUITE_END();
 
   std::shared_ptr<ares::CDatabase> db;
@@ -68,6 +71,34 @@ protected:
                          db->get_stationid("高崎"), db->get_stationid("土合"));
       CPPUNIT_ASSERT_EQUAL(false, route.is_valid());
     }
+  }
+
+  void calcHonshuMain() {
+    ares::CRoute route(db);
+    // 353.8km
+    route.append_route(db->get_lineid("北陸"),
+                       db->get_stationid("米原"), db->get_stationid("直江津"));
+    CPPUNIT_ASSERT_EQUAL(5780, route.calc_fare_inplace());
+  }
+
+  void calcHonshuMainMiddle() {
+    ares::CRoute route(db);
+    // 467.8km
+    route.append_route(db->get_lineid("東北"),
+                       db->get_stationid("蕨"), db->get_stationid("北上"));
+    CPPUNIT_ASSERT_EQUAL(7350, route.calc_fare_inplace());
+  }
+
+  void calcHonshuMain2Lines() {
+    ares::CRoute route(db);
+    // 535.0km
+    route.append_route(db->get_lineid("東北"),
+                       db->get_stationid("蕨"), db->get_stationid("東京"));
+    route.append_route(db->get_lineid("東海道"),
+                       db->get_stationid("東京"), db->get_stationid("名古屋"));
+    route.append_route(db->get_lineid("関西"),
+                       db->get_stationid("名古屋"), db->get_stationid("王寺"));
+    CPPUNIT_ASSERT_EQUAL(8190, route.calc_fare_inplace());
   }
 
 public:
