@@ -71,11 +71,24 @@ namespace ares
 
   bool CRoute::is_valid() const
   {
+    // Connectivity: each segment tail = next segment head
+    for(auto itr=$.begin()+1; itr != $.end(); ++itr)
+    {
+      if((itr-1)->end != itr->begin){ return false; }
+    }
+    // NoOverlap   : segments does not overlap
+    std::map<line_id_t, liquid::UniqueIntervalTree<station_id_t> > checktree;
+    for(auto itr=$.begin(); itr != $.end(); ++itr)
+    {
+      if(!checktree[itr->line].insert(itr->begin, itr->end)) { return false; }
+    }
     return true;
   }
 
   int CRoute::calc_fare_inplace()
   {
+    // Rewrite Route: shinkansen / route-variant
+    // Calc
     return 0;
   }
 
