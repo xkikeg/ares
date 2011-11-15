@@ -2,8 +2,12 @@
 
 #include <cstdlib>
 #include <string>
+#include <map>
+#include <ostream>
+#include <boost/preprocessor.hpp>
 
 #define $ (*this)
+#define PRT(x) BOOST_PP_STRINGIZE(x) << " " << x << " "
 
 // Depends on Locale
 namespace liquid
@@ -28,4 +32,93 @@ namespace liquid
       delete [] wcs;
     }
   }
+
+  /**
+   * Interval Tree for ranges without overlap.
+   */
+  template <class T>
+  class UniqueIntervalTree
+  {
+  private:
+    typedef typename std::map<T, T> Container;
+    Container tree;
+
+  public:
+    typedef typename Container::iterator iterator;
+    typedef typename Container::const_iterator const_iterator;
+
+    /**
+     * Clear all ranges.
+     */
+    void clear() {
+      tree.clear();
+    }
+
+    /**
+     * Dump all ranges.
+     */
+    friend std::ostream & operator<<(std::ostream & ost,
+                                     const UniqueIntervalTree<T> & obj) {
+      for(typename UniqueIntervalTree<T>::const_iterator i = obj.tree.begin();
+          i != obj.tree.end(); ++i)
+      {
+        if(i != obj.tree.begin()) { ost << ","; }
+        ost << "[" << i->first << "," << i->second <<  "]";
+      }
+      return ost;
+    }
+
+    /**
+     * Insert specified range [begin, end].
+     * Constraint: begin != end
+     * @param[in] begin Begin of the range.
+     * @param[in] end   End of the range.
+     * @retval true     Insertion succeed.
+     * @retval false    Insertion failed due to overlapping.
+     */
+    bool insert(T begin, T end) {
+      if(end < begin) { std::swap(begin, end); }
+      if(!(begin < end)) { return false; }
+      if(tree.empty())
+      {
+        auto ret = tree.insert(std::make_pair(begin, end));
+        return ret.second;
+      }
+      const std::pair<iterator, iterator> range = tree.equal_range(begin);
+      // all ranges are larger than begin.
+      if(range.second == tree.begin())
+      {
+        if(tree.begin()->first < end) { return false; }
+        tree.insert(tree.begin(), std::make_pair(begin, end));
+        return true;
+      }
+      // all ranges are smaller than begin.
+      if(range.first == tree.end())
+      {
+        iterator End = std::prev(range.first);
+        if(begin < End->second) { return false; }
+        tree.insert(End, std::make_pair(begin, end));
+        return true;
+      }
+      const iterator lower = std::prev(range.second);
+      const iterator upper = range.first;
+      // constraint: example: [1,5] >= [5,9] =< [10,15]
+      if(begin < lower->second || upper->first < end) { return false; }
+      tree.insert(lower, std::make_pair(begin, end));
+      return true;
+    }
+
+    /**
+     * Check whether the point is in interval or not.
+     * @param[in] point Point to query.
+     * @retval true     When point is in ranges (including boudary.)
+     * @retval false    When point is out of ranges
+     */
+    bool query(T point) {
+      iterator itr = tree.upper_bound(point);
+      if(itr == tree.begin()) return false;
+      --itr;
+      return itr->first <= point && point <= itr->second;
+    }
+  };
 }
