@@ -168,6 +168,19 @@ namespace ares
                        company_id_t company,
                        int kilo) const;
 
+    //! Get kilo from line id & station id.
+    int get_kilo(const line_id_t line,
+                 const station_id_t station) const;
+
+    //! Get company id & 10*kilo.
+    bool get_company_and_kilo(const line_id_t line,
+                              const station_id_t begin,
+                              const station_id_t end,
+                              std::vector<
+                                std::pair<company_id_t,
+                                          line_id_t> > & result,
+                              bool & is_main) const;
+
     //! Check if the station is in the line.
     bool is_belong_to_line(line_id_t line, station_id_t station) const;
 

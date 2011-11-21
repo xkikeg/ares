@@ -280,6 +280,95 @@ namespace ares
     return -1;
   }
 
+  int CDatabase::get_kilo(const line_id_t line,
+                          const station_id_t station) const
+  {
+    const char * sql =
+      "SELECT kilo FROM kilo WHERE lineid=? AND stationid=?";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, line);
+    stmt.bind(2, station);
+    int rc = stmt.step();
+    if (rc == SQLITE_ROW)
+      return stmt.column(0);
+    // DB error check
+    if(rc != SQLITE_DONE)
+      std::cerr << db->errmsg() << std::endl;
+    // DB or argument error handling
+    return -1;
+  }
+
+  /**
+   * @note この実装は1路線にたかだか2会社しか入らないことを暗黙の仮定にしている。
+   * 仮にJR東海が運賃体系を変えるようなことが起これば大変なことになる。
+   * あとSQLのテーブルの組み方自体がlineの会社設定とkiloの会社設定の2つだけで
+   * 成り立っているので、lineで設定していない会社同士が接するような状態も
+   * 設定できない。ただ、正直どれも起こりそうにないので真面目に実装はしない。
+   * @note 戻り値をboolじゃなくて結果の配列にしたい。
+   */
+  // should add main or local
+  bool CDatabase::get_company_and_kilo(const line_id_t line,
+                                       const station_id_t begin,
+                                       const station_id_t end,
+                                       std::vector<
+                                         std::pair<company_id_t,
+                                                   line_id_t> > & result,
+                                       bool & is_main) const
+  {
+    const char * sql =
+      "SELECT MIN(kilo.kilo), MAX(kilo.kilo), "
+      "       line.linecompanyid, kilo.kilocompanyid, line.is_main"
+      " FROM kilo NATURAL JOIN line"
+      " WHERE lineid=?1 AND kilo BETWEEN"
+      "  (SELECT min(kilo) FROM kilo"
+      "    WHERE lineid = ?1 AND stationid IN (?2, ?3))"
+      "  AND"
+      "  (SELECT max(kilo) FROM kilo"
+      "    WHERE lineid = ?1 AND stationid IN (?2, ?3))"
+      " GROUP BY line.linecompanyid, kilo.kilocompanyid, line.is_main";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, line);
+    stmt.bind(2, begin);
+    stmt.bind(3, end);
+    company_id_t comp_main, comp_sub;
+    int kilo_main=0, kilo_sub=0, kilo_max=0, kilo_min=INT_MAX;
+    int rc;
+    while(true)
+    {
+      rc = stmt.step();
+      if(rc != SQLITE_ROW) { break; }
+      const int
+        kilo_temp_max = stmt.column(1),
+        kilo_temp_min = stmt.column(0),
+        kilo_temp = kilo_temp_max - kilo_temp_min;
+      is_main = static_cast<int>(stmt.column(4));
+      kilo_max = std::max(kilo_max, kilo_temp_max);
+      kilo_min = std::min(kilo_min, kilo_temp_min);
+      // kilocompanyid exists
+      if(!stmt.column(3).is_null())
+      {
+        kilo_sub += kilo_temp;
+        comp_sub = stmt.column(3);
+      }else{
+        kilo_main += kilo_temp;
+        comp_main = stmt.column(2);
+      }
+    }
+    // DB error check: throwing exception might be better.
+    if(rc != SQLITE_DONE)
+    {
+      std::cerr << db->errmsg() << std::endl;
+      return false;
+    }
+    // Cannot get results. maybe line, begin, end are bad.
+    if(kilo_main == 0 && kilo_sub == 0) { return false; }
+    // if kilo_main & kilo_sub exists, kilo_main is not correct.
+    if(kilo_main != 0 && kilo_sub != 0) { kilo_main = kilo_max - kilo_min - kilo_sub; }
+    if(kilo_main != 0) { result.push_back(std::make_pair(comp_main, kilo_main)); }
+    if(kilo_sub  != 0) { result.push_back(std::make_pair(comp_sub , kilo_sub )); }
+    return true;
+   }
+
   bool CDatabase::is_belong_to_line(line_id_t line, station_id_t station) const
   {
     const std::string sql =
