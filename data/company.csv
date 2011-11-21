@@ -1,7 +1,6 @@
 companyid:integer:p,companyname:text
-0,複数
-1,本州
-2,北海道
-3,九州
-4,四国
-5,社線
+0,本州
+1,北海道
+2,九州
+3,四国
+4,社線
