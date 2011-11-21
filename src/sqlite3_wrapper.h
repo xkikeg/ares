@@ -220,6 +220,13 @@ namespace sqlite3_wrapper
     public:
       //! Constructor.
       column_value(const SQLiteStmt * t, int icol) : t(t), _icol(icol){}
+      /**
+       * Check if column is NULL or not. Call before getting value.
+       */
+      bool is_null() const
+      {
+        return (sqlite3_column_type(t->stmt, _icol) == SQLITE_NULL);
+      }
       //! cast operator to int.
       operator int()
       {
