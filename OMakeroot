@@ -7,7 +7,7 @@ DefineCommandVars()
 SRCDIR = $(dir src)
 TESTDIR = $(dir test)
 
-CXXFLAGS += -std=c++0x -g -Wall
+CXXFLAGS += -std=c++0x -g -Wall -Wextra
 # ASFLAGS +=
 LDFLAGS += -lsqlite3
 INCLUDES += $(SRCDIR)
