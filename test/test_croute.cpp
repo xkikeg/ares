@@ -12,9 +12,10 @@ class CRouteTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST(testContainStation);
   CPPUNIT_TEST(testValidRoute);
   CPPUNIT_TEST(testInvalidRoute);
-  CPPUNIT_TEST(calcHonshuMain);
-  CPPUNIT_TEST(calcHonshuMainMiddle);
-  CPPUNIT_TEST(calcHonshuMain2Lines);
+  CPPUNIT_TEST(testCalcHonshuMain);
+  CPPUNIT_TEST(testFareHonshuMain);
+  CPPUNIT_TEST(testFareHonshuMainMiddle);
+  CPPUNIT_TEST(testFareHonshuMain2Lines);
   CPPUNIT_TEST_SUITE_END();
 
   std::shared_ptr<ares::CDatabase> db;
@@ -73,7 +74,33 @@ protected:
     }
   }
 
-  void calcHonshuMain() {
+  void testCalcHonshuMain() {
+    using ares::CRoute;
+    CPPUNIT_ASSERT_EQUAL(140, CRoute::calc_honshu_main(1));
+    CPPUNIT_ASSERT_EQUAL(140, CRoute::calc_honshu_main(3));
+    CPPUNIT_ASSERT_EQUAL(180, CRoute::calc_honshu_main(4));
+    CPPUNIT_ASSERT_EQUAL(180, CRoute::calc_honshu_main(6));
+    CPPUNIT_ASSERT_EQUAL(190, CRoute::calc_honshu_main(7));
+    CPPUNIT_ASSERT_EQUAL(190, CRoute::calc_honshu_main(10));
+    CPPUNIT_ASSERT_EQUAL(230, CRoute::calc_honshu_main(11));
+    CPPUNIT_ASSERT_EQUAL(230, CRoute::calc_honshu_main(15));
+    CPPUNIT_ASSERT_EQUAL(320, CRoute::calc_honshu_main(16));
+    CPPUNIT_ASSERT_EQUAL(320, CRoute::calc_honshu_main(20));
+    CPPUNIT_ASSERT_EQUAL(400, CRoute::calc_honshu_main(21));
+    CPPUNIT_ASSERT_EQUAL(400, CRoute::calc_honshu_main(25));
+    CPPUNIT_ASSERT_EQUAL(480, CRoute::calc_honshu_main(26));
+    CPPUNIT_ASSERT_EQUAL(820, CRoute::calc_honshu_main(50));
+    CPPUNIT_ASSERT_EQUAL(950, CRoute::calc_honshu_main(51));
+    CPPUNIT_ASSERT_EQUAL(1620, CRoute::calc_honshu_main(100));
+    CPPUNIT_ASSERT_EQUAL(1890, CRoute::calc_honshu_main(101));
+    CPPUNIT_ASSERT_EQUAL(4940, CRoute::calc_honshu_main(300));
+    CPPUNIT_ASSERT_EQUAL(5250, CRoute::calc_honshu_main(301));
+    CPPUNIT_ASSERT_EQUAL(9030, CRoute::calc_honshu_main(600));
+    CPPUNIT_ASSERT_EQUAL(9350, CRoute::calc_honshu_main(601));
+    CPPUNIT_ASSERT_EQUAL(11970, CRoute::calc_honshu_main(999));
+  }
+
+  void testFareHonshuMain() {
     ares::CRoute route(db);
     // 353.8km
     route.append_route(db->get_lineid("北陸"),
@@ -81,7 +108,7 @@ protected:
     CPPUNIT_ASSERT_EQUAL(5780, route.calc_fare_inplace());
   }
 
-  void calcHonshuMainMiddle() {
+  void testFareHonshuMainMiddle() {
     ares::CRoute route(db);
     // 467.8km
     route.append_route(db->get_lineid("東北"),
@@ -89,7 +116,7 @@ protected:
     CPPUNIT_ASSERT_EQUAL(7350, route.calc_fare_inplace());
   }
 
-  void calcHonshuMain2Lines() {
+  void testFareHonshuMain2Lines() {
     ares::CRoute route(db);
     // 535.0km
     route.append_route(db->get_lineid("東北"),
