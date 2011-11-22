@@ -85,11 +85,38 @@ namespace ares
     return true;
   }
 
+  class CKilo CRoute::get_kilo() const
+  {
+    CKilo kilo;
+    std::vector<std::pair<company_id_t, line_id_t> > result;
+    for(auto itr=$.begin(); itr != $.end(); ++itr)
+    {
+      bool is_main;
+      result.clear();
+      bool ret = $.db->get_company_and_kilo(itr->line,
+                                            itr->begin,
+                                            itr->end,
+                                            result,
+                                            is_main);
+      if(!ret) { return CKilo(); }
+      for(auto j=result.begin(); j != result.end(); ++j)
+      {
+        kilo.add(j->first, is_main, j->second);
+      }
+    }
+    return kilo;
+  }
+
   int CRoute::calc_fare_inplace()
   {
+    // Error checking, returning -1 is not good, boost::optional is better.
+    if(!$.is_valid()) { return -1; }
     // Rewrite Route: shinkansen / route-variant
+    // Get Kilo
+    CKilo kilo($.get_kilo());
     // Calc
-    return 0;
+    // Check if honshu main or not!!!
+    return calc_honshu_main(kilo.get_kilo(COMPANY_HONSHU, true));
   }
 
   int CRoute::calc_honshu_main(int kilo)

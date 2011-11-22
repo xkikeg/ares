@@ -3,6 +3,7 @@
 #include <memory>
 #include "ares.h"
 #include "csegment.h"
+#include "ckilo.h"
 
 namespace ares
 {
@@ -17,6 +18,7 @@ namespace ares
   private:
     std::shared_ptr<CDatabase> db;
     std::vector<CSegment> way;
+
   public:
     typedef std::vector<CSegment>::iterator iterator;
     typedef std::vector<CSegment>::const_iterator const_iterator;
@@ -69,6 +71,9 @@ namespace ares
      * Function to validate route.
      */
     bool is_valid() const;
+
+    //! Return kilo sumulation of the route.
+    CKilo get_kilo() const;
 
     /**
      * Function to calc fare of route.
