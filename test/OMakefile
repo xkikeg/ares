@@ -13,6 +13,7 @@ CXXFILES[] =
 MAIN = test
 
 test.sqlite:
-	ln -s ../ares.sqlite
+	if $(or $(not $(file-exists $@)), $(not $(equal $(readlink $@), $(ARES_DB_FILE))))
+		ln-or-cp $(ARES_DB_FILE) $@
 
 .DEFAULT: $(CXXProgram $(MAIN), $(CXXFILES)) test.sqlite

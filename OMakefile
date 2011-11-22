@@ -1,4 +1,8 @@
 .DEFAULT: ares.sqlite
 
-ares.sqlite: mksql.py $(glob data/*.csv)
+ARES_DB_FILE = $(file ares.sqlite)
+
+$(ARES_DB_FILE): mksql.py $(glob data/*.csv)
 	./mksql.py
+
+.SUBDIRS: $(SRCDIR) $(TESTDIR)

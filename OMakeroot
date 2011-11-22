@@ -12,4 +12,4 @@ CXXFLAGS += -std=c++0x -g -Wall -Wextra
 LDFLAGS += -lsqlite3
 INCLUDES += $(SRCDIR)
 
-.SUBDIRS: . $(SRCDIR) $(TESTDIR)
+.SUBDIRS: .
