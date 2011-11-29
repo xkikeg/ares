@@ -26,6 +26,7 @@ namespace ares
   typedef sqlite3_wrapper::IOException IOException;
 
   class CSegment;
+  class CKiloValue;
 
   /**
    * Exception to represent that no object has found.
@@ -176,9 +177,7 @@ namespace ares
     bool get_company_and_kilo(const line_id_t line,
                               const station_id_t begin,
                               const station_id_t end,
-                              std::vector<
-                                std::pair<company_id_t,
-                                          line_id_t> > & result,
+                              std::vector<CKiloValue> & result,
                               bool & is_main) const;
 
     //! Check if the station is in the line.

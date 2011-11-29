@@ -7,6 +7,7 @@
 #include "sqlite3_wrapper.h"
 #include "cdatabase.h"
 #include "csegment.h"
+#include "ckilo.h"
 
 namespace ares
 {
@@ -300,19 +301,18 @@ namespace ares
 
   /**
    * @note この実装は1路線にたかだか2会社しか入らないことを暗黙の仮定にしている。
+   * 更に言うと、2会社の境界駅は1つであることを仮定している。
    * 仮にJR東海が運賃体系を変えるようなことが起これば大変なことになる。
    * あとSQLのテーブルの組み方自体がlineの会社設定とkiloの会社設定の2つだけで
    * 成り立っているので、lineで設定していない会社同士が接するような状態も
    * 設定できない。ただ、正直どれも起こりそうにないので真面目に実装はしない。
+   * @note この実装は2会社にまたがる路線が幹線であることを仮定している。
    * @note 戻り値をboolじゃなくて結果の配列にしたい。
    */
-  // should add main or local
   bool CDatabase::get_company_and_kilo(const line_id_t line,
                                        const station_id_t begin,
                                        const station_id_t end,
-                                       std::vector<
-                                         std::pair<company_id_t,
-                                                   line_id_t> > & result,
+                                       std::vector<CKiloValue> & result,
                                        bool & is_main) const
   {
     const char * sql =
@@ -330,8 +330,11 @@ namespace ares
     stmt.bind(1, line);
     stmt.bind(2, begin);
     stmt.bind(3, end);
-    company_id_t comp_main, comp_sub;
-    int kilo_main=0, kilo_sub=0, kilo_max=0, kilo_min=INT_MAX;
+    company_id_t comp_main=-1, comp_sub=-1;
+    // 0 means begin, 1 means end
+    int main[2]={0};
+    int sub[2]={0};
+    int kilo_max=0, kilo_min=INT_MAX;
     int rc;
     while(true)
     {
@@ -339,18 +342,19 @@ namespace ares
       if(rc != SQLITE_ROW) { break; }
       const int
         kilo_temp_max = stmt.column(1),
-        kilo_temp_min = stmt.column(0),
-        kilo_temp = kilo_temp_max - kilo_temp_min;
+        kilo_temp_min = stmt.column(0);
       is_main = static_cast<int>(stmt.column(4));
       kilo_max = std::max(kilo_max, kilo_temp_max);
       kilo_min = std::min(kilo_min, kilo_temp_min);
       // kilocompanyid exists
       if(!stmt.column(3).is_null())
       {
-        kilo_sub += kilo_temp;
+        sub[0] = kilo_temp_min;
+        sub[1] = kilo_temp_max;
         comp_sub = stmt.column(3);
       }else{
-        kilo_main += kilo_temp;
+        main[0] = kilo_temp_min;
+        main[1] = kilo_temp_max;
         comp_main = stmt.column(2);
       }
     }
@@ -360,12 +364,22 @@ namespace ares
       std::cerr << db->errmsg() << std::endl;
       return false;
     }
+    const int kilo_all = kilo_max - kilo_min;
     // Cannot get results. maybe line, begin, end are bad.
-    if(kilo_main == 0 && kilo_sub == 0) { return false; }
-    // if kilo_main & kilo_sub exists, kilo_main is not correct.
-    if(kilo_main != 0 && kilo_sub != 0) { kilo_main = kilo_max - kilo_min - kilo_sub; }
-    if(kilo_main != 0) { result.push_back(std::make_pair(comp_main, kilo_main)); }
-    if(kilo_sub  != 0) { result.push_back(std::make_pair(comp_sub , kilo_sub )); }
+    if(kilo_all == 0) { return false; }
+    // if kilo_main & kilo_sub exists, main[] is not correct.
+    if(comp_main != -1 && comp_sub != -1)
+    {
+      // main is near than sub.
+      if(main[0] < sub[0]) { main[1] = sub[0]; }
+      // sub is near than main. this is not probable in current JR.
+      else { main[0] = sub[1]; }
+    }
+    const int
+      kilo_main = main[1] - main[0],
+      kilo_sub  =  sub[1] -  sub[0];
+    if(kilo_main != 0) { result.push_back({comp_main, main[0], main[1]}); }
+    if(kilo_sub  != 0) { result.push_back({comp_sub ,  sub[0] , sub[1]}); }
     return true;
    }
 

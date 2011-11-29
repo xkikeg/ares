@@ -88,7 +88,7 @@ namespace ares
   class CKilo CRoute::get_kilo() const
   {
     CKilo kilo;
-    std::vector<std::pair<company_id_t, line_id_t> > result;
+    std::vector<CKiloValue> result;
     for(auto itr=$.begin(); itr != $.end(); ++itr)
     {
       bool is_main;
@@ -101,7 +101,7 @@ namespace ares
       if(!ret) { return CKilo(); }
       for(auto j=result.begin(); j != result.end(); ++j)
       {
-        kilo.add(j->first, is_main, j->second);
+        kilo.add(j->company, is_main, j->begin, j->end);
       }
     }
     return kilo;
@@ -113,10 +113,25 @@ namespace ares
     if(!$.is_valid()) { return -1; }
     // Rewrite Route: shinkansen / route-variant
     // Get Kilo
-    CKilo kilo($.get_kilo());
+    const CKilo kilo($.get_kilo());
     // Calc
-    // Check if honshu main or not!!!
-    return calc_honshu_main(kilo.get_kilo(COMPANY_HONSHU, true));
+    if(kilo.is_only(COMPANY_HONSHU))
+    {
+      const int kilo_main  = kilo.get_kilo(COMPANY_HONSHU, true );
+      const int kilo_local = kilo.get_kilo(COMPANY_HONSHU, false);
+      if(kilo_main == 0 && kilo_local == 0) return 0;
+      // Main only
+      if(kilo_local == 0) { return calc_honshu_main(kilo_main); }
+      // Local only
+      if(kilo_main == 0) { return $.db->get_fare_table("B1",
+                                                       COMPANY_HONSHU,
+                                                       kilo_local); }
+      // Both main & local
+      const int kilo_total =
+        kilo_main + kilo.get_kilo(COMPANY_HONSHU, false, false);
+      return calc_honshu_main(kilo_total);
+    }
+    return -1;
   }
 
   int CRoute::calc_honshu_main(int kilo)
