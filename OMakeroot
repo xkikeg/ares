@@ -6,6 +6,7 @@ DefineCommandVars()
 
 SRCDIR = $(dir src)
 TESTDIR = $(dir test)
+GTESTDIR = $(dir googletest)
 
 CXXFLAGS += -std=c++0x -g -Wall -Wextra
 # ASFLAGS +=

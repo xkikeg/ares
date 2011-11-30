@@ -1,28 +1,18 @@
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include "gtest/gtest.h"
 
 #include "sqlite3_wrapper.h"
 #include "croute.h"
 #include "cdatabase.h"
 
-class CRouteTest : public CPPUNIT_NS::TestFixture
+class CRouteTest : public testing::Test
 {
-  CPPUNIT_TEST_SUITE(CRouteTest);
-  CPPUNIT_TEST(testEqualityTwoAndThreeArgs);
-  CPPUNIT_TEST(testContainStation);
-  CPPUNIT_TEST(testValidRoute);
-  CPPUNIT_TEST(testInvalidRoute);
-  CPPUNIT_TEST(testCalcHonshuMain);
-  CPPUNIT_TEST(testFareHonshuMain);
-  CPPUNIT_TEST(testFareHonshuMainMiddle);
-  CPPUNIT_TEST(testFareHonshuMain2Lines);
-  CPPUNIT_TEST(testFareHonshuLocalOnly);
-  CPPUNIT_TEST(testFareHonshuMainAndLocal);
-  CPPUNIT_TEST_SUITE_END();
+public:
 
-  std::shared_ptr<ares::CDatabase> db;
+  CRouteTest() : db(new ares::CDatabase("test.sqlite")) {}
 
 protected:
+
+  std::shared_ptr<ares::CDatabase> db;
 
   ares::CRoute createRoute2argsTokaidoSannyo() {
     ares::CRoute route(db, db->get_stationid("東京"));
@@ -39,129 +29,118 @@ protected:
                        db->get_stationid("神戸"), db->get_stationid("岡山"));
     return std::move(route);
   }
-
-  void testEqualityTwoAndThreeArgs() {
-    CPPUNIT_ASSERT_EQUAL(createRoute2argsTokaidoSannyo(),
-                         createRouteTokaidoSannyo());
-  }
-
-  void testContainStation() {
-    ares::CRoute route = createRouteTokaidoSannyo();
-    CPPUNIT_ASSERT_EQUAL(true, route.is_contains(db->get_stationid("東京")));
-    CPPUNIT_ASSERT_EQUAL(true, route.is_contains(db->get_stationid("大阪")));
-    CPPUNIT_ASSERT_EQUAL(true, route.is_contains(db->get_stationid("神戸")));
-    CPPUNIT_ASSERT_EQUAL(true, route.is_contains(db->get_stationid("姫路")));
-    CPPUNIT_ASSERT_EQUAL(true, route.is_contains(db->get_stationid("岡山")));
-    CPPUNIT_ASSERT_EQUAL(false, route.is_contains(db->get_stationid("広島")));
-    CPPUNIT_ASSERT_EQUAL(false, route.is_contains(db->get_stationid("盛岡")));
-  }
-
-  void testValidRoute() {
-    ares::CRoute route = createRouteTokaidoSannyo();
-    CPPUNIT_ASSERT_EQUAL(true, route.is_valid());
-  }
-
-  void testInvalidRoute() {
-    {
-      ares::CRoute route = createRouteTokaidoSannyo();
-      route.append_route(db->get_lineid("山陽"),
-                         db->get_stationid("神戸"), db->get_stationid("岡山"));
-      CPPUNIT_ASSERT_EQUAL(false, route.is_valid());
-    }
-    {
-      ares::CRoute route = createRouteTokaidoSannyo();
-      route.append_route(db->get_lineid("上越"),
-                         db->get_stationid("高崎"), db->get_stationid("土合"));
-      CPPUNIT_ASSERT_EQUAL(false, route.is_valid());
-    }
-  }
-
-  void testCalcHonshuMain() {
-    using ares::CRoute;
-    CPPUNIT_ASSERT_EQUAL(140, CRoute::calc_honshu_main(1));
-    CPPUNIT_ASSERT_EQUAL(140, CRoute::calc_honshu_main(3));
-    CPPUNIT_ASSERT_EQUAL(180, CRoute::calc_honshu_main(4));
-    CPPUNIT_ASSERT_EQUAL(180, CRoute::calc_honshu_main(6));
-    CPPUNIT_ASSERT_EQUAL(190, CRoute::calc_honshu_main(7));
-    CPPUNIT_ASSERT_EQUAL(190, CRoute::calc_honshu_main(10));
-    CPPUNIT_ASSERT_EQUAL(230, CRoute::calc_honshu_main(11));
-    CPPUNIT_ASSERT_EQUAL(230, CRoute::calc_honshu_main(15));
-    CPPUNIT_ASSERT_EQUAL(320, CRoute::calc_honshu_main(16));
-    CPPUNIT_ASSERT_EQUAL(320, CRoute::calc_honshu_main(20));
-    CPPUNIT_ASSERT_EQUAL(400, CRoute::calc_honshu_main(21));
-    CPPUNIT_ASSERT_EQUAL(400, CRoute::calc_honshu_main(25));
-    CPPUNIT_ASSERT_EQUAL(480, CRoute::calc_honshu_main(26));
-    CPPUNIT_ASSERT_EQUAL(820, CRoute::calc_honshu_main(50));
-    CPPUNIT_ASSERT_EQUAL(950, CRoute::calc_honshu_main(51));
-    CPPUNIT_ASSERT_EQUAL(1620, CRoute::calc_honshu_main(100));
-    CPPUNIT_ASSERT_EQUAL(1890, CRoute::calc_honshu_main(101));
-    CPPUNIT_ASSERT_EQUAL(4940, CRoute::calc_honshu_main(300));
-    CPPUNIT_ASSERT_EQUAL(5250, CRoute::calc_honshu_main(301));
-    CPPUNIT_ASSERT_EQUAL(9030, CRoute::calc_honshu_main(600));
-    CPPUNIT_ASSERT_EQUAL(9350, CRoute::calc_honshu_main(601));
-    CPPUNIT_ASSERT_EQUAL(11970, CRoute::calc_honshu_main(999));
-  }
-
-  void testFareHonshuMain() {
-    ares::CRoute route(db);
-    // 353.8km
-    route.append_route(db->get_lineid("北陸"),
-                       db->get_stationid("米原"), db->get_stationid("直江津"));
-    CPPUNIT_ASSERT_EQUAL(5780, route.calc_fare_inplace());
-  }
-
-  void testFareHonshuMainMiddle() {
-    ares::CRoute route(db);
-    // 467.8km
-    route.append_route(db->get_lineid("東北"),
-                       db->get_stationid("蕨"), db->get_stationid("北上"));
-    CPPUNIT_ASSERT_EQUAL(7350, route.calc_fare_inplace());
-  }
-
-  void testFareHonshuMain2Lines() {
-    ares::CRoute route(db);
-    // 535.0km
-    route.append_route(db->get_lineid("東北"),
-                       db->get_stationid("蕨"), db->get_stationid("東京"));
-    route.append_route(db->get_lineid("東海道"),
-                       db->get_stationid("東京"), db->get_stationid("名古屋"));
-    route.append_route(db->get_lineid("関西"),
-                       db->get_stationid("名古屋"), db->get_stationid("王寺"));
-    CPPUNIT_ASSERT_EQUAL(8190, route.calc_fare_inplace());
-  }
-
-  void testFareHonshuLocalOnly() {
-    ares::CRoute route(db);
-    // 111.6km real
-    // 122.8km fake
-    route.append_route(db->get_lineid("姫新"),
-                       db->get_stationid("佐用"), db->get_stationid("姫路"));
-    route.append_route(db->get_lineid("播但"),
-                       db->get_stationid("姫路"), db->get_stationid("和田山"));
-    CPPUNIT_ASSERT_EQUAL(2210, route.calc_fare_inplace());
-  }
-
-  void testFareHonshuMainAndLocal() {
-    ares::CRoute route(db);
-    // 110.1km real
-    // 119.6km fake
-    route.append_route(db->get_lineid("姫新"),
-                       db->get_stationid("佐用"), db->get_stationid("姫路"));
-    route.append_route(db->get_lineid("山陽"),
-                       db->get_stationid("姫路"), db->get_stationid("加古川"));
-    route.append_route(db->get_lineid("加古川"),
-                       db->get_stationid("加古川"), db->get_stationid("谷川"));
-    CPPUNIT_ASSERT_EQUAL(1890, route.calc_fare_inplace());
-  }
-
-public:
-  virtual void setUp() {
-    db.reset(new ares::CDatabase("test.sqlite"));
-  }
-
-  virtual void tearDown() {
-    db.reset();
-  }
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(CRouteTest);
+TEST_F(CRouteTest, EqualityTwoAndThreeArgs) {
+  EXPECT_EQ(createRoute2argsTokaidoSannyo(),
+            createRouteTokaidoSannyo());
+}
+
+TEST_F(CRouteTest, ContainStation) {
+  ares::CRoute route = createRouteTokaidoSannyo();
+  EXPECT_TRUE(route.is_contains(db->get_stationid("東京")));
+  EXPECT_TRUE(route.is_contains(db->get_stationid("大阪")));
+  EXPECT_TRUE(route.is_contains(db->get_stationid("神戸")));
+  EXPECT_TRUE(route.is_contains(db->get_stationid("姫路")));
+  EXPECT_TRUE(route.is_contains(db->get_stationid("岡山")));
+  EXPECT_FALSE(route.is_contains(db->get_stationid("広島")));
+  EXPECT_FALSE(route.is_contains(db->get_stationid("盛岡")));
+}
+
+TEST_F(CRouteTest, ValidRoute) {
+  ares::CRoute route = createRouteTokaidoSannyo();
+  EXPECT_TRUE(route.is_valid());
+}
+
+TEST_F(CRouteTest, InvalidRoute) {
+  {
+    ares::CRoute route = createRouteTokaidoSannyo();
+    route.append_route(db->get_lineid("山陽"),
+                       db->get_stationid("神戸"), db->get_stationid("岡山"));
+    EXPECT_FALSE(route.is_valid());
+  }
+  {
+    ares::CRoute route = createRouteTokaidoSannyo();
+    route.append_route(db->get_lineid("上越"),
+                       db->get_stationid("高崎"), db->get_stationid("土合"));
+    EXPECT_FALSE(route.is_valid());
+  }
+}
+
+TEST_F(CRouteTest, CalcHonshuMain) {
+  using ares::CRoute;
+  EXPECT_EQ(140, CRoute::calc_honshu_main(1));
+  EXPECT_EQ(140, CRoute::calc_honshu_main(3));
+  EXPECT_EQ(180, CRoute::calc_honshu_main(4));
+  EXPECT_EQ(180, CRoute::calc_honshu_main(6));
+  EXPECT_EQ(190, CRoute::calc_honshu_main(7));
+  EXPECT_EQ(190, CRoute::calc_honshu_main(10));
+  EXPECT_EQ(230, CRoute::calc_honshu_main(11));
+  EXPECT_EQ(230, CRoute::calc_honshu_main(15));
+  EXPECT_EQ(320, CRoute::calc_honshu_main(16));
+  EXPECT_EQ(320, CRoute::calc_honshu_main(20));
+  EXPECT_EQ(400, CRoute::calc_honshu_main(21));
+  EXPECT_EQ(400, CRoute::calc_honshu_main(25));
+  EXPECT_EQ(480, CRoute::calc_honshu_main(26));
+  EXPECT_EQ(820, CRoute::calc_honshu_main(50));
+  EXPECT_EQ(950, CRoute::calc_honshu_main(51));
+  EXPECT_EQ(1620, CRoute::calc_honshu_main(100));
+  EXPECT_EQ(1890, CRoute::calc_honshu_main(101));
+  EXPECT_EQ(4940, CRoute::calc_honshu_main(300));
+  EXPECT_EQ(5250, CRoute::calc_honshu_main(301));
+  EXPECT_EQ(9030, CRoute::calc_honshu_main(600));
+  EXPECT_EQ(9350, CRoute::calc_honshu_main(601));
+  EXPECT_EQ(11970, CRoute::calc_honshu_main(999));
+}
+
+TEST_F(CRouteTest, FareHonshuMain) {
+  ares::CRoute route(db);
+  // 353.8km
+  route.append_route(db->get_lineid("北陸"),
+                     db->get_stationid("米原"), db->get_stationid("直江津"));
+  EXPECT_EQ(5780, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareHonshuMainMiddle) {
+  ares::CRoute route(db);
+  // 467.8km
+  route.append_route(db->get_lineid("東北"),
+                     db->get_stationid("蕨"), db->get_stationid("北上"));
+  EXPECT_EQ(7350, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareHonshuMain2Lines) {
+  ares::CRoute route(db);
+  // 535.0km
+  route.append_route(db->get_lineid("東北"),
+                     db->get_stationid("蕨"), db->get_stationid("東京"));
+  route.append_route(db->get_lineid("東海道"),
+                     db->get_stationid("東京"), db->get_stationid("名古屋"));
+  route.append_route(db->get_lineid("関西"),
+                     db->get_stationid("名古屋"), db->get_stationid("王寺"));
+  EXPECT_EQ(8190, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareHonshuLocalOnly) {
+  ares::CRoute route(db);
+  // 111.6km real
+  // 122.8km fake
+  route.append_route(db->get_lineid("姫新"),
+                     db->get_stationid("佐用"), db->get_stationid("姫路"));
+  route.append_route(db->get_lineid("播但"),
+                     db->get_stationid("姫路"), db->get_stationid("和田山"));
+  EXPECT_EQ(2210, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareHonshuMainAndLocal) {
+  ares::CRoute route(db);
+  // 110.1km real
+  // 119.6km fake
+  route.append_route(db->get_lineid("姫新"),
+                     db->get_stationid("佐用"), db->get_stationid("姫路"));
+  route.append_route(db->get_lineid("山陽"),
+                     db->get_stationid("姫路"), db->get_stationid("加古川"));
+  route.append_route(db->get_lineid("加古川"),
+                     db->get_stationid("加古川"), db->get_stationid("谷川"));
+  EXPECT_EQ(1890, route.calc_fare_inplace());
+}

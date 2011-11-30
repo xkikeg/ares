@@ -2,18 +2,30 @@
 
 # .SUBDIRS:
 
-CXXFLAGS += $(shell cppunit-config --cflags)
-LDFLAGS += $(shell cppunit-config --libs)
+INCLUDES += $(GTESTDIR)/include $(GTESTDIR)
 LIBS += $(SRCDIR)/libares
 
 CXXFILES[] =
    $(removesuffix $(ls test_*.cpp))
-   testmain
 
-MAIN = test
+ln-if-not-exist(source, target) =
+	if $(not $(and $(file-exists $(target)), $(equal $(readlink $(target)), $(source))))
+		ln-or-cp $(source) $(target)
 
 test.sqlite:
-	if $(or $(not $(file-exists $@)), $(not $(equal $(readlink $@), $(ARES_DB_FILE))))
-		ln-or-cp $(ARES_DB_FILE) $@
+	$(ln-if-not-exist $(ARES_DB_FILE), $@)
 
-.DEFAULT: $(CXXProgram $(MAIN), $(CXXFILES)) test.sqlite
+gtest-all.cc:
+	$(ln-if-not-exist $(GTESTDIR)/src/$@, $@)
+
+gtest_main.cc:
+	$(ln-if-not-exist $(GTESTDIR)/src/$@, $@)
+
+GTEST_LIB = $(StaticCXXLibrary libgtest, gtest-all)
+GTEST_MAIN = $(StaticCXXLibrary libgtest_main, gtest_main)
+
+LIBS += libgtest libgtest_main
+
+TEST = $(CXXProgram test, $(CXXFILES))
+
+.DEFAULT: test.sqlite $(TEST) $(GTEST_LIB) $(GTEST_MAIN)
