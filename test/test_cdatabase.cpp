@@ -92,6 +92,12 @@ protected:
   }
 };
 
+TEST_F(CDatabaseTest, BadFileName) {
+  EXPECT_THROW({
+      ares::CDatabase db(".");
+    }, ares::IOException);
+}
+
 TEST_F(CDatabaseTest, GetStationNameKanji) {
   u8vec_t kagoshima_prefix = {
     "鹿児島",

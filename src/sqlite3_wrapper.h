@@ -1,7 +1,8 @@
 #pragma once
 
+#include <string>
 #include <iostream>
-#include <exception>
+#include <stdexcept>
 #include <boost/utility.hpp>
 #include <sqlite3.h>
 
@@ -10,8 +11,10 @@ namespace sqlite3_wrapper
   /**
    * IO Error Exception.
    */
-  class IOException : std::exception
+  class IOException : std::runtime_error
   {
+  public:
+    IOException(const std::string & str) : std::runtime_error(str) {}
   };
 
   /**
@@ -36,9 +39,9 @@ namespace sqlite3_wrapper
       rc = sqlite3_open_v2(dbname, &db, flags, zVfs);
       if(rc != SQLITE_OK)
 	{
-	  std::cerr << sqlite3_errmsg(db) << std::endl;
+      std::string err = sqlite3_errmsg(db);
 	  sqlite3_close(db);
-	  throw IOException();
+	  throw IOException(err);
 	}
     }
     ~SQLite()
