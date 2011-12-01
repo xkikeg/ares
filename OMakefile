@@ -1,8 +1,13 @@
-.DEFAULT: ares.sqlite
+.PHONY: clean
 
 ARES_DB_FILE = $(file ares.sqlite)
+
+.DEFAULT: $(ARES_DB_FILE)
 
 $(ARES_DB_FILE): mksql.py $(glob data/*.csv)
 	./mksql.py
 
 .SUBDIRS: $(SRCDIR) $(TESTDIR)
+
+clean:
+	rm $(filter-proper-targets $(ls R, .))
