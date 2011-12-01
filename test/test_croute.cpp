@@ -3,17 +3,28 @@
 #include "sqlite3_wrapper.h"
 #include "croute.h"
 #include "cdatabase.h"
+#include "test_dbfilename.h"
 
 class CRouteTest : public testing::Test
 {
 public:
-
-  CRouteTest() : db(new ares::CDatabase("test.sqlite")) {}
+  CRouteTest() : db(new ares::CDatabase(TEST_DB_FILENAME)),
+                 route(db) {}
 
 protected:
-
   std::shared_ptr<ares::CDatabase> db;
+  ares::CRoute route;
+};
 
+class CRouteTokaidoTest : public CRouteTest
+{
+public:
+  CRouteTokaidoTest() : CRouteTest()
+  {
+    route = createRouteTokaidoSannyo();
+  }
+
+protected:
   ares::CRoute createRoute2argsTokaidoSannyo() {
     ares::CRoute route(db, db->get_stationid("東京"));
     route.append_route(db->get_lineid("東海道"), db->get_stationid("神戸"));
@@ -31,13 +42,11 @@ protected:
   }
 };
 
-TEST_F(CRouteTest, EqualityTwoAndThreeArgs) {
-  EXPECT_EQ(createRoute2argsTokaidoSannyo(),
-            createRouteTokaidoSannyo());
+TEST_F(CRouteTokaidoTest, EqualityTwoAndThreeArgs) {
+  EXPECT_EQ(createRoute2argsTokaidoSannyo(), route);
 }
 
-TEST_F(CRouteTest, ContainStation) {
-  ares::CRoute route = createRouteTokaidoSannyo();
+TEST_F(CRouteTokaidoTest, ContainStation) {
   EXPECT_TRUE(route.is_contains(db->get_stationid("東京")));
   EXPECT_TRUE(route.is_contains(db->get_stationid("大阪")));
   EXPECT_TRUE(route.is_contains(db->get_stationid("神戸")));
@@ -47,24 +56,20 @@ TEST_F(CRouteTest, ContainStation) {
   EXPECT_FALSE(route.is_contains(db->get_stationid("盛岡")));
 }
 
-TEST_F(CRouteTest, ValidRoute) {
-  ares::CRoute route = createRouteTokaidoSannyo();
+TEST_F(CRouteTokaidoTest, ValidRoute) {
   EXPECT_TRUE(route.is_valid());
 }
 
-TEST_F(CRouteTest, InvalidRoute) {
-  {
-    ares::CRoute route = createRouteTokaidoSannyo();
-    route.append_route(db->get_lineid("山陽"),
-                       db->get_stationid("神戸"), db->get_stationid("岡山"));
-    EXPECT_FALSE(route.is_valid());
-  }
-  {
-    ares::CRoute route = createRouteTokaidoSannyo();
-    route.append_route(db->get_lineid("上越"),
-                       db->get_stationid("高崎"), db->get_stationid("土合"));
-    EXPECT_FALSE(route.is_valid());
-  }
+TEST_F(CRouteTokaidoTest, InvalidDuplicateRoute) {
+  route.append_route(db->get_lineid("山陽"),
+                     db->get_stationid("神戸"), db->get_stationid("岡山"));
+  EXPECT_FALSE(route.is_valid());
+}
+
+TEST_F(CRouteTokaidoTest, InvalidDiscontinuousRoute) {
+  route.append_route(db->get_lineid("上越"),
+                     db->get_stationid("高崎"), db->get_stationid("土合"));
+  EXPECT_FALSE(route.is_valid());
 }
 
 TEST_F(CRouteTest, CalcHonshuMain) {
@@ -94,7 +99,6 @@ TEST_F(CRouteTest, CalcHonshuMain) {
 }
 
 TEST_F(CRouteTest, FareHonshuMain) {
-  ares::CRoute route(db);
   // 353.8km
   route.append_route(db->get_lineid("北陸"),
                      db->get_stationid("米原"), db->get_stationid("直江津"));
@@ -102,7 +106,6 @@ TEST_F(CRouteTest, FareHonshuMain) {
 }
 
 TEST_F(CRouteTest, FareHonshuMainMiddle) {
-  ares::CRoute route(db);
   // 467.8km
   route.append_route(db->get_lineid("東北"),
                      db->get_stationid("蕨"), db->get_stationid("北上"));
@@ -110,7 +113,6 @@ TEST_F(CRouteTest, FareHonshuMainMiddle) {
 }
 
 TEST_F(CRouteTest, FareHonshuMain2Lines) {
-  ares::CRoute route(db);
   // 535.0km
   route.append_route(db->get_lineid("東北"),
                      db->get_stationid("蕨"), db->get_stationid("東京"));
@@ -122,7 +124,6 @@ TEST_F(CRouteTest, FareHonshuMain2Lines) {
 }
 
 TEST_F(CRouteTest, FareHonshuLocalOnly) {
-  ares::CRoute route(db);
   // 111.6km real
   // 122.8km fake
   route.append_route(db->get_lineid("姫新"),
@@ -133,7 +134,6 @@ TEST_F(CRouteTest, FareHonshuLocalOnly) {
 }
 
 TEST_F(CRouteTest, FareHonshuMainAndLocal) {
-  ares::CRoute route(db);
   // 110.1km real
   // 119.6km fake
   route.append_route(db->get_lineid("姫新"),

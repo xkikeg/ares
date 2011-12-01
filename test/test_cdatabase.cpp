@@ -7,13 +7,13 @@
 #include "cdatabase.h"
 #include "csegment.h"
 
-#define DB_NAME "test.sqlite"
+#include "test_dbfilename.h"
 
 using namespace std::placeholders;
 class CDatabaseTest : public testing::Test
 {
 public:
-  CDatabaseTest() : db(new ares::CDatabase(DB_NAME)) {}
+  CDatabaseTest() : db(new ares::CDatabase(TEST_DB_FILENAME)) {}
 
 protected:
 
