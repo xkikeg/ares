@@ -29,7 +29,12 @@ namespace ares
   class CKiloValue;
 
   /**
+   * @~english
    * Exception to represent that no object has found.
+   */
+  /**
+   * @~japanese
+   * オブジェクトが見つからなかった時の例外.
    */
   class DoesNotExist : public std::logic_error
   {

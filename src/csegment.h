@@ -5,6 +5,10 @@
 
 namespace ares
 {
+  /**
+   * @~
+   * 経路の1区間を表現するクラス.
+   */
   struct CSegment
   {
     station_id_t begin, end;
@@ -23,7 +27,12 @@ namespace ares
         line(line) {}
 
     /**
+     * @~english
      * Check whether this segment is begin.
+     */
+    /**
+     * @~japanese
+     * 最初のセグメントかどうかを判定する.
      */
     bool is_begin() const {
       return line == 0 && end == 0;

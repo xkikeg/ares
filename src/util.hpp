@@ -34,7 +34,12 @@ namespace liquid
   }
 
   /**
+   * @~english
    * Interval Tree for ranges without overlap.
+   */
+  /**
+   * @~japanese
+   * 区間が重ならない前提の区間木.
    */
   template <class T>
   class UniqueIntervalTree
@@ -69,8 +74,18 @@ namespace liquid
     }
 
     /**
-     * Insert specified range [begin, end].
-     * Constraint: begin != end
+     * @~japanese
+     * [begin, end]で指定した区間を挿入する.
+     * @a begin と @a end が異なる必要がある.
+     * @param[in] begin 区間の始点.
+     * @param[in] end   区間の終点.
+     * @retval true     挿入が成功した場合.
+     * @retval false    挿入が重なりによって失敗した場合.
+     */
+    /**
+     * @~english
+     * Insert specified range [@a begin, @a end].
+     * Constraint: @a begin != @a end
      * @param[in] begin Begin of the range.
      * @param[in] end   End of the range.
      * @retval true     Insertion succeed.

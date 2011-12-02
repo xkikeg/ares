@@ -9,7 +9,12 @@
 namespace sqlite3_wrapper
 {
   /**
+   * @~english
    * IO Error Exception.
+   */
+  /**
+   * @~japanese
+   * IOエラー例外.
    */
   class IOException : std::runtime_error
   {
@@ -18,7 +23,12 @@ namespace sqlite3_wrapper
   };
 
   /**
+   * @~english
    * Wrapper object of sqlite3 object.
+   */
+  /**
+   * @~japanese
+   * sqlite3オブジェクトのラッパークラス.
    */
   class SQLite : boost::noncopyable
   {
@@ -26,10 +36,18 @@ namespace sqlite3_wrapper
     sqlite3 * db;
   public:
     /**
+     * @~english
      * Constructor with filname and options.
      * @param[in] dbname database filename.
      * @param[in] flags database file open mode.
      * @param[in] zVfs Name of VFS module to use. Refer SQLite document.
+     */
+    /**
+     * @~japanese
+     * 通常のコンストラクタ.
+     * @param[in] データベースのファイル名.
+     * @param[in] データベースを開くときのオプション.
+     * @param[in] VFSモジュールのzVfs名を指定. SQLiteのドキュメント読め.
      */
     SQLite(const char * dbname,
 	   int flags=SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
@@ -38,12 +56,13 @@ namespace sqlite3_wrapper
       int rc;
       rc = sqlite3_open_v2(dbname, &db, flags, zVfs);
       if(rc != SQLITE_OK)
-	{
-      std::string err = sqlite3_errmsg(db);
-	  sqlite3_close(db);
-	  throw IOException(err);
-	}
+      {
+        std::string err = sqlite3_errmsg(db);
+        sqlite3_close(db);
+        throw IOException(err);
+      }
     }
+
     ~SQLite()
     {
       sqlite3_close(db);
