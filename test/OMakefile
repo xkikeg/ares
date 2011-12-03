@@ -25,7 +25,7 @@ gtest_main.cc:
 	$(ln-if-not-exist $(GTESTDIR)/src/$@, $@)
 
 $(TEST_DB_FILE_HEADER):
-	echo "#define TEST_DB_FILENAME \"$(TEST_DB_FILE)\"" > $@
+	echo "#define TEST_DB_FILENAME \"$(absname $(TEST_DB_FILE))\"" > $@
 
 GENERATED_FILES = $(CGeneratedFiles $(TEST_DB_FILE_HEADER))
 GTEST_LIB = $(StaticCXXLibrary libgtest, gtest-all)
