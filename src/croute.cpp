@@ -62,7 +62,7 @@ namespace ares
 
   bool CRoute::is_contains(station_id_t station) const
   {
-    for(auto itr = $.begin(); itr != $.end(); ++itr)
+    for(const_iterator itr = $.begin(); itr != $.end(); ++itr)
     {
       if($.db->is_contains(*itr, station)) return true;
     }
@@ -72,13 +72,13 @@ namespace ares
   bool CRoute::is_valid() const
   {
     // Connectivity: each segment tail = next segment head
-    for(auto itr=$.begin()+1; itr != $.end(); ++itr)
+    for(const_iterator itr=$.begin()+1; itr != $.end(); ++itr)
     {
       if((itr-1)->end != itr->begin){ return false; }
     }
     // NoOverlap   : segments does not overlap
     std::map<line_id_t, liquid::UniqueIntervalTree<station_id_t> > checktree;
-    for(auto itr=$.begin(); itr != $.end(); ++itr)
+    for(const_iterator itr=$.begin(); itr != $.end(); ++itr)
     {
       if(!checktree[itr->line].insert(itr->begin, itr->end)) { return false; }
     }
@@ -89,7 +89,7 @@ namespace ares
   {
     CKilo kilo;
     std::vector<CKiloValue> result;
-    for(auto itr=$.begin(); itr != $.end(); ++itr)
+    for(const_iterator itr=$.begin(); itr != $.end(); ++itr)
     {
       bool is_main;
       result.clear();
@@ -99,7 +99,8 @@ namespace ares
                                             result,
                                             is_main);
       if(!ret) { return CKilo(); }
-      for(auto j=result.begin(); j != result.end(); ++j)
+      for(std::vector<CKiloValue>::iterator j=result.begin();
+          j != result.end(); ++j)
       {
         kilo.add(j->company, is_main, j->begin, j->end);
       }

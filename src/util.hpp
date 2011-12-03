@@ -96,7 +96,8 @@ namespace liquid
       if(!(begin < end)) { return false; }
       if(tree.empty())
       {
-        auto ret = tree.insert(std::make_pair(begin, end));
+        std::pair<iterator, bool> ret =
+          tree.insert(std::make_pair(begin, end));
         return ret.second;
       }
       const std::pair<iterator, iterator> range = tree.equal_range(begin);
@@ -110,12 +111,14 @@ namespace liquid
       // all ranges are smaller than begin.
       if(range.first == tree.end())
       {
-        iterator End = std::prev(range.first);
+        iterator End = range.first;
+        --End;
         if(begin < End->second) { return false; }
         tree.insert(End, std::make_pair(begin, end));
         return true;
       }
-      const iterator lower = std::prev(range.second);
+      iterator lower = range.second;
+      --lower;
       const iterator upper = range.first;
       // constraint: example: [1,5] >= [5,9] =< [10,15]
       if(begin < lower->second || upper->first < end) { return false; }

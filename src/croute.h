@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <boost/tr1/memory.hpp>
 #include "ares.h"
 #include "csegment.h"
 #include "ckilo.h"
@@ -16,7 +17,7 @@ namespace ares
   class CRoute
   {
   private:
-    std::shared_ptr<CDatabase> db;
+    std::tr1::shared_ptr<CDatabase> db;
     std::vector<CSegment> way;
 
   public:
@@ -27,10 +28,10 @@ namespace ares
      * Constructor.
      * Constructor with existing CDatabase object.
      */
-    CRoute(std::shared_ptr<CDatabase> db)
+    CRoute(std::tr1::shared_ptr<CDatabase> db)
       : db(db) {}
 
-    CRoute(std::shared_ptr<CDatabase> db, station_id_t begin)
+    CRoute(std::tr1::shared_ptr<CDatabase> db, station_id_t begin)
       : db(db), way(1, CSegment(begin)) {}
 
     friend std::ostream & operator<<(std::ostream & ost, const CRoute & route);

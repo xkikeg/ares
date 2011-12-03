@@ -4,7 +4,6 @@
 
 #include "ckilo.h"
 
-using namespace std::placeholders;
 class CKiloTest : public testing::Test
 {
 protected:

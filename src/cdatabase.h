@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <memory>
+#include <boost/tr1/memory.hpp>
 #include <stdexcept>
 #include <boost/utility.hpp>
 #include <boost/lexical_cast.hpp>
@@ -67,7 +67,7 @@ namespace ares
   class CDatabase : boost::noncopyable
   {
   private:
-    std::unique_ptr<SQLite> db;
+    std::tr1::shared_ptr<SQLite> db;
   public:
     /**
      * Constructor.

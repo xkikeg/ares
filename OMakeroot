@@ -8,7 +8,7 @@ SRCDIR = $(dir src)
 TESTDIR = $(dir test)
 GTESTDIR = $(dir googletest)
 
-CXXFLAGS += -std=c++0x -g -Wall -Wextra
+CXXFLAGS += -g -Wall -Wextra
 # ASFLAGS +=
 LDFLAGS += -lsqlite3
 INCLUDES += $(SRCDIR)

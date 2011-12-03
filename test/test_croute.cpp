@@ -12,7 +12,7 @@ public:
                  route(db) {}
 
 protected:
-  std::shared_ptr<ares::CDatabase> db;
+  std::tr1::shared_ptr<ares::CDatabase> db;
   ares::CRoute route;
 };
 
@@ -29,7 +29,7 @@ protected:
     ares::CRoute route(db, db->get_stationid("東京"));
     route.append_route(db->get_lineid("東海道"), db->get_stationid("神戸"));
     route.append_route(db->get_lineid("山陽"), db->get_stationid("岡山"));
-    return std::move(route);
+    return route;
   }
 
   ares::CRoute createRouteTokaidoSannyo() {
@@ -38,7 +38,7 @@ protected:
                        db->get_stationid("東京"), db->get_stationid("神戸"));
     route.append_route(db->get_lineid("山陽"),
                        db->get_stationid("神戸"), db->get_stationid("岡山"));
-    return std::move(route);
+    return route;
   }
 };
 

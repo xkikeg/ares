@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+#include <vector>
 #include <string>
 #include <iostream>
 #include <stdexcept>
@@ -322,14 +324,14 @@ namespace sqlite3_wrapper
      * @param[in]     icol   Index of the column to append as first.
      * @param[in]     jcol   Index of the column to append as second.
      */
-    template <class T>
-    bool fill_column(T & vec, int icol, int jcol)
+    template <class T, class U>
+    bool fill_column(std::vector<std::pair<T, U> > & vec, int icol, int jcol)
     {
       int rc;
       while((rc = this->step()) == SQLITE_ROW)
       {
-        vec.push_back(std::make_pair(this->column(icol),
-                                     this->column(jcol)));
+        vec.push_back(std::make_pair(static_cast<T>(this->column(icol)),
+                                     static_cast<U>(this->column(jcol))));
       }
       if(rc != SQLITE_DONE)
       {

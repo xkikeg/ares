@@ -20,7 +20,7 @@
   }                                                                 \
   sresult.clear();
 
-void testdb(std::shared_ptr<ares::CDatabase> db)
+void testdb(std::tr1::shared_ptr<ares::CDatabase> db)
 {
   ares::station_vector sresult;
   teststation("鹿児島", name, PREFIX);
@@ -41,7 +41,7 @@ void testdb(std::shared_ptr<ares::CDatabase> db)
   }
 }
 
-void testroute(std::shared_ptr<ares::CDatabase> db)
+void testroute(std::tr1::shared_ptr<ares::CDatabase> db)
 {
   ares::CRoute route(db, db->get_stationid("東京"));
   route.append_route(db->get_lineid   ("東海道"),
@@ -68,7 +68,7 @@ int main(int argc, char ** argv)
   std::wcout.imbue(loc);
   std::cerr.imbue(loc);
   std::wcerr.imbue(loc);
-  std::shared_ptr<ares::CDatabase> db;
+  std::tr1::shared_ptr<ares::CDatabase> db;
   try
   {
     db.reset(new ares::CDatabase(argv[1]));
