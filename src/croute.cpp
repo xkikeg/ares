@@ -104,7 +104,7 @@ namespace ares
         kilo.add(j->company, is_main, j->begin, j->end);
       }
     }
-    return kilo;
+    return std::move(kilo);
   }
 
   int CRoute::calc_fare_inplace()
@@ -117,19 +117,25 @@ namespace ares
     // Calc
     if(kilo.is_only(COMPANY_HONSHU))
     {
-      const int kilo_main  = kilo.get_kilo(COMPANY_HONSHU, true );
-      const int kilo_local = kilo.get_kilo(COMPANY_HONSHU, false);
-      if(kilo_main == 0 && kilo_local == 0) return 0;
+      const CHecto hecto_main  = kilo.get(COMPANY_HONSHU, true );
+      const CHecto hecto_local = kilo.get(COMPANY_HONSHU, false);
+      if(hecto_main == 0 && hecto_local == 0) return 0;
       // Main only
-      if(kilo_local == 0) { return calc_honshu_main(kilo_main); }
-      // Local only
-      if(kilo_main == 0) { return $.db->get_fare_table("B1",
-                                                       COMPANY_HONSHU,
-                                                       kilo_local); }
+      if(hecto_local == 0) { return calc_honshu_main(hecto_main); }
+      // Local only or (Main+Local)<=10
+      if(hecto_main == 0 || (hecto_main + hecto_local) <= 10)
+      {
+        return $.db->get_fare_table("B1",
+                                    COMPANY_HONSHU,
+                                    hecto_main + hecto_local);
+      }
       // Both main & local
-      const int kilo_total =
-        kilo_main + kilo.get_kilo(COMPANY_HONSHU, false, false);
-      return calc_honshu_main(kilo_total);
+      const int hecto_total =
+        hecto_main + kilo.get(COMPANY_HONSHU, false, false);
+      return calc_honshu_main(hecto_total);
+    }
+    if(kilo.is_only(COMPANY_KYUSHU))
+    {
     }
     return -1;
   }

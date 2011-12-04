@@ -5,6 +5,9 @@
 #include "cdatabase.h"
 #include "test_dbfilename.h"
 
+#define EXPECT_FARE_EQ(expected, route) \
+  EXPECT_EQ(expected, route.calc_fare_inplace()) << route.get_kilo()
+
 class CRouteTest : public testing::Test
 {
 public:
@@ -118,14 +121,14 @@ TEST_F(CRouteTest, FareHonshuMain) {
   // 353.8km
   route.append_route(db->get_lineid("北陸"),
                      db->get_stationid("米原"), db->get_stationid("直江津"));
-  EXPECT_EQ(5780, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(5780, route);
 }
 
 TEST_F(CRouteTest, FareHonshuMainMiddle) {
   // 467.8km
   route.append_route(db->get_lineid("東北"),
                      db->get_stationid("蕨"), db->get_stationid("北上"));
-  EXPECT_EQ(7350, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(7350, route);
 }
 
 TEST_F(CRouteTest, FareHonshuMain2Lines) {
@@ -136,7 +139,7 @@ TEST_F(CRouteTest, FareHonshuMain2Lines) {
                      db->get_stationid("東京"), db->get_stationid("名古屋"));
   route.append_route(db->get_lineid("関西"),
                      db->get_stationid("名古屋"), db->get_stationid("王寺"));
-  EXPECT_EQ(8190, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(8190, route);
 }
 
 TEST_F(CRouteTest, FareHonshuShinkansenGantoku) {
@@ -144,14 +147,14 @@ TEST_F(CRouteTest, FareHonshuShinkansenGantoku) {
   // 92.9km fake
   route.append_route(db->get_lineid("新幹線"),
                      db->get_stationid("広島"), db->get_stationid("徳山"));
-  EXPECT_EQ(1620, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(1620, route);
 }
 
 TEST_F(CRouteTest, FareHonshuShinkansenKokura) {
   // 86.2km real
   route.append_route(db->get_lineid("新幹線"),
                      db->get_stationid("新下関"), db->get_stationid("博多"));
-  EXPECT_EQ(1450, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(1450, route);
 }
 
 TEST_F(CRouteTest, FareHonshuLocalOnly) {
@@ -161,7 +164,7 @@ TEST_F(CRouteTest, FareHonshuLocalOnly) {
                      db->get_stationid("佐用"), db->get_stationid("姫路"));
   route.append_route(db->get_lineid("播但"),
                      db->get_stationid("姫路"), db->get_stationid("和田山"));
-  EXPECT_EQ(2210, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(2210, route);
 }
 
 TEST_F(CRouteTest, FareHonshuMainAndLocal) {
@@ -173,7 +176,27 @@ TEST_F(CRouteTest, FareHonshuMainAndLocal) {
                      db->get_stationid("姫路"), db->get_stationid("加古川"));
   route.append_route(db->get_lineid("加古川"),
                      db->get_stationid("加古川"), db->get_stationid("谷川"));
-  EXPECT_EQ(1890, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(1890, route);
+}
+
+TEST_F(CRouteTest, FareHonshuMainAndLocalShort) {
+  //  9.7km real
+  // 10.0km fake
+  route.append_route(db->get_lineid("八高"),
+                     db->get_stationid("北八王子"), db->get_stationid("八王子"));
+  route.append_route(db->get_lineid("中央東"),
+                     db->get_stationid("八王子"), db->get_stationid("日野"));
+  EXPECT_FARE_EQ(200, route);
+}
+
+TEST_F(CRouteTest, FareHonshuMainAndLocalNotShort) {
+  // 11.7km real
+  // 12.2km fake
+  route.append_route(db->get_lineid("八高"),
+                     db->get_stationid("小宮"), db->get_stationid("八王子"));
+  route.append_route(db->get_lineid("中央東"),
+                     db->get_stationid("八王子"), db->get_stationid("日野"));
+  EXPECT_FARE_EQ(230, route);
 }
 
 TEST_F(CRouteTest, FareKyushuMain) {
@@ -182,7 +205,7 @@ TEST_F(CRouteTest, FareKyushuMain) {
                      db->get_stationid("大分"), db->get_stationid("博多"));
   route.append_route(db->get_lineid("鹿児島1"),
                      db->get_stationid("博多"), db->get_stationid("鳥栖"));
-  EXPECT_EQ(4200, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(4200, route);
 }
 
 TEST_F(CRouteTest, FareKyushuLocal) {
@@ -192,7 +215,7 @@ TEST_F(CRouteTest, FareKyushuLocal) {
                      db->get_stationid("大分"), db->get_stationid("博多"));
   route.append_route(db->get_lineid("鹿児島1"),
                      db->get_stationid("博多"), db->get_stationid("鳥栖"));
-  EXPECT_EQ(5670, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(5670, route);
 }
 
 TEST_F(CRouteTest, FareKyushuMainAndLocal) {
@@ -202,7 +225,7 @@ TEST_F(CRouteTest, FareKyushuMainAndLocal) {
                      db->get_stationid("久留米大学前"), db->get_stationid("久留米"));
   route.append_route(db->get_lineid("鹿児島1"),
                      db->get_stationid("久留米"), db->get_stationid("鳥栖"));
-  EXPECT_EQ(270, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(270, route);
 }
 
 TEST_F(CRouteTest, FareKyushuAndHonshuMain) {
@@ -212,5 +235,5 @@ TEST_F(CRouteTest, FareKyushuAndHonshuMain) {
                      db->get_stationid("新下関"), db->get_stationid("門司"));
   route.append_route(db->get_lineid("鹿児島1"),
                      db->get_stationid("門司"), db->get_stationid("博多"));
-  EXPECT_EQ(1600, route.calc_fare_inplace());
+  EXPECT_FARE_EQ(1600, route);
 }
