@@ -106,12 +106,6 @@ namespace ares
       return CHecto(a.hecto + b.hecto);
     }
 
-    //! intとの比較演算子. 営業キロとみなして比較する.
-    friend bool operator==(const CHecto & a, int b)
-    {
-      return static_cast<int>(a) == b;
-    }
-
     //! 営業キロを取得するメンバ
     int get_kilo() const { return hecto2kilo($.hecto); }
 
