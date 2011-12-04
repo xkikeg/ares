@@ -60,6 +60,14 @@ TEST_F(CRouteTokaidoTest, ValidRoute) {
   EXPECT_TRUE(route.is_valid());
 }
 
+TEST_F(CRouteTokaidoTest, ValidDuplicateShinkansen) {
+  route.append_route(db->get_lineid("山陽"),
+                     db->get_stationid("岡山"), db->get_stationid("三原"));
+  route.append_route(db->get_lineid("新幹線"),
+                     db->get_stationid("三原"), db->get_stationid("新尾道"));
+  EXPECT_TRUE(route.is_valid());
+}
+
 TEST_F(CRouteTokaidoTest, InvalidDuplicateRoute) {
   route.append_route(db->get_lineid("山陽"),
                      db->get_stationid("神戸"), db->get_stationid("岡山"));
@@ -69,6 +77,14 @@ TEST_F(CRouteTokaidoTest, InvalidDuplicateRoute) {
 TEST_F(CRouteTokaidoTest, InvalidDiscontinuousRoute) {
   route.append_route(db->get_lineid("上越"),
                      db->get_stationid("高崎"), db->get_stationid("土合"));
+  EXPECT_FALSE(route.is_valid());
+}
+
+TEST_F(CRouteTokaidoTest, InvalidDuplicateShinkansen) {
+  route.append_route(db->get_lineid("山陽"),
+                     db->get_stationid("岡山"), db->get_stationid("三原"));
+  route.append_route(db->get_lineid("新幹線"),
+                     db->get_stationid("三原"), db->get_stationid("福山"));
   EXPECT_FALSE(route.is_valid());
 }
 
@@ -123,6 +139,21 @@ TEST_F(CRouteTest, FareHonshuMain2Lines) {
   EXPECT_EQ(8190, route.calc_fare_inplace());
 }
 
+TEST_F(CRouteTest, FareHonshuShinkansenGantoku) {
+  // 88.5km real
+  // 92.9km fake
+  route.append_route(db->get_lineid("新幹線"),
+                     db->get_stationid("広島"), db->get_stationid("徳山"));
+  EXPECT_EQ(1620, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareHonshuShinkansenKokura) {
+  // 86.2km real
+  route.append_route(db->get_lineid("新幹線"),
+                     db->get_stationid("新下関"), db->get_stationid("博多"));
+  EXPECT_EQ(1450, route.calc_fare_inplace());
+}
+
 TEST_F(CRouteTest, FareHonshuLocalOnly) {
   // 111.6km real
   // 122.8km fake
@@ -143,4 +174,43 @@ TEST_F(CRouteTest, FareHonshuMainAndLocal) {
   route.append_route(db->get_lineid("加古川"),
                      db->get_stationid("加古川"), db->get_stationid("谷川"));
   EXPECT_EQ(1890, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareKyushuMain) {
+  // 227.1km real
+  route.append_route(db->get_lineid("日豊"),
+                     db->get_stationid("大分"), db->get_stationid("博多"));
+  route.append_route(db->get_lineid("鹿児島1"),
+                     db->get_stationid("博多"), db->get_stationid("鳥栖"));
+  EXPECT_EQ(4200, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareKyushuLocal) {
+  // 289.5km real
+  // 318.5km real
+  route.append_route(db->get_lineid("日豊"),
+                     db->get_stationid("大分"), db->get_stationid("博多"));
+  route.append_route(db->get_lineid("鹿児島1"),
+                     db->get_stationid("博多"), db->get_stationid("鳥栖"));
+  EXPECT_EQ(5670, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareKyushuMainAndLocal) {
+  // 13.9km real
+  // 14.6km real
+  route.append_route(db->get_lineid("久大"),
+                     db->get_stationid("久留米大学前"), db->get_stationid("久留米"));
+  route.append_route(db->get_lineid("鹿児島1"),
+                     db->get_stationid("久留米"), db->get_stationid("鳥栖"));
+  EXPECT_EQ(270, route.calc_fare_inplace());
+}
+
+TEST_F(CRouteTest, FareKyushuAndHonshuMain) {
+  // 86.2km real
+  // 79.0km kyushu part
+  route.append_route(db->get_lineid("山陽"),
+                     db->get_stationid("新下関"), db->get_stationid("門司"));
+  route.append_route(db->get_lineid("鹿児島1"),
+                     db->get_stationid("門司"), db->get_stationid("博多"));
+  EXPECT_EQ(1600, route.calc_fare_inplace());
 }
