@@ -5,7 +5,6 @@
 INCLUDES += $(GTESTDIR)/include $(GTESTDIR)
 LIBS += $(SRCDIR)/libares
 
-TEST_DB_FILE = test.sqlite
 TEST_DB_FILE_HEADER = test_dbfilename.h
 
 CXXFILES[] =
@@ -15,9 +14,6 @@ ln-if-not-exist(source, target) =
 	if $(not $(and $(file-exists $(target)), $(equal $(readlink $(target)), $(source))))
 		ln-or-cp $(source) $(target)
 
-$(TEST_DB_FILE):
-	$(ln-if-not-exist $(ARES_DB_FILE), $@)
-
 gtest-all.cc:
 	$(ln-if-not-exist $(GTESTDIR)/src/$@, $@)
 
@@ -25,7 +21,7 @@ gtest_main.cc:
 	$(ln-if-not-exist $(GTESTDIR)/src/$@, $@)
 
 $(TEST_DB_FILE_HEADER):
-	echo "#define TEST_DB_FILENAME \"$(absname $(TEST_DB_FILE))\"" > $@
+	echo "#define TEST_DB_FILENAME \"$(absname $(ARES_DB_FILE))\"" > $@
 
 GENERATED_FILES = $(CGeneratedFiles $(TEST_DB_FILE_HEADER))
 GTEST_LIB = $(StaticCXXLibrary libgtest, gtest-all)
@@ -35,4 +31,4 @@ LIBS += libgtest libgtest_main
 
 TEST = $(CXXProgram test, $(CXXFILES))
 
-.DEFAULT: $(TEST_DB_FILE) $(TEST) $(GTEST_LIB) $(GTEST_MAIN)
+.DEFAULT: $(TEST) $(GTEST_LIB) $(GTEST_MAIN)
