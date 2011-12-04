@@ -64,6 +64,7 @@ protected:
                                               ares::find_mode mode,     \
                                               const char * query) {     \
     ares::station_vector sidresult;                                     \
+    SCOPED_TRACE("check get station name with "BOOST_PP_STRINGIZE(col));\
     db->BOOST_PP_CAT(find_stationid_with_,col)(query, mode, sidresult); \
     diffStationNameVector(reference, sidresult);                        \
   }
@@ -100,8 +101,8 @@ protected:
     for(u8pvec_t::iterator i=expected.begin(), j=actual.begin();
         i != expected.end() && j != actual.end(); ++i, ++j)
     {
-      EXPECT_EQ(i->first, j->first);
-      EXPECT_EQ(i->second, j->second);
+      EXPECT_EQ(i->first, j->first) << L"Different line name";
+      EXPECT_EQ(i->second, j->second) << L"Different station name";
     }
   }
 };
@@ -143,20 +144,28 @@ TEST_F(CDatabaseTest, GetStationNameDenryaku) {
 }
 
 TEST_F(CDatabaseTest, LineConnection) {
+  SCOPED_TRACE("check 鹿児島1 connection");
   u8pvec_t kagoshima1 = list_of
-    (std::make_pair("山陽"  ,"門司"  ))
-    (std::make_pair("博多南","博多"  ))
-    (std::make_pair("筑豊"  ,"折尾"  ))
-    (std::make_pair("筑豊"  ,"原田"  ))
-    (std::make_pair("香椎"  ,"香椎"  ))
-    (std::make_pair("篠栗"  ,"吉塚"  ))
-    (std::make_pair("日豊"  ,"小倉"  ))
-    (std::make_pair("日豊"  ,"西小倉"))
-    (std::make_pair("久大"  ,"久留米"))
-    (std::make_pair("豊肥"  ,"熊本"  ))
-    (std::make_pair("三角"  ,"宇土"  ))
-    (std::make_pair("長崎"  ,"鳥栖"  ))
-    (std::make_pair("肥薩"  ,"八代"  ));
+    (std::make_pair("山陽"      ,"門司"      ))
+    (std::make_pair("新幹線"    ,"小倉"      ))
+    (std::make_pair("新幹線"    ,"博多"      ))
+    (std::make_pair("博多南"    ,"博多"      ))
+    (std::make_pair("九州新幹線","博多"      ))
+    (std::make_pair("筑豊"      ,"折尾"      ))
+    (std::make_pair("筑豊"      ,"原田"      ))
+    (std::make_pair("香椎"      ,"香椎"      ))
+    (std::make_pair("篠栗"      ,"吉塚"      ))
+    (std::make_pair("日豊"      ,"小倉"      ))
+    (std::make_pair("日豊"      ,"西小倉"    ))
+    (std::make_pair("九州新幹線","久留米"    ))
+    (std::make_pair("久大"      ,"久留米"    ))
+    (std::make_pair("九州新幹線","筑後船小屋"))
+    (std::make_pair("九州新幹線","熊本"      ))
+    (std::make_pair("豊肥"      ,"熊本"      ))
+    (std::make_pair("三角"      ,"宇土"      ))
+    (std::make_pair("長崎"      ,"鳥栖"      ))
+    (std::make_pair("肥薩"      ,"八代"      ))
+    (std::make_pair("九州新幹線","新八代"    ));
   checkLineConnection("鹿児島1", kagoshima1);
 }
 
