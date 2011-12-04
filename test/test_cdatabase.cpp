@@ -60,6 +60,7 @@ protected:
                                               ares::find_mode mode,     \
                                               const char * query) {     \
     ares::station_vector sidresult;                                     \
+    SCOPED_TRACE("check get station name with "BOOST_PP_STRINGIZE(col));\
     db->BOOST_PP_CAT(find_stationid_with_,col)(query, mode, sidresult); \
     diffStationNameVector(std::move(reference), sidresult);             \
   }
@@ -86,8 +87,8 @@ protected:
     for(auto i=expected.begin(), j=actual.begin();
         i != expected.end() && j != actual.end(); ++i, ++j)
     {
-      EXPECT_EQ(i->first, j->first);
-      EXPECT_EQ(i->second, j->second);
+      EXPECT_EQ(i->first, j->first) << L"Different line name";
+      EXPECT_EQ(i->second, j->second) << L"Different station name";
     }
   }
 };
@@ -132,6 +133,7 @@ TEST_F(CDatabaseTest, GetStationNameDenryaku) {
 }
 
 TEST_F(CDatabaseTest, LineConnection) {
+  SCOPED_TRACE("check 鹿児島1 connection");
   u8pvec_t kagoshima1 = {
     std::make_pair("山陽"  ,"門司"  ),
     std::make_pair("博多南","博多"  ),
