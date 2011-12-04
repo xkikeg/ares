@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import re
+import csv
 import sys
 import string
 import sqlite3
@@ -40,10 +41,6 @@ def typechange(x, typestring, isnull):
         return x
 
 
-def parse_csv(line):
-    return tuple(string.strip(i, '"') for i in line[:-1].split(','))
-
-
 # Read header.
 # Header format is like that shown below.
 # id:integer:p, name:text:un, other:integer::foo[name]
@@ -54,7 +51,7 @@ def parse_csv(line):
 # 'foo' table's 'name' column value is written.
 # This program will find foo(name) and insert foo(id) value.
 def parse_header(line):
-    headline = [i.split(':') for i in parse_csv(line)]
+    headline = [i.split(':') for i in line]
     names = tuple(i[0] for i in headline)
     types = tuple(i[1] for i in headline)
     constraint = tuple(i[2] if len(i) > 2 else None for i in headline)
@@ -73,20 +70,21 @@ def mktable_from_csv(db, tablename, filename = None):
     if DEBUG: print "Start Table: ", tablename
     if filename is None: filename = DATA_DIR + tablename + ".csv"
     # Open CSV file.
-    csv = open(filename, 'r')
+    csvfile = csv.reader(open(filename, 'r'))
     # Read header.
     (names,
      types,
      constraint,
      foreignkey,
      primarykey,
-     options) = parse_header(csv.readline())
+     options) = parse_header(csvfile.next())
     if DEBUG: print names, types, constraint, foreignkey, options
 
     # Read rows.
-    rawrows = [parse_csv(i) for i in csv.readlines()]
+    rawrows = []
     rows = []
-    for row in rawrows:
+    for row in csvfile:
+        rawrows.append(row)
         if row[0] == "": continue
         cols = []
         for i, col in enumerate(row):
