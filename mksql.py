@@ -151,14 +151,12 @@ def mktable_from_csv(db, tablename, filename = None):
             ",".join('?' for i in range(0, len(original_cols)))))
     if DEBUG: print sql
     #db.executemany(sql, rows)
-    for row in rows:
+    for i, row in enumerate(rows):
         try:
             db.execute(sql, row)
         except:
-            print >>sys.stderr, "Error occurred: ",
-            for i in row:
-                print i, "@",
-            print ""
+            print >>sys.stderr, "== Error occurred =="
+            print >>sys.stderr, " @ ".join([str(i) for i in row])
             raise
 
 
