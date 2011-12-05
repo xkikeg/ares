@@ -55,9 +55,22 @@ namespace ares
     }
   }
 
+  void CRoute::append_route(const char * line, const char * station)
+  {
+    $.append_route(db->get_lineid(line),
+                   db->get_stationid(station));
+  }
+
   void CRoute::append_route(line_id_t line, station_id_t begin, station_id_t end)
   {
     way.push_back(CSegment(begin, line, end));
+  }
+
+  void CRoute::append_route(const char * line, const char * begin, const char * end)
+  {
+    $.append_route(db->get_lineid(line),
+                   db->get_stationid(begin),
+                   db->get_stationid(end));
   }
 
   bool CRoute::is_contains(station_id_t station) const
