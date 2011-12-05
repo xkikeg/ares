@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include <stdexcept>
 #include "util.hpp"
 #include "ares.h"
@@ -68,11 +69,51 @@ namespace ares
   /**
    * @~
    * 営業キロの基本単位を表現するクラス.
-   * 会社と始点・終点の営業キロで表現される.
+   * 会社と始点・終点の営業キロの10倍で表現される.
    */
   struct CKiloValue {
     company_id_t company;
     int begin, end;
+  };
+
+  /**
+   * @~
+   * 営業キロの10倍(ヘクトメートル)を管理するクラス.
+   */
+  class CHecto
+  {
+  private:
+    int hecto;
+
+  public:
+    CHecto() : hecto(0) {}
+
+    explicit CHecto(int hecto) : hecto(hecto) {}
+
+    /**
+     * @~
+     * 10倍営業キロを切り上げて実際の営業キロにする関数.
+     * @param[in] hecto 営業キロの10倍
+     * @return          切り上げした営業キロ
+     */
+    static int hecto2kilo(int hecto) {
+      return hecto / 10 + (hecto % 10 ? 1 : 0);
+    }
+
+    //! 加算演算子.
+    friend class CHecto operator+(const CHecto & a, const CHecto & b)
+    {
+      return CHecto(a.hecto + b.hecto);
+    }
+
+    //! 営業キロを取得するメンバ
+    int get_kilo() const { return hecto2kilo($.hecto); }
+
+    //! 営業キロの10倍を取得するメンバ
+    int get_hecto() const { return $.hecto; }
+
+    //! same as get_kilo() member.
+    operator int() const { return $.get_kilo(); }
   };
 
   /**
@@ -114,8 +155,23 @@ namespace ares
      * @param[in] end     着駅の営業キロ
      */
     void add(size_t i, bool is_main, int begin, int end) {
-      $.set(i, is_main,  true, $.get(i, is_main,  true) + (end - begin));
-      $.set(i, is_main, false, $.get(i, is_main, false) + real2fake(begin, end));
+      $.set(i, is_main,  true,
+            $.get_rawhecto(i, is_main,  true) + (end - begin));
+      $.set(i, is_main, false,
+            $.get_rawhecto(i, is_main, false) + real2fake(begin, end));
+    }
+
+    /**
+     * @~
+     * 営業キロの10倍の値をintで取得する関数.
+     * @param[in] i       会社を指定するindex
+     * @param[in] is_main trueなら幹線, falseなら地方交通線
+     * @param[in] is_real trueなら実キロ, falseなら擬制キロ
+     * @return            営業キロの10倍の値
+     */
+    int get_rawhecto(size_t i, bool is_main, bool is_real=true) const {
+      check_boundary(i);
+      return $.kilo[i][linetype(is_main)][kilotype(is_real)];
     }
 
     /**
@@ -124,24 +180,10 @@ namespace ares
      * @param[in] i       会社を指定するindex
      * @param[in] is_main trueなら幹線, falseなら地方交通線
      * @param[in] is_real trueなら実キロ, falseなら擬制キロ
-     * @return            営業キロの10倍の値
+     * @return            営業キロ
      */
-    int get(size_t i, bool is_main, bool is_real=true) const {
-      check_boundary(i);
-      return $.kilo[i][linetype(is_main)][kilotype(is_real)];
-    }
-
-    /**
-     * @~
-     * 切り上げ済みの営業キロを取得する関数.
-     * @param[in] i       会社を指定するindex
-     * @param[in] is_main trueなら幹線, falseなら地方交通線
-     * @param[in] is_real trueなら実キロ, falseなら擬制キロ
-     * @return            切り上げした営業キロ
-     */
-    int get_kilo(size_t i, bool is_main, bool is_real=true) const {
-      const int kilo10 = $.get(i, is_main, is_real);
-      return kilo10 / 10 + (kilo10 % 10 ? 1 : 0);
+    class CHecto get(size_t i, bool is_main, bool is_real=true) const {
+      return CHecto($.get_rawhecto(i, is_main, is_real));
     }
 
     /**
@@ -177,6 +219,7 @@ namespace ares
     /**
      * @~
      * 指定された会社にだけ営業キロが設定されているかを調べる.
+     * @note 指定された会社自体の営業キロが0でもtrueが返る.
      * @param[in] idx 会社を指定するindex
      * @retval true   指定された会社以外の営業キロが0
      * @retval false  指定された会社以外の営業キロが非負
@@ -217,7 +260,7 @@ namespace ares
      * @~
      * ストリームへの出力関数.
      */
-    friend std::ostream & operator<<(std::ostream & ost, CKilo & kilo) {
+    friend std::ostream & operator<<(std::ostream & ost, const CKilo & kilo) {
       for(int i=0; i != MAX_COMPANY_TYPE; ++i)
       {
         ost << COMPANY_TYPE_LABEL[i] << ": ";
