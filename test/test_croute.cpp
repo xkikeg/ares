@@ -140,6 +140,44 @@ TEST_F(CRouteTest, FareHonshuMain2Lines) {
   EXPECT_FARE_EQ(8190, route);
 }
 
+TEST_F(CRouteTest, FareHonshuYamanote) {
+  // 6.8km
+  route.append_route(UTF8("東海道"), UTF8("品川"), UTF8("東京"));
+  EXPECT_FARE_EQ(160, route);
+  // 13.9km
+  route.append_route(UTF8("東北"), UTF8("田端"));
+  EXPECT_FARE_EQ(190, route);
+}
+
+TEST_F(CRouteTest, FareHonshuOsakaKanjo) {
+  // 10.0km
+  route.append_route(UTF8("大阪環状"), UTF8("大阪"), UTF8("今宮"));
+  route.append_route(UTF8("関西"), UTF8("新今宮"));
+  EXPECT_FARE_EQ(170, route);
+  // 14.9km
+  route.append_route(UTF8("大阪環状"), UTF8("玉造"));
+  EXPECT_FARE_EQ(190, route);
+}
+
+TEST_F(CRouteTest, FareHonshuTokyoDenshaTokutei) {
+  // 7.1km
+  route.append_route(UTF8("中央東"), UTF8("御茶ノ水"), UTF8("神田"));
+  route.append_route(UTF8("東北"), UTF8("田端"));
+  EXPECT_FARE_EQ(160, route);
+  // 13.2km
+  route.append_route(UTF8("東北"), UTF8("赤羽"));
+  EXPECT_FARE_EQ(210, route);
+}
+
+TEST_F(CRouteTest, FareHonshuOsakaDenshaTokutei) {
+  // 8.9km
+  route.append_route(UTF8("関西"), UTF8("JR難波"), UTF8("加美"));
+  EXPECT_FARE_EQ(170, route);
+  // 10.6km
+  route.append_route(UTF8("関西"), UTF8("久宝寺"));
+  EXPECT_FARE_EQ(210, route);
+}
+
 TEST_F(CRouteTest, FareHonshuShinkansenGantoku) {
   // 88.5km real
   // 92.9km fake
