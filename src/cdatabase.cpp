@@ -378,8 +378,8 @@ namespace ares
     const int
       kilo_main = main[1] - main[0],
       kilo_sub  =  sub[1] -  sub[0];
-    if(kilo_main != 0) { result.push_back({comp_main, main[0], main[1]}); }
-    if(kilo_sub  != 0) { result.push_back({comp_sub ,  sub[0] , sub[1]}); }
+    if(kilo_main != 0) { result.push_back(CKiloValue({comp_main, main[0], main[1]})); }
+    if(kilo_sub  != 0) { result.push_back(CKiloValue({comp_sub ,  sub[0] , sub[1]})); }
     return true;
    }
 

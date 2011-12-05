@@ -69,6 +69,19 @@ protected:
   CHECK_GET_STATION_NAME(yomi)
   CHECK_GET_STATION_NAME(denryaku)
 
+  struct make_line_station_pair
+  {
+  private:
+    std::shared_ptr<ares::CDatabase> db;
+  public:
+    make_line_station_pair(std::shared_ptr<ares::CDatabase> db) : db(db) {}
+    u8pair_t operator()(ares::station_fqdn_t x)
+    {
+      return std::make_pair(db->get_line_name(x.first),
+                            db->get_station_name(x.second));
+    }
+  };
+
   void checkLineConnection(const char * linename,
                            u8pvec_t expected) {
     ares::line_id_t l;
@@ -77,10 +90,7 @@ protected:
     db->find_connect_line(l, result);
     u8pvec_t actual(result.size());
     std::transform(result.begin(), result.end(), actual.begin(),
-                   [&](ares::station_fqdn_t x) -> u8pair_t {
-                     return std::make_pair(db->get_line_name(x.first),
-                                           db->get_station_name(x.second));
-                   });
+                   make_line_station_pair(db));
     EXPECT_EQ(expected.size(), actual.size());
     std::sort(expected.begin(), expected.end());
     std::sort(  actual.begin(),   actual.end());
