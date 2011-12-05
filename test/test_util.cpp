@@ -2,10 +2,9 @@
 
 #include "util.hpp"
 
-class UniqueIntervalTreeTest : public testing::Test
+class UniqueIntervalTreeTest : public ::testing::Test
 {
 protected:
-
   liquid::UniqueIntervalTree<int> tree;
 };
 

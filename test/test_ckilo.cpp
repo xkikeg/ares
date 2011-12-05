@@ -4,11 +4,9 @@
 
 #include "ckilo.h"
 
-using namespace std::placeholders;
-class CKiloTest : public testing::Test
+class CKiloTest : public ::testing::Test
 {
 protected:
-
   ares::CKilo kilo;
 };
 

@@ -8,26 +8,24 @@
 #define EXPECT_FARE_EQ(expected, route) \
   EXPECT_EQ(expected, route.calc_fare_inplace()) << route.get_kilo()
 
-class CRouteTest : public testing::Test
+class CRouteTest : public ::testing::Test
 {
-public:
-  CRouteTest() : db(new ares::CDatabase(TEST_DB_FILENAME)),
-                 route(db) {}
-
 protected:
   std::shared_ptr<ares::CDatabase> db;
   ares::CRoute route;
+
+  CRouteTest() : db(new ares::CDatabase(TEST_DB_FILENAME)),
+                 route(db) {}
 };
 
 class CRouteTokaidoTest : public CRouteTest
 {
-public:
+protected:
   CRouteTokaidoTest() : CRouteTest()
   {
     route = createRouteTokaidoSannyo();
   }
 
-protected:
   ares::CRoute createRoute2argsTokaidoSannyo() {
     ares::CRoute route(db, db->get_stationid("東京"));
     route.append_route(db->get_lineid("東海道"), db->get_stationid("神戸"));
