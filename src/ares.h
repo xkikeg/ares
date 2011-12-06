@@ -44,4 +44,17 @@ namespace ares
     KILO_FAKE,
     MAX_KILO_TYPE,
   };
+
+  /**
+   * @~
+   * 電車特定区間の列挙体.
+   */
+  enum DENSHA_SPECIAL_TYPE {
+    DENSHA_SPECIAL_NONE,
+    DENSHA_SPECIAL_TOKYO,
+    DENSHA_SPECIAL_OSAKA,
+    DENSHA_SPECIAL_YAMANOTE,
+    DENSHA_SPECIAL_OSAKAKANJO,
+    MAX_DENSHA_SPECIAL_TYPE,
+  };
 }

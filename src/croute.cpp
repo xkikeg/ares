@@ -108,13 +108,17 @@ namespace ares
     for(auto itr=$.begin(); itr != $.end(); ++itr)
     {
       bool is_main;
+      DENSHA_SPECIAL_TYPE denshaid, circleid;
       result.clear();
       bool ret = $.db->get_company_and_kilo(itr->line,
                                             itr->begin,
                                             itr->end,
                                             result,
-                                            is_main);
+                                            is_main,
+                                            denshaid,
+                                            circleid);
       if(!ret) { return CKilo(); }
+      kilo.update_denshaid(denshaid, circleid);
       for(auto j=result.begin(); j != result.end(); ++j)
       {
         kilo.add(j->company, is_main, j->begin, j->end);
@@ -137,7 +141,23 @@ namespace ares
       const CHecto hecto_local = kilo.get(COMPANY_HONSHU, false);
       if(hecto_main == 0 && hecto_local == 0) return 0;
       // Main only
-      if(hecto_local == 0) { return calc_honshu_main(hecto_main); }
+      if(hecto_local == 0)
+      {
+        const DENSHA_SPECIAL_TYPE denshaid = kilo.get_densha_and_circleid();
+        const char * faretable=nullptr;
+        switch(denshaid)
+        {
+        case DENSHA_SPECIAL_TOKYO:      faretable = "D1"; break;
+        case DENSHA_SPECIAL_OSAKA:      faretable = "D2"; break;
+        case DENSHA_SPECIAL_YAMANOTE:   faretable = "E1"; break;
+        case DENSHA_SPECIAL_OSAKAKANJO: faretable = "E2"; break;
+        default:
+          return calc_honshu_main(hecto_main);
+        }
+        return $.db->get_fare_table(faretable,
+                                    COMPANY_HONSHU,
+                                    hecto_main);
+      }
       // Local only or (Main+Local)<=10
       if(hecto_main == 0 || (hecto_main + hecto_local) <= 10)
       {

@@ -68,6 +68,7 @@ namespace ares
   {
   private:
     std::unique_ptr<SQLite> db;
+
   public:
     /**
      * Constructor.
@@ -174,16 +175,44 @@ namespace ares
                        company_id_t company,
                        int kilo) const;
 
+    /**
+     * @~
+     * 電車特定区間を調べる.
+     * @param[in] line  路線ID.
+     * @param[in] range 営業キロの範囲.
+     * @return          指定された区間の電車特定区間IDと山手環状特例ID.
+     *                  冗長だが一般性のため両方返している.
+     */
+    std::pair<DENSHA_SPECIAL_TYPE, DENSHA_SPECIAL_TYPE>
+    get_denshaid(const line_id_t line,
+                 const std::pair<int, int> range) const;
+
     //! Get kilo from line id & station id.
     int get_kilo(const line_id_t line,
                  const station_id_t station) const;
 
+    //! Get kilo range of [begin, end] in line.
+    std::pair<int, int> get_range(const line_id_t line,
+                                  const station_id_t begin,
+                                  const station_id_t end) const;
+
     //! Get company id & 10*kilo.
+    /**
+     * @param[in]     line     路線ID
+     * @param[in]     begin    始点の駅ID
+     * @param[in]     end      終点の駅ID
+     * @param[in,out] result   結果の配列
+     * @param[out]    is_main  幹線ならtrue, 地方交通線ならfalse
+     * @param[out]    denshaid 電車特定区間ID
+     * @param[out]    circleid 山手・大阪環状特例区間ID
+     */
     bool get_company_and_kilo(const line_id_t line,
                               const station_id_t begin,
                               const station_id_t end,
                               std::vector<CKiloValue> & result,
-                              bool & is_main) const;
+                              bool & is_main,
+                              DENSHA_SPECIAL_TYPE & denshaid,
+                              DENSHA_SPECIAL_TYPE & circleid) const;
 
     //! Check if the station is in the line.
     bool is_belong_to_line(line_id_t line, station_id_t station) const;

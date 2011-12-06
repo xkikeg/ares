@@ -2,6 +2,7 @@
 
 #include <ostream>
 #include <stdexcept>
+#include <boost/optional.hpp>
 #include "util.hpp"
 #include "ares.h"
 
@@ -32,6 +33,23 @@ namespace ares
       "地方交通線",
       "幹線",
     };
+
+    const char * DENSHA_TYPE_LABEL[] =
+    {
+      "該当なし",
+      "電車特定区間(東京)",
+      "電車特定区間(大阪)",
+      "山手線内",
+      "大阪環状線内",
+    };
+
+    template<class T>
+    void set_default_if_changed(boost::optional<T> & target,
+                                const T newval,
+                                const T DEFAULT_VALUE)
+    {
+      target = (target && *target != newval) ? DEFAULT_VALUE : newval;
+    }
   }
 
   /**
@@ -96,6 +114,7 @@ namespace ares
   private:
 
     int kilo[MAX_COMPANY_TYPE][MAX_LINE_TYPE][MAX_KILO_TYPE];
+    boost::optional<DENSHA_SPECIAL_TYPE> denshaid, circleid;
 
     void check_boundary(size_t i) const {
       if(i >= MAX_COMPANY_TYPE)
@@ -111,7 +130,6 @@ namespace ares
     }
 
   public:
-
     CKilo() : kilo({{{0}}}) {}
 
     /**
@@ -201,6 +219,13 @@ namespace ares
       return true;
     }
 
+    void update_denshaid(const DENSHA_SPECIAL_TYPE new_denshaid,
+                         const DENSHA_SPECIAL_TYPE new_circleid)
+    {
+      set_default_if_changed($.denshaid, new_denshaid, DENSHA_SPECIAL_NONE);
+      set_default_if_changed($.circleid, new_circleid, DENSHA_SPECIAL_NONE);
+    }
+
     /**
      * @~
      * (10倍された)実キロを擬制キロに変換する.
@@ -224,6 +249,22 @@ namespace ares
       return real2fake(realend) - real2fake(realbegin);
     }
 
+    DENSHA_SPECIAL_TYPE get_densha_and_circleid() const
+    {
+      const DENSHA_SPECIAL_TYPE circle = $.get_circleid();
+      return (circle != DENSHA_SPECIAL_NONE) ? circle : $.get_denshaid();
+    }
+
+    DENSHA_SPECIAL_TYPE get_denshaid() const
+    {
+      return $.denshaid ? *$.denshaid : DENSHA_SPECIAL_NONE;
+    }
+
+    DENSHA_SPECIAL_TYPE get_circleid() const
+    {
+      return $.circleid ? *$.circleid : DENSHA_SPECIAL_NONE;
+    }
+
     /**
      * @~
      * ストリームへの出力関数.
@@ -241,6 +282,10 @@ namespace ares
         }
         ost << '\n';
       }
+      if(kilo.circleid && *(kilo.circleid) != DENSHA_SPECIAL_NONE)
+      { ost << DENSHA_TYPE_LABEL[*(kilo.circleid)] << '\n'; }
+      else if(kilo.denshaid && *(kilo.denshaid) != DENSHA_SPECIAL_NONE)
+      { ost << DENSHA_TYPE_LABEL[*(kilo.denshaid)] << '\n'; }
       return ost;
     }
   };
