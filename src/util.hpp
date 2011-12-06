@@ -123,6 +123,10 @@ namespace liquid
       return true;
     }
 
+    bool insert(std::pair<T, T> range) {
+      return $.insert(range.first, range.second);
+    }
+
     /**
      * Check whether the point is in interval or not.
      * @param[in] point Point to query.
