@@ -9,8 +9,10 @@
 #define UTF8(x) (x)
 #endif
 
-#define EXPECT_FARE_EQ(expected, route) \
-  EXPECT_EQ(expected, route.calc_fare_inplace()) << route.get_kilo()
+#define EXPECT_FARE_EQ(expected, route)                   \
+  ASSERT_TRUE(route.is_valid());                          \
+  EXPECT_EQ(expected, route.calc_fare_inplace()) << route \
+  << "\n" << route.get_kilo()
 
 class CRouteTest : public ::testing::Test
 {
