@@ -299,6 +299,34 @@ namespace ares
     return -1;
   }
 
+  std::pair<int, int> CDatabase::get_range(const line_id_t line,
+                                           const station_id_t begin,
+                                           const station_id_t end) const
+  {
+    const char sql[] =
+      "SELECT min(kilo), max(kilo) FROM kilo"
+      " WHERE lineid = ? AND stationid IN (?, ?)";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, line);
+    stmt.bind(2, begin);
+    stmt.bind(3, end);
+    const int rc = stmt.step();
+    if (rc == SQLITE_ROW)
+    {
+      return std::make_pair(stmt.column(0), stmt.column(1));
+    }
+    if (rc == SQLITE_DONE)
+    {
+      std::cerr << "Invalid line & station\n";
+    }
+    // error checking: should throw exception in sqlite3 wrapper
+    if(rc != SQLITE_DONE)
+    {
+      std::cerr << "SQL error in get_range: " << db->errmsg() << std::endl;
+    }
+    return std::make_pair(-1, -1);
+  }
+
   /**
    * @note この実装は1路線にたかだか2会社しか入らないことを暗黙の仮定にしている。
    * 更に言うと、2会社の境界駅は1つであることを仮定している。

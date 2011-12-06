@@ -93,7 +93,10 @@ namespace ares
     std::map<line_id_t, liquid::UniqueIntervalTree<station_id_t> > checktree;
     for(auto itr=$.begin(); itr != $.end(); ++itr)
     {
-      if(!checktree[itr->line].insert(itr->begin, itr->end)) { return false; }
+      if(!$.db->is_belong_to_line(itr->line, itr->begin) ||
+         !$.db->is_belong_to_line(itr->line, itr->end  ) ||
+         !checktree[itr->line].insert(
+           $.db->get_range(itr->line, itr->begin, itr->end))) { return false; }
     }
     return true;
   }
