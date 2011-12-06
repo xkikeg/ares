@@ -74,6 +74,17 @@ TEST_F(CRouteTokaidoTest, ValidRoute) {
   EXPECT_TRUE(route.is_valid());
 }
 
+TEST_F(CRouteTest, ValidSmallPieceRoute) {
+  route.append_route(UTF8("東海道"), UTF8("東京"), UTF8("有楽町"));
+  route.append_route(UTF8("東海道"), UTF8("有楽町"), UTF8("新橋"));
+  route.append_route(UTF8("東海道"), UTF8("新橋"), UTF8("浜松町"));
+  route.append_route(UTF8("東海道"), UTF8("浜松町"), UTF8("品川"));
+  route.append_route(UTF8("東海道"), UTF8("品川"), UTF8("大井町"));
+  route.append_route(UTF8("東海道"), UTF8("大井町"), UTF8("蒲田"));
+  route.append_route(UTF8("東海道"), UTF8("蒲田"), UTF8("新子安"));
+  EXPECT_TRUE(route.is_valid());
+}
+
 TEST_F(CRouteTokaidoTest, ValidDuplicateShinkansen) {
   route.append_route(UTF8("山陽"), UTF8("岡山"), UTF8("三原"));
   route.append_route(UTF8("新幹線"), UTF8("三原"), UTF8("新尾道"));
@@ -154,10 +165,11 @@ TEST_F(CRouteTest, FareHonshuYamanote) {
 TEST_F(CRouteTest, FareHonshuOsakaKanjo) {
   // 10.0km
   route.append_route(UTF8("大阪環状"), UTF8("大阪"), UTF8("今宮"));
-  route.append_route(UTF8("関西"), UTF8("新今宮"));
+  route.append_route(UTF8("関西"), UTF8("今宮"), UTF8("新今宮"));
   EXPECT_FARE_EQ(170, route);
   // 14.9km
-  route.append_route(UTF8("大阪環状"), UTF8("玉造"));
+  route.append_route(UTF8("関西"), UTF8("新今宮"), UTF8("天王寺"));
+  route.append_route(UTF8("大阪環状"), UTF8("天王寺"), UTF8("玉造"));
   EXPECT_FARE_EQ(190, route);
 }
 
@@ -228,16 +240,16 @@ TEST_F(CRouteTest, FareHonshuMainAndLocalNotShort) {
 
 TEST_F(CRouteTest, FareKyushuMain) {
   // 227.1km real
-  route.append_route(UTF8("日豊"), UTF8("大分"), UTF8("博多"));
-  route.append_route(UTF8("鹿児島1"), UTF8("博多"), UTF8("鳥栖"));
+  route.append_route(UTF8("日豊"), UTF8("大分"), UTF8("西小倉"));
+  route.append_route(UTF8("鹿児島1"), UTF8("西小倉"), UTF8("鳥栖"));
   EXPECT_FARE_EQ(4200, route);
 }
 
 TEST_F(CRouteTest, FareKyushuLocal) {
   // 289.5km real
   // 318.5km real
-  route.append_route(UTF8("日豊"), UTF8("大分"), UTF8("博多"));
-  route.append_route(UTF8("鹿児島1"), UTF8("博多"), UTF8("鳥栖"));
+  route.append_route(UTF8("久大"), UTF8("久留米"), UTF8("大分"));
+  route.append_route(UTF8("豊肥"), UTF8("大分"), UTF8("熊本"));
   EXPECT_FARE_EQ(5670, route);
 }
 
