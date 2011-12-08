@@ -3,7 +3,7 @@
 # .SUBDIRS:
 
 MAIN = test
-LIB  = libares
+LIB  = $(LIBARES)
 MAINSRC = $(MAIN)
 
 CXXFILES[] = $(filter-out $(MAINSRC), $(removesuffix $(ls *.cpp)))

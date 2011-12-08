@@ -3,7 +3,7 @@
 # .SUBDIRS:
 
 INCLUDES += $(GTESTDIR)/include $(GTESTDIR)
-LIBS += $(SRCDIR)/libares
+LIBS += $(LIBARES)
 
 TEST_DB_FILE_HEADER = test_dbfilename.h
 

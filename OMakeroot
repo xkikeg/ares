@@ -8,6 +8,8 @@ SRCDIR = $(dir src)
 TESTDIR = $(dir test)
 GTESTDIR = $(dir googletest)
 
+LIBARES = $(file $(SRCDIR)/libares)
+
 CXXFLAGS += -std=c++0x -g -Wall -Wextra
 # ASFLAGS +=
 LDFLAGS += -lsqlite3
