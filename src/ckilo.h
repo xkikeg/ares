@@ -197,18 +197,21 @@ namespace ares
       return (kilo[i][0][0] == 0 && kilo[i][1][0] == 0);
     }
 
-    // bool is_zero_honshu()   { return is_zero(0); }
-    // bool is_zero_hokkaido() { return is_zero(1); }
-    // bool is_zero_kyushu()   { return is_zero(2); }
-    // bool is_zero_shikoku()  { return is_zero(3); }
+    bool is_all_zero() const {
+      for(size_t i=0; i<MAX_COMPANY_TYPE; ++i)
+      {
+        if(!is_zero(i)) { return false; }
+      }
+      return true;
+    }
 
     /**
      * @~
      * 指定された会社にだけ営業キロが設定されているかを調べる.
      * @note 指定された会社自体の営業キロが0でもtrueが返る.
      * @param[in] idx 会社を指定するindex
-     * @retval true   指定された会社以外の営業キロが0
-     * @retval false  指定された会社以外の営業キロが非負
+     * @retval true   指定された会社以外の営業キロが0.
+     * @retval false  指定された会社以外の営業キロが非ゼロ.
      */
     bool is_only(size_t idx) const {
       check_boundary(idx);
@@ -217,6 +220,27 @@ namespace ares
         if(i != idx && !is_zero(i)) { return false; }
       }
       return true;
+    }
+
+    /**
+     * 全会社の中で唯一値のある会社IDを返す.
+     * @retval 会社ID その会社IDのみ営業キロが非ゼロ.
+     * @retval 無効値 すべての会社のキロがゼロ, もしくは複数会社で非ゼロ.
+     */
+    boost::optional<COMPANY_TYPE> get_only() const {
+      boost::optional<COMPANY_TYPE> ret;
+      for(size_t i=0; i < MAX_COMPANY_TYPE; ++i)
+      {
+        // i-th company exists.
+        if(!is_zero(i))
+        {
+          // already exists non-zero company.
+          if(ret) { return boost::none; }
+          // first non-zero company.
+          else { ret = COMPANY_TYPE(i); }
+        }
+      }
+      return ret;
     }
 
     void update_denshaid(const DENSHA_SPECIAL_TYPE new_denshaid,

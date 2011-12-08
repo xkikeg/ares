@@ -268,3 +268,71 @@ TEST_F(CRouteTest, FareKyushuAndHonshuMain) {
   route.append_route(UTF8("鹿児島1"), UTF8("門司"), UTF8("博多"));
   EXPECT_FARE_EQ(1600, route);
 }
+
+TEST_F(CRouteTest, FareHokkaidoMainHakodate) {
+  // 423.1km
+  route.append_route(UTF8("函館"), UTF8("函館"), UTF8("旭川"));
+  EXPECT_FARE_EQ(7140, route);
+}
+
+TEST_F(CRouteTest, FareHokkaidoMainHokuto) {
+  // 318.7km
+  route.append_route(UTF8("函館"), UTF8("函館"), UTF8("長万部"));
+  route.append_route(UTF8("室蘭"), UTF8("沼ノ端"));
+  route.append_route(UTF8("千歳"), UTF8("（函）白石"));
+  route.append_route(UTF8("函館"), UTF8("札幌"));
+  EXPECT_FARE_EQ(5560, route);
+}
+
+TEST_F(CRouteTest, FareHokkaidoMainOzora) {
+  // 348.5km
+  route.append_route(UTF8("根室"), UTF8("釧路"), UTF8("新得"));
+  route.append_route(UTF8("石勝"), UTF8("南千歳"));
+  route.append_route(UTF8("千歳"), UTF8("（函）白石"));
+  route.append_route(UTF8("函館"), UTF8("札幌"));
+  EXPECT_FARE_EQ(6090, route);
+}
+
+TEST_F(CRouteTest, FareHokkaidoLocalSohya) {
+  // 396.2km real
+  // 422.1km fake
+  route.append_route(UTF8("宗谷"), UTF8("稚内"), UTF8("旭川"));
+  route.append_route(UTF8("函館"), UTF8("札幌"));
+  EXPECT_FARE_EQ(7140, route);
+}
+
+TEST_F(CRouteTest, FareHokkaidoMainAndLocal) {
+  // 5.9km real
+  // 6.3km fake
+  route.append_route(UTF8("函館"), UTF8("琴似"), UTF8("桑園"));
+  route.append_route(UTF8("札沼"), UTF8("新川"));
+  EXPECT_FARE_EQ(200, route) << L"210なら10km以下特例の処理ミスかも";
+  //  9.5km real
+  // 10.2km fake
+  route.append_route(UTF8("札沼"), UTF8("太平"));
+  EXPECT_FARE_EQ(220, route) << L"260なら10km以下特例の処理ミスかも";
+  // 28.1km real
+  // 30.7km fake
+  route.append_route(UTF8("札沼"), UTF8("石狩当別"));
+  EXPECT_FARE_EQ(620, route);
+}
+
+TEST_F(CRouteTest, FareHokkaidoMainAndLocalOkhotsk) {
+  // 113.2km real
+  // 124.5km fake
+  route.append_route(UTF8("石北"), UTF8("網走"), UTF8("遠軽"));
+  EXPECT_FARE_EQ(2420, route);
+  // 237.7km real
+  // 261.5km fake
+  route.append_route(UTF8("石北"), UTF8("新旭川"));
+  route.append_route(UTF8("宗谷"), UTF8("旭川"));
+  EXPECT_FARE_EQ(4930, route);
+  // 333.9km real
+  // 357.7km fake
+  route.append_route(UTF8("函館"), UTF8("岩見沢"));
+  EXPECT_FARE_EQ(6090, route);
+  // 374.5km real
+  // 398.3km fake
+  route.append_route(UTF8("函館"), UTF8("札幌"));
+  EXPECT_FARE_EQ(6610, route);
+}
