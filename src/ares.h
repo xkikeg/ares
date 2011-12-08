@@ -12,4 +12,49 @@ namespace ares
   typedef std::vector<station_id_t> station_vector;
   typedef std::pair<line_id_t, station_id_t> station_fqdn_t;
   typedef std::vector<station_fqdn_t> connect_vector;
+
+  /**
+   * @~
+   * 運賃体系上の会社の列挙体.
+   */
+  enum COMPANY_TYPE {
+    COMPANY_HONSHU,
+    COMPANY_HOKKAIDO,
+    COMPANY_KYUSHU,
+    COMPANY_SHIKOKU,
+    MAX_COMPANY_TYPE,
+  };
+
+  /**
+   * @~
+   * 幹線と地方交通線の列挙体.
+   */
+  enum LINE_TYPE {
+    LINE_LOCAL,
+    LINE_MAIN,
+    MAX_LINE_TYPE,
+  };
+
+  /**
+   * @~
+   * 実キロと擬制キロの列挙体.
+   */
+  enum KILO_TYPE {
+    KILO_REAL,
+    KILO_FAKE,
+    MAX_KILO_TYPE,
+  };
+
+  /**
+   * @~
+   * 電車特定区間の列挙体.
+   */
+  enum DENSHA_SPECIAL_TYPE {
+    DENSHA_SPECIAL_NONE,
+    DENSHA_SPECIAL_TOKYO,
+    DENSHA_SPECIAL_OSAKA,
+    DENSHA_SPECIAL_YAMANOTE,
+    DENSHA_SPECIAL_OSAKAKANJO,
+    MAX_DENSHA_SPECIAL_TYPE,
+  };
 }

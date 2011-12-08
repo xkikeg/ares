@@ -5,48 +5,59 @@
 #include "cdatabase.h"
 #include "test_dbfilename.h"
 
-#define EXPECT_FARE_EQ(expected, route) \
-  EXPECT_EQ(expected, route.calc_fare_inplace()) << route.get_kilo()
+#ifndef UTF8
+#define UTF8(x) (x)
+#endif
 
-class CRouteTest : public testing::Test
+#define EXPECT_FARE_EQ(expected, route)                   \
+  ASSERT_TRUE(route.is_valid());                          \
+  EXPECT_EQ(expected, route.calc_fare_inplace()) << route \
+  << "\n" << route.get_kilo()
+
+class CRouteTest : public ::testing::Test
 {
-public:
-  CRouteTest() : db(new ares::CDatabase(TEST_DB_FILENAME)),
-                 route(db) {}
-
 protected:
   std::tr1::shared_ptr<ares::CDatabase> db;
   ares::CRoute route;
+
+  CRouteTest() : db(new ares::CDatabase(TEST_DB_FILENAME)),
+                 route(db) {}
 };
 
 class CRouteTokaidoTest : public CRouteTest
 {
-public:
+protected:
   CRouteTokaidoTest() : CRouteTest()
   {
     route = createRouteTokaidoSannyo();
   }
 
-protected:
   ares::CRoute createRoute2argsTokaidoSannyo() {
     ares::CRoute route(db, db->get_stationid("東京"));
-    route.append_route(db->get_lineid("東海道"), db->get_stationid("神戸"));
-    route.append_route(db->get_lineid("山陽"), db->get_stationid("岡山"));
+    route.append_route(UTF8("東海道"), UTF8("神戸"));
+    route.append_route(UTF8("山陽"),   UTF8("岡山"));
     return route;
   }
 
   ares::CRoute createRouteTokaidoSannyo() {
     ares::CRoute route(db);
-    route.append_route(db->get_lineid("東海道"),
-                       db->get_stationid("東京"), db->get_stationid("神戸"));
-    route.append_route(db->get_lineid("山陽"),
-                       db->get_stationid("神戸"), db->get_stationid("岡山"));
+    route.append_route(UTF8("東海道"), UTF8("東京"), UTF8("神戸"));
+    route.append_route(UTF8("山陽"),   UTF8("神戸"), UTF8("岡山"));
     return route;
   }
 };
 
 TEST_F(CRouteTokaidoTest, EqualityTwoAndThreeArgs) {
   EXPECT_EQ(createRoute2argsTokaidoSannyo(), route);
+}
+
+TEST_F(CRouteTokaidoTest, EqualityIdAndChar) {
+  ares::CRoute id_route(db);
+  id_route.append_route(db->get_lineid("東海道"),
+                        db->get_stationid("東京"), db->get_stationid("神戸"));
+  id_route.append_route(db->get_lineid("山陽"),
+                        db->get_stationid("神戸"), db->get_stationid("岡山"));
+  EXPECT_EQ($.route, id_route);
 }
 
 TEST_F(CRouteTokaidoTest, ContainStation) {
@@ -63,31 +74,36 @@ TEST_F(CRouteTokaidoTest, ValidRoute) {
   EXPECT_TRUE(route.is_valid());
 }
 
+TEST_F(CRouteTest, ValidSmallPieceRoute) {
+  route.append_route(UTF8("東海道"), UTF8("東京"), UTF8("有楽町"));
+  route.append_route(UTF8("東海道"), UTF8("有楽町"), UTF8("新橋"));
+  route.append_route(UTF8("東海道"), UTF8("新橋"), UTF8("浜松町"));
+  route.append_route(UTF8("東海道"), UTF8("浜松町"), UTF8("品川"));
+  route.append_route(UTF8("東海道"), UTF8("品川"), UTF8("大井町"));
+  route.append_route(UTF8("東海道"), UTF8("大井町"), UTF8("蒲田"));
+  route.append_route(UTF8("東海道"), UTF8("蒲田"), UTF8("新子安"));
+  EXPECT_TRUE(route.is_valid());
+}
+
 TEST_F(CRouteTokaidoTest, ValidDuplicateShinkansen) {
-  route.append_route(db->get_lineid("山陽"),
-                     db->get_stationid("岡山"), db->get_stationid("三原"));
-  route.append_route(db->get_lineid("新幹線"),
-                     db->get_stationid("三原"), db->get_stationid("新尾道"));
+  route.append_route(UTF8("山陽"), UTF8("岡山"), UTF8("三原"));
+  route.append_route(UTF8("新幹線"), UTF8("三原"), UTF8("新尾道"));
   EXPECT_TRUE(route.is_valid());
 }
 
 TEST_F(CRouteTokaidoTest, InvalidDuplicateRoute) {
-  route.append_route(db->get_lineid("山陽"),
-                     db->get_stationid("神戸"), db->get_stationid("岡山"));
+  route.append_route(UTF8("山陽"), UTF8("神戸"), UTF8("岡山"));
   EXPECT_FALSE(route.is_valid());
 }
 
 TEST_F(CRouteTokaidoTest, InvalidDiscontinuousRoute) {
-  route.append_route(db->get_lineid("上越"),
-                     db->get_stationid("高崎"), db->get_stationid("土合"));
+  route.append_route(UTF8("上越"), UTF8("高崎"), UTF8("土合"));
   EXPECT_FALSE(route.is_valid());
 }
 
 TEST_F(CRouteTokaidoTest, InvalidDuplicateShinkansen) {
-  route.append_route(db->get_lineid("山陽"),
-                     db->get_stationid("岡山"), db->get_stationid("三原"));
-  route.append_route(db->get_lineid("新幹線"),
-                     db->get_stationid("三原"), db->get_stationid("福山"));
+  route.append_route(UTF8("山陽"),UTF8("岡山"), UTF8("三原"));
+  route.append_route(UTF8("新幹線"), UTF8("三原"), UTF8("福山"));
   EXPECT_FALSE(route.is_valid());
 }
 
@@ -119,121 +135,136 @@ TEST_F(CRouteTest, CalcHonshuMain) {
 
 TEST_F(CRouteTest, FareHonshuMain) {
   // 353.8km
-  route.append_route(db->get_lineid("北陸"),
-                     db->get_stationid("米原"), db->get_stationid("直江津"));
+  route.append_route(UTF8("北陸"), UTF8("米原"), UTF8("直江津"));
   EXPECT_FARE_EQ(5780, route);
 }
 
 TEST_F(CRouteTest, FareHonshuMainMiddle) {
   // 467.8km
-  route.append_route(db->get_lineid("東北"),
-                     db->get_stationid("蕨"), db->get_stationid("北上"));
+  route.append_route(UTF8("東北"), UTF8("蕨"), UTF8("北上"));
   EXPECT_FARE_EQ(7350, route);
 }
 
 TEST_F(CRouteTest, FareHonshuMain2Lines) {
   // 535.0km
-  route.append_route(db->get_lineid("東北"),
-                     db->get_stationid("蕨"), db->get_stationid("東京"));
-  route.append_route(db->get_lineid("東海道"),
-                     db->get_stationid("東京"), db->get_stationid("名古屋"));
-  route.append_route(db->get_lineid("関西"),
-                     db->get_stationid("名古屋"), db->get_stationid("王寺"));
+  route.append_route(UTF8("東北"), UTF8("蕨"), UTF8("東京"));
+  route.append_route(UTF8("東海道"), UTF8("東京"), UTF8("名古屋"));
+  route.append_route(UTF8("関西"), UTF8("名古屋"), UTF8("王寺"));
   EXPECT_FARE_EQ(8190, route);
+}
+
+TEST_F(CRouteTest, FareHonshuYamanote) {
+  // 6.8km
+  route.append_route(UTF8("東海道"), UTF8("品川"), UTF8("東京"));
+  EXPECT_FARE_EQ(160, route);
+  // 13.9km
+  route.append_route(UTF8("東北"), UTF8("田端"));
+  EXPECT_FARE_EQ(190, route);
+}
+
+TEST_F(CRouteTest, FareHonshuOsakaKanjo) {
+  // 10.0km
+  route.append_route(UTF8("大阪環状"), UTF8("大阪"), UTF8("今宮"));
+  route.append_route(UTF8("関西"), UTF8("今宮"), UTF8("新今宮"));
+  EXPECT_FARE_EQ(170, route);
+  // 14.9km
+  route.append_route(UTF8("関西"), UTF8("新今宮"), UTF8("天王寺"));
+  route.append_route(UTF8("大阪環状"), UTF8("天王寺"), UTF8("玉造"));
+  EXPECT_FARE_EQ(190, route);
+}
+
+TEST_F(CRouteTest, FareHonshuTokyoDenshaTokutei) {
+  // 7.1km
+  route.append_route(UTF8("中央東"), UTF8("御茶ノ水"), UTF8("神田"));
+  route.append_route(UTF8("東北"), UTF8("田端"));
+  EXPECT_FARE_EQ(160, route);
+  // 13.2km
+  route.append_route(UTF8("東北"), UTF8("赤羽"));
+  EXPECT_FARE_EQ(210, route);
+}
+
+TEST_F(CRouteTest, FareHonshuOsakaDenshaTokutei) {
+  // 8.9km
+  route.append_route(UTF8("関西"), UTF8("JR難波"), UTF8("加美"));
+  EXPECT_FARE_EQ(170, route);
+  // 10.6km
+  route.append_route(UTF8("関西"), UTF8("久宝寺"));
+  EXPECT_FARE_EQ(210, route);
 }
 
 TEST_F(CRouteTest, FareHonshuShinkansenGantoku) {
   // 88.5km real
   // 92.9km fake
-  route.append_route(db->get_lineid("新幹線"),
-                     db->get_stationid("広島"), db->get_stationid("徳山"));
+  route.append_route(UTF8("新幹線"), UTF8("広島"), UTF8("徳山"));
   EXPECT_FARE_EQ(1620, route);
 }
 
 TEST_F(CRouteTest, FareHonshuShinkansenKokura) {
   // 86.2km real
-  route.append_route(db->get_lineid("新幹線"),
-                     db->get_stationid("新下関"), db->get_stationid("博多"));
+  route.append_route(UTF8("新幹線"), UTF8("新下関"), UTF8("博多"));
   EXPECT_FARE_EQ(1450, route);
 }
 
 TEST_F(CRouteTest, FareHonshuLocalOnly) {
   // 111.6km real
   // 122.8km fake
-  route.append_route(db->get_lineid("姫新"),
-                     db->get_stationid("佐用"), db->get_stationid("姫路"));
-  route.append_route(db->get_lineid("播但"),
-                     db->get_stationid("姫路"), db->get_stationid("和田山"));
+  route.append_route(UTF8("姫新"), UTF8("佐用"), UTF8("姫路"));
+  route.append_route(UTF8("播但"), UTF8("姫路"), UTF8("和田山"));
   EXPECT_FARE_EQ(2210, route);
 }
 
 TEST_F(CRouteTest, FareHonshuMainAndLocal) {
   // 110.1km real
   // 119.6km fake
-  route.append_route(db->get_lineid("姫新"),
-                     db->get_stationid("佐用"), db->get_stationid("姫路"));
-  route.append_route(db->get_lineid("山陽"),
-                     db->get_stationid("姫路"), db->get_stationid("加古川"));
-  route.append_route(db->get_lineid("加古川"),
-                     db->get_stationid("加古川"), db->get_stationid("谷川"));
+  route.append_route(UTF8("姫新"), UTF8("佐用"), UTF8("姫路"));
+  route.append_route(UTF8("山陽"), UTF8("姫路"), UTF8("加古川"));
+  route.append_route(UTF8("加古川"), UTF8("加古川"), UTF8("谷川"));
   EXPECT_FARE_EQ(1890, route);
 }
 
 TEST_F(CRouteTest, FareHonshuMainAndLocalShort) {
   //  9.7km real
   // 10.0km fake
-  route.append_route(db->get_lineid("八高"),
-                     db->get_stationid("北八王子"), db->get_stationid("八王子"));
-  route.append_route(db->get_lineid("中央東"),
-                     db->get_stationid("八王子"), db->get_stationid("日野"));
+  route.append_route(UTF8("八高"), UTF8("北八王子"), UTF8("八王子"));
+  route.append_route(UTF8("中央東"), UTF8("八王子"), UTF8("日野"));
   EXPECT_FARE_EQ(200, route);
 }
 
 TEST_F(CRouteTest, FareHonshuMainAndLocalNotShort) {
   // 11.7km real
   // 12.2km fake
-  route.append_route(db->get_lineid("八高"),
-                     db->get_stationid("小宮"), db->get_stationid("八王子"));
-  route.append_route(db->get_lineid("中央東"),
-                     db->get_stationid("八王子"), db->get_stationid("日野"));
+  route.append_route(UTF8("八高"), UTF8("小宮"), UTF8("八王子"));
+  route.append_route(UTF8("中央東"), UTF8("八王子"), UTF8("日野"));
   EXPECT_FARE_EQ(230, route);
 }
 
 TEST_F(CRouteTest, FareKyushuMain) {
   // 227.1km real
-  route.append_route(db->get_lineid("日豊"),
-                     db->get_stationid("大分"), db->get_stationid("博多"));
-  route.append_route(db->get_lineid("鹿児島1"),
-                     db->get_stationid("博多"), db->get_stationid("鳥栖"));
+  route.append_route(UTF8("日豊"), UTF8("大分"), UTF8("西小倉"));
+  route.append_route(UTF8("鹿児島1"), UTF8("西小倉"), UTF8("鳥栖"));
   EXPECT_FARE_EQ(4200, route);
 }
 
 TEST_F(CRouteTest, FareKyushuLocal) {
   // 289.5km real
   // 318.5km real
-  route.append_route(db->get_lineid("日豊"),
-                     db->get_stationid("大分"), db->get_stationid("博多"));
-  route.append_route(db->get_lineid("鹿児島1"),
-                     db->get_stationid("博多"), db->get_stationid("鳥栖"));
+  route.append_route(UTF8("久大"), UTF8("久留米"), UTF8("大分"));
+  route.append_route(UTF8("豊肥"), UTF8("大分"), UTF8("熊本"));
   EXPECT_FARE_EQ(5670, route);
 }
 
 TEST_F(CRouteTest, FareKyushuMainAndLocal) {
   // 13.9km real
   // 14.6km real
-  route.append_route(db->get_lineid("久大"),
-                     db->get_stationid("久留米大学前"), db->get_stationid("久留米"));
-  route.append_route(db->get_lineid("鹿児島1"),
-                     db->get_stationid("久留米"), db->get_stationid("鳥栖"));
+  route.append_route(UTF8("久大"), UTF8("久留米大学前"), UTF8("久留米"));
+  route.append_route(UTF8("鹿児島1"), UTF8("久留米"), UTF8("鳥栖"));
   EXPECT_FARE_EQ(270, route);
 }
 
 TEST_F(CRouteTest, FareKyushuAndHonshuMain) {
   // 86.2km real
   // 79.0km kyushu part
-  route.append_route(db->get_lineid("山陽"),
-                     db->get_stationid("新下関"), db->get_stationid("門司"));
-  route.append_route(db->get_lineid("鹿児島1"),
-                     db->get_stationid("門司"), db->get_stationid("博多"));
+  route.append_route(UTF8("山陽"), UTF8("新下関"), UTF8("門司"));
+  route.append_route(UTF8("鹿児島1"), UTF8("門司"), UTF8("博多"));
   EXPECT_FARE_EQ(1600, route);
 }

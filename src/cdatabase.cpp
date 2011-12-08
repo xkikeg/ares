@@ -30,6 +30,50 @@ namespace ares
     }
   }
 
+  std::pair<DENSHA_SPECIAL_TYPE, DENSHA_SPECIAL_TYPE>
+  CDatabase::get_denshaid(const line_id_t line,
+                          const std::pair<int, int> range) const
+  {
+    const char sql[] =
+      "SELECT station.denshaid, station.denshacircleid"
+      " FROM station NATURAL JOIN kilo NATURAL JOIN line"
+      " WHERE lineid=? AND kilo BETWEEN ? AND ?"
+      " GROUP BY station.denshaid, station.denshacircleid";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, line);
+    stmt.bind(2, range.first);
+    stmt.bind(3, range.second);
+    int rc;
+    DENSHA_SPECIAL_TYPE denshaid = DENSHA_SPECIAL_NONE; //!< 電車特定区間ID
+    DENSHA_SPECIAL_TYPE circleid = DENSHA_SPECIAL_NONE; //!< 山手/環状特例ID
+    bool iscircle = true; //!< 山手/環状特例かのフラグ
+    while(true)
+    {
+      rc = stmt.step();
+      if(rc != SQLITE_ROW) { break; }
+      // 電車特定区間ではない
+      if(stmt.column(0).is_null())
+      {
+        return std::make_pair(DENSHA_SPECIAL_NONE, DENSHA_SPECIAL_NONE);
+      }
+      // 電車特定区間である
+      else { denshaid = DENSHA_SPECIAL_TYPE(static_cast<int>(stmt.column(0))); }
+      // 山手線内・大阪環状線内ではない
+      if(stmt.column(1).is_null()) { iscircle = false; }
+      // 山手線内・大阪環状線内である
+      else if(iscircle)
+      {
+        circleid = DENSHA_SPECIAL_TYPE(static_cast<int>(stmt.column(1)));
+      }
+    }
+    if(rc != SQLITE_DONE)
+    {
+      std::cerr << "SQL error in get_denshaid: " << db->errmsg() << std::endl;
+      return std::make_pair(DENSHA_SPECIAL_TYPE(-1), DENSHA_SPECIAL_TYPE(-1));
+    }
+    return std::make_pair(denshaid, circleid);
+  }
+
   CDatabase::CDatabase(const char * dbname)
   : db(new SQLite(dbname, SQLITE_OPEN_READONLY))
   {
@@ -299,6 +343,35 @@ namespace ares
     return -1;
   }
 
+  std::pair<int, int> CDatabase::get_range(const line_id_t line,
+                                           const station_id_t begin,
+                                           const station_id_t end) const
+  {
+    const char sql[] =
+      "SELECT min(kilo), max(kilo) FROM kilo"
+      " WHERE lineid = ? AND stationid IN (?, ?)";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, line);
+    stmt.bind(2, begin);
+    stmt.bind(3, end);
+    const int rc = stmt.step();
+    if (rc == SQLITE_ROW)
+    {
+      return std::make_pair(static_cast<const int>(stmt.column(0)),
+                            static_cast<const int>(stmt.column(1)));
+    }
+    if (rc == SQLITE_DONE)
+    {
+      std::cerr << "Invalid line & station\n";
+    }
+    // error checking: should throw exception in sqlite3 wrapper
+    if(rc != SQLITE_DONE)
+    {
+      std::cerr << "SQL error in get_range: " << db->errmsg() << std::endl;
+    }
+    return std::make_pair(-1, -1);
+  }
+
   /**
    * @note この実装は1路線にたかだか2会社しか入らないことを暗黙の仮定にしている。
    * 更に言うと、2会社の境界駅は1つであることを仮定している。
@@ -313,23 +386,27 @@ namespace ares
                                        const station_id_t begin,
                                        const station_id_t end,
                                        std::vector<CKiloValue> & result,
-                                       bool & is_main) const
+                                       bool & is_main,
+                                       DENSHA_SPECIAL_TYPE & denshaid,
+                                       DENSHA_SPECIAL_TYPE & circleid) const
   {
+    std::pair<int, int> range = $.get_range(line, begin, end);
+    {
+      const std::pair<DENSHA_SPECIAL_TYPE, DENSHA_SPECIAL_TYPE>
+        densha = $.get_denshaid(line, range);
+      denshaid = densha.first;
+      circleid = densha.second;
+    }
     const char sql[] =
       "SELECT MIN(kilo.kilo), MAX(kilo.kilo), "
       "       line.linecompanyid, kilo.kilocompanyid, line.is_main"
       " FROM kilo NATURAL JOIN line"
-      " WHERE lineid=?1 AND kilo BETWEEN"
-      "  (SELECT min(kilo) FROM kilo"
-      "    WHERE lineid = ?1 AND stationid IN (?2, ?3))"
-      "  AND"
-      "  (SELECT max(kilo) FROM kilo"
-      "    WHERE lineid = ?1 AND stationid IN (?2, ?3))"
+      " WHERE lineid=? AND kilo BETWEEN ? AND ?"
       " GROUP BY line.linecompanyid, kilo.kilocompanyid, line.is_main";
     sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, line);
-    stmt.bind(2, begin);
-    stmt.bind(3, end);
+    stmt.bind(2, range.first);
+    stmt.bind(3, range.second);
     company_id_t comp_main=-1, comp_sub=-1;
     // 0 means begin, 1 means end
     int main[2]={0};
@@ -366,7 +443,7 @@ namespace ares
     }
     const int kilo_all = kilo_max - kilo_min;
     // Cannot get results. maybe line, begin, end are bad.
-    if(kilo_all == 0) { return false; }
+    if(kilo_all == 0) { std::cerr << "Zero Kilo\n"; return false; }
     // if kilo_main & kilo_sub exists, main[] is not correct.
     if(comp_main != -1 && comp_sub != -1)
     {
@@ -387,9 +464,9 @@ namespace ares
 
   bool CDatabase::is_belong_to_line(line_id_t line, station_id_t station) const
   {
-    const std::string sql =
+    const char sql[] =
       "SELECT * FROM kilo WHERE lineid = ? AND stationid = ?";
-    sqlite3_wrapper::SQLiteStmt stmt(*db, sql);
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, line);
     stmt.bind(2, station);
     int rc = stmt.step();

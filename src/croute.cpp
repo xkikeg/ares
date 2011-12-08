@@ -55,9 +55,22 @@ namespace ares
     }
   }
 
+  void CRoute::append_route(const char * line, const char * station)
+  {
+    $.append_route(db->get_lineid(line),
+                   db->get_stationid(station));
+  }
+
   void CRoute::append_route(line_id_t line, station_id_t begin, station_id_t end)
   {
     way.push_back(CSegment(begin, line, end));
+  }
+
+  void CRoute::append_route(const char * line, const char * begin, const char * end)
+  {
+    $.append_route(db->get_lineid(line),
+                   db->get_stationid(begin),
+                   db->get_stationid(end));
   }
 
   bool CRoute::is_contains(station_id_t station) const
@@ -80,7 +93,10 @@ namespace ares
     std::map<line_id_t, liquid::UniqueIntervalTree<station_id_t> > checktree;
     for(const_iterator itr=$.begin(); itr != $.end(); ++itr)
     {
-      if(!checktree[itr->line].insert(itr->begin, itr->end)) { return false; }
+      if(!$.db->is_belong_to_line(itr->line, itr->begin) ||
+         !$.db->is_belong_to_line(itr->line, itr->end  ) ||
+         !checktree[itr->line].insert(
+           $.db->get_range(itr->line, itr->begin, itr->end))) { return false; }
     }
     return true;
   }
@@ -92,13 +108,17 @@ namespace ares
     for(const_iterator itr=$.begin(); itr != $.end(); ++itr)
     {
       bool is_main;
+      DENSHA_SPECIAL_TYPE denshaid, circleid;
       result.clear();
       bool ret = $.db->get_company_and_kilo(itr->line,
                                             itr->begin,
                                             itr->end,
                                             result,
-                                            is_main);
+                                            is_main,
+                                            denshaid,
+                                            circleid);
       if(!ret) { return CKilo(); }
+      kilo.update_denshaid(denshaid, circleid);
       for(std::vector<CKiloValue>::iterator j=result.begin();
           j != result.end(); ++j)
       {
@@ -122,7 +142,23 @@ namespace ares
       const CHecto hecto_local = kilo.get(COMPANY_HONSHU, false);
       if(hecto_main == 0 && hecto_local == 0) return 0;
       // Main only
-      if(hecto_local == 0) { return calc_honshu_main(hecto_main); }
+      if(hecto_local == 0)
+      {
+        const DENSHA_SPECIAL_TYPE denshaid = kilo.get_densha_and_circleid();
+        const char * faretable=NULL;
+        switch(denshaid)
+        {
+        case DENSHA_SPECIAL_TOKYO:      faretable = "D1"; break;
+        case DENSHA_SPECIAL_OSAKA:      faretable = "D2"; break;
+        case DENSHA_SPECIAL_YAMANOTE:   faretable = "E1"; break;
+        case DENSHA_SPECIAL_OSAKAKANJO: faretable = "E2"; break;
+        default:
+          return calc_honshu_main(hecto_main);
+        }
+        return $.db->get_fare_table(faretable,
+                                    COMPANY_HONSHU,
+                                    hecto_main);
+      }
       // Local only or (Main+Local)<=10
       if(hecto_main == 0 || (hecto_main + hecto_local) <= 10)
       {

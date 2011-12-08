@@ -159,9 +159,14 @@ def mktable_from_csv(db, tablename, filename = None):
 
 
 def create_view(db):
-    sql = "CREATE VIEW junction AS SELECT station.* FROM kilo NATURAL JOIN station GROUP BY kilo.stationid HAVING count(*) > 1;"
-    if DEBUG: print sql
-    db.execute(sql)
+    sqls = [
+        "CREATE VIEW junction AS SELECT station.* FROM kilo NATURAL JOIN station GROUP BY kilo.stationid HAVING count(*) > 1",
+        "CREATE VIEW jointkilo AS SELECT * FROM (SELECT station.*,count(*) AS connectcount FROM station NATURAL JOIN kilo GROUP BY kilo.stationid) AS station NATURAL JOIN kilo NATURAL JOIN line",
+        ]
+    for sql in sqls:
+        if DEBUG: print sql
+        db.execute(sql)
+    return
 
 
 def mksqldb(db_name=DB_NAME):

@@ -14,17 +14,15 @@
 using namespace std::tr1::placeholders;
 using namespace boost::assign;
 
-class CDatabaseTest : public testing::Test
+class CDatabaseTest : public ::testing::Test
 {
-public:
-  CDatabaseTest() : db(new ares::CDatabase(TEST_DB_FILENAME)) {}
-
 protected:
-
   std::tr1::shared_ptr<ares::CDatabase> db;
   typedef std::pair<std::string, std::string> u8pair_t;
   typedef std::vector<std::string> u8vec_t;
   typedef std::vector<u8pair_t> u8pvec_t;
+
+  CDatabaseTest() : db(new ares::CDatabase(TEST_DB_FILENAME)) {}
 
   void diffStringVector(u8vec_t expected, u8vec_t actual) {
     EXPECT_EQ(expected.size(), actual.size());

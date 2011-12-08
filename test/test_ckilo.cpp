@@ -4,10 +4,9 @@
 
 #include "ckilo.h"
 
-class CKiloTest : public testing::Test
+class CKiloTest : public ::testing::Test
 {
 protected:
-
   ares::CKilo kilo;
 };
 
