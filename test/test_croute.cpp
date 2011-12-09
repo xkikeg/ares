@@ -22,6 +22,8 @@ protected:
 
   CRouteTest() : db(new ares::CDatabase(TEST_DB_FILENAME)),
                  route(db) {}
+
+  virtual ~CRouteTest(){ };
 };
 
 class CRouteTokaidoTest : public CRouteTest
@@ -335,4 +337,42 @@ TEST_F(CRouteTest, FareHokkaidoMainAndLocalOkhotsk) {
   // 398.3km fake
   route.append_route(UTF8("函館"), UTF8("札幌"));
   EXPECT_FARE_EQ(6610, route);
+}
+
+TEST_F(CRouteTest, FareHokkaidoAndHonshuHakucho)
+{
+  // 44.4km real
+  // 48.8km fake
+  route.append_route(UTF8("津軽"), UTF8("青森"), UTF8("中小国"));
+  route.append_route(UTF8("海峡"), UTF8("津軽今別"));
+  EXPECT_FARE_EQ(850, route);
+  // 157.0km real
+  // 172.7km fake
+  route.append_route(UTF8("海峡"), UTF8("木古内"));
+  route.append_route(UTF8("江差"), UTF8("五稜郭"));
+  EXPECT_FARE_EQ(3150, route);
+  // 160.4km real
+  // 176.1km fake
+  route.append_route(UTF8("函館"), UTF8("函館"));
+  EXPECT_FARE_EQ(3150, route);
+}
+
+class CRouteHonshibisanTest : public CRouteTest
+{
+protected:
+  CRouteHonshibisanTest() : CRouteTest()
+  {
+    route.append_route(UTF8("宇野"), UTF8("岡山"), UTF8("茶屋町"));
+    route.append_route(UTF8("本四備讃"), UTF8("宇多津"));
+  }
+};
+
+TEST_F(CRouteHonshibisanTest, FareShikokuAndHonshuUzushio)
+{
+  // 71.8km
+  route.append_route(UTF8("予讃"), UTF8("（讃）高松"));
+  EXPECT_FARE_EQ(1470, route);
+  // 146.3km
+  route.append_route(UTF8("高徳"), UTF8("徳島"));
+  EXPECT_FARE_EQ(2760, route);
 }

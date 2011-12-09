@@ -21,12 +21,16 @@ namespace ares
              class LocalLineLookupFunction>
     int calc_fare_as_honshu(const CDatabase & db,
                             const CKilo & kilo,
-                            const COMPANY_TYPE comp_type,
+                            const boost::optional<COMPANY_TYPE> comp_type,
                             MainLineLookupFunction func_main,
                             LocalLineLookupFunction func_local)
     {
-      const CHecto hecto_main  = kilo.get(comp_type, true );
-      const CHecto hecto_local = kilo.get(comp_type, false);
+      const CHecto hecto_main  =
+        comp_type ? kilo.get(*comp_type, true ) : kilo.get_all(true);
+      const CHecto hecto_local =
+        comp_type ? kilo.get(*comp_type, false) : kilo.get_all(false);
+      const CHecto hecto_local_fake = comp_type
+        ? kilo.get(*comp_type, false, false) : kilo.get_all(false, false);
       // Main only
       if(hecto_local == 0)
       {
@@ -52,7 +56,7 @@ namespace ares
       }
       // Both main & local
       const int hecto_total =
-        hecto_main + kilo.get(comp_type, false, false);
+        hecto_main + hecto_local_fake;
       return func_main(hecto_total);
     }
   }
@@ -202,11 +206,23 @@ namespace ares
     {
       const int base_fare =
         calc_fare_as_honshu(*db, kilo,
-                            COMPANY_HONSHU,
+                            boost::none,
                             std::bind(CRoute::calc_honshu_main, _1),
                             std::bind(&CDatabase::get_fare_table,
                                       $.db, "B1", COMPANY_HONSHU, _1));
-      return base_fare;
+      int add_fare = 0;
+      for(size_t i=COMPANY_HOKKAIDO; i < MAX_COMPANY_TYPE; ++i)
+      {
+        if(!kilo.is_zero(i))
+          add_fare +=
+            calc_fare_as_honshu(*db, kilo,
+                                COMPANY_TYPE(i),
+                                std::bind(&CDatabase::get_fare_table,
+                                          $.db, "A2", i, _1),
+                                std::bind(&CDatabase::get_fare_table,
+                                          $.db, "B2", i, _1));
+      }
+      return base_fare + add_fare;
     }
   }
 

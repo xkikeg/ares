@@ -92,6 +92,13 @@ namespace ares
       return CHecto(a.hecto + b.hecto);
     }
 
+    //! 加算代入演算子.
+    class CHecto & operator+=(const CHecto & b)
+    {
+      $.hecto += b.hecto;
+      return $;
+    }
+
     //! 営業キロを取得するメンバ
     int get_kilo() const { return hecto2kilo($.hecto); }
 
@@ -170,6 +177,22 @@ namespace ares
      */
     class CHecto get(size_t i, bool is_main, bool is_real=true) const {
       return std::move(CHecto($.get_rawhecto(i, is_main, is_real)));
+    }
+
+    /**
+     * @~
+     * ＪＲ区間すべての営業キロの10倍を取得する関数.
+     * @param[in] is_main trueなら幹線, falseなら地方交通線
+     * @param[in] is_real trueなら実キロ, falseなら擬制キロ
+     * @return            営業キロ
+     */
+    class CHecto get_all(bool is_main, bool is_real=true) const {
+      CHecto hecto;
+      for(size_t i=0; i<MAX_COMPANY_TYPE; ++i)
+      {
+        hecto += $.get(i, is_main, is_real);
+      }
+      return hecto;
     }
 
     /**
