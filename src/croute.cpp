@@ -189,7 +189,23 @@ namespace ares
     // JR四国 or JR九州
     if(only && (*only == COMPANY_KYUSHU || *only == COMPANY_SHIKOKU))
     {
-      return -1;
+      const CHecto hecto_main  = kilo.get(*only, true );
+      const CHecto hecto_local = kilo.get(*only, false);
+      const CHecto hecto_lfake = kilo.get(*only, false, false);
+      // only 幹線
+      if(hecto_local == 0)
+      {
+        return $.db->get_fare_table("C1", *only, hecto_main);
+      }
+      // only 地方交通線
+      else if(hecto_main == 0)
+      {
+        return $.db->get_fare_table("C1", *only, hecto_lfake);
+      }
+      else
+      {
+        return $.db->get_fare_table("C1", *only, hecto_main + hecto_lfake);
+      }
     }
     // JR北海道
     else if(only && (*only == COMPANY_HOKKAIDO))

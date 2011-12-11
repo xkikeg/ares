@@ -247,19 +247,93 @@ TEST_F(CRouteTest, FareKyushuMain) {
   EXPECT_FARE_EQ(4200, route);
 }
 
+TEST_F(CRouteTest, FareKyushuMainShinkansenSakura) {
+  // 28.6km
+  route.append_route(UTF8("九州新幹線"), UTF8("博多"), UTF8("新鳥栖"));
+  EXPECT_FARE_EQ(540, route);
+  // 35.7km
+  route.append_route(UTF8("九州新幹線"), UTF8("久留米"));
+  EXPECT_FARE_EQ(720, route);
+  // 118.4km
+  route.append_route(UTF8("九州新幹線"), UTF8("熊本"));
+  EXPECT_FARE_EQ(2070, route);
+  // 151.3km
+  route.append_route(UTF8("九州新幹線"), UTF8("新八代"));
+  EXPECT_FARE_EQ(2730, route);
+  // 288.9km
+  route.append_route(UTF8("九州新幹線"), UTF8("鹿児島中央"));
+  EXPECT_FARE_EQ(5360, route);
+}
+
 TEST_F(CRouteTest, FareKyushuLocal) {
   // 289.5km real
-  // 318.5km real
+  // 318.5km fake
   route.append_route(UTF8("久大"), UTF8("久留米"), UTF8("大分"));
   route.append_route(UTF8("豊肥"), UTF8("大分"), UTF8("熊本"));
   EXPECT_FARE_EQ(5670, route);
 }
 
-TEST_F(CRouteTest, FareKyushuMainAndLocal) {
-  // 13.9km real
-  // 14.6km real
-  route.append_route(UTF8("久大"), UTF8("久留米大学前"), UTF8("久留米"));
-  route.append_route(UTF8("鹿児島1"), UTF8("久留米"), UTF8("鳥栖"));
+TEST_F(CRouteTest, FareKyushuLocalSpecialCase) {
+  // 2.8km real
+  // 3.1km fake
+  route.append_route(UTF8("唐津"), UTF8("山本"), UTF8("本牟田部"));
+  EXPECT_FARE_EQ(170, route);
+  //  9.6km real
+  // 10.6km fake
+  route.append_route(UTF8("唐津"), UTF8("岩屋"));
+  EXPECT_FARE_EQ(240, route);
+  // 27.8km real
+  // 30.6km fake
+  route.append_route(UTF8("唐津"), UTF8("小城"));
+  EXPECT_FARE_EQ(580, route);
+  // 32.9km real
+  // 36.2km fake
+  route.append_route(UTF8("唐津"), UTF8("久保田"));
+  EXPECT_FARE_EQ(720, route);
+}
+
+TEST_F(CRouteTest, FareKyushuMainAndLocalYufu) {
+  // 42.5km real
+  // 43.2km fake
+  route.append_route(UTF8("鹿児島1"), UTF8("博多"), UTF8("久留米"));
+  route.append_route(UTF8("久大"), UTF8("久留米大学前"));
+  EXPECT_FARE_EQ(820, route);
+  // 83.3km real
+  // 88.1km fake
+  route.append_route(UTF8("久大"), UTF8("日田"));
+  EXPECT_FARE_EQ(1600, route);
+  //  95.2km real
+  // 101.2km fake
+  route.append_route(UTF8("久大"), UTF8("天ヶ瀬"));
+  EXPECT_FARE_EQ(2070, route);
+  // 108.9km real
+  // 116.2km fake
+  route.append_route(UTF8("久大"), UTF8("豊後森"));
+  EXPECT_FARE_EQ(2070, route);
+  // 134.8km real
+  // 144.7km fake
+  route.append_route(UTF8("久大"), UTF8("由布院"));
+  EXPECT_FARE_EQ(2730, route);
+  // 177.2km real
+  // 191.4km fake
+  route.append_route(UTF8("久大"), UTF8("大分"));
+  EXPECT_FARE_EQ(3570, route);
+}
+
+TEST_F(CRouteTest, FareKyushuMainAndLocalSpecialCase) {
+  //  9.7km real
+  // 10.2km fake
+  route.append_route(UTF8("筑豊"), UTF8("二島"), UTF8("折尾"));
+  route.append_route(UTF8("鹿児島1"), UTF8("黒崎"));
+  EXPECT_FARE_EQ(240, route);
+}
+
+TEST_F(CRouteTest, FareKyushuMainAndLocalNonSpecialCase) {
+  // 切り上げ営業キロが11kmになってしまうので救済措置は取られない.
+  // 10.3km real
+  // 10.7km fake
+  route.append_route(UTF8("唐津"), UTF8("鬼塚"), UTF8("山本"));
+  route.append_route(UTF8("筑肥"), UTF8("西相知"));
   EXPECT_FARE_EQ(270, route);
 }
 
