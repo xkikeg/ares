@@ -431,6 +431,35 @@ TEST_F(CRouteTest, FareHokkaidoAndHonshuHakucho)
   EXPECT_FARE_EQ(3150, route);
 }
 
+TEST_F(CRouteTest, FareShikokuMainShimanto)
+{
+  route.append_route(UTF8("予讃"), UTF8("（讃）高松"), UTF8("坂出"));
+  EXPECT_FARE_EQ(440, route);
+  route.append_route(UTF8("予讃"), UTF8("宇多津"));
+  EXPECT_FARE_EQ(540, route);
+  route.append_route(UTF8("予讃"), UTF8("多度津"));
+  EXPECT_FARE_EQ(640, route);
+  route.append_route(UTF8("土讃"), UTF8("阿波池田"));
+  EXPECT_FARE_EQ(1410, route);
+  route.append_route(UTF8("土讃"), UTF8("後免"));
+  EXPECT_FARE_EQ(2660, route);
+  route.append_route(UTF8("土讃"), UTF8("高知"));
+  EXPECT_FARE_EQ(2660, route);
+  route.append_route(UTF8("土讃"), UTF8("佐川"));
+  EXPECT_FARE_EQ(3400, route);
+  route.append_route(UTF8("土讃"), UTF8("須崎"));
+  EXPECT_FARE_EQ(3710, route);
+  route.append_route(UTF8("土讃"), UTF8("窪川"));
+  EXPECT_FARE_EQ(4030, route);
+  // 社線のテスト
+  // route.append_route(UTF8("土佐くろしお"), UTF8("土佐佐賀"));
+  // EXPECT_FARE_EQ(4870, route);
+  // route.append_route(UTF8("土佐くろしお"), UTF8("中村"));
+  // EXPECT_FARE_EQ(5090, route);
+  // route.append_route(UTF8("土佐くろしお"), UTF8("宿毛"));
+  // EXPECT_FARE_EQ(5580, route);
+}
+
 class CRouteHonshibisanTest : public CRouteTest
 {
 protected:
@@ -449,4 +478,23 @@ TEST_F(CRouteHonshibisanTest, FareShikokuAndHonshuUzushio)
   // 146.3km
   route.append_route(UTF8("高徳"), UTF8("徳島"));
   EXPECT_FARE_EQ(2760, route);
+}
+
+TEST_F(CRouteHonshibisanTest, FareShikokuAndHonshuShiokaze)
+{
+  // 76.5km
+  route.append_route(UTF8("予讃"), UTF8("観音寺"));
+  EXPECT_FARE_EQ(1480, route);
+  // 123.1km
+  route.append_route(UTF8("予讃"), UTF8("新居浜"));
+  EXPECT_FARE_EQ(2440, route);
+  // 134.3km
+  route.append_route(UTF8("予讃"), UTF8("伊予西条"));
+  EXPECT_FARE_EQ(2450, route);
+  // 164.9km
+  route.append_route(UTF8("予讃"), UTF8("今治"));
+  EXPECT_FARE_EQ(3180, route);
+  // 214.4km
+  route.append_route(UTF8("予讃"), UTF8("松山"));
+  EXPECT_FARE_EQ(3810, route);
 }

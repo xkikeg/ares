@@ -200,10 +200,18 @@ namespace ares
       // only 地方交通線
       else if(hecto_main == 0)
       {
+        boost::optional<int> special_fare =
+          $.db->get_fare_country_table("C2", *only, hecto_local, hecto_lfake);
+        if(special_fare) { return *special_fare; }
         return $.db->get_fare_table("C1", *only, hecto_lfake);
       }
       else
       {
+        boost::optional<int> special_fare =
+          $.db->get_fare_country_table("C3", *only,
+                                       hecto_main + hecto_local,
+                                       hecto_main + hecto_lfake);
+        if(special_fare) { return *special_fare; }
         return $.db->get_fare_table("C1", *only, hecto_main + hecto_lfake);
       }
     }

@@ -325,6 +325,32 @@ namespace ares
     return -1;
   }
 
+  boost::optional<int> CDatabase::get_fare_country_table(const char * table,
+                                                         company_id_t company,
+                                                         int realkilo,
+                                                         int fakekilo) const
+  {
+    const char sql[] =
+      "SELECT fare FROM fare_country WHERE type = ?1 AND companyid = ?2"
+      " AND (realkilo = ?3    AND fakekilo = ?4"
+      "      OR"
+      "      realkilo is NULL AND fakekilo = ?4"
+      "     )";
+    sqlite3_wrapper::SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, table);
+    stmt.bind(2, company);
+    stmt.bind(3, realkilo);
+    stmt.bind(4, fakekilo);
+    int rc = stmt.step();
+    if (rc == SQLITE_ROW)
+      return boost::make_optional<int>(stmt.column(0));
+    if (rc == SQLITE_DONE)
+      return boost::none;
+    if(rc != SQLITE_DONE)
+      std::cerr << db->errmsg() << std::endl;
+    return -1;
+  }
+
   int CDatabase::get_kilo(const line_id_t line,
                           const station_id_t station) const
   {

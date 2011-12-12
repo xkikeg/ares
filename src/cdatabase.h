@@ -4,6 +4,7 @@
 #include <memory>
 #include <stdexcept>
 #include <boost/utility.hpp>
+#include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
 #include "ares.h"
 
@@ -174,6 +175,12 @@ namespace ares
     int get_fare_table(const char * table,
                        company_id_t company,
                        int kilo) const;
+
+    //! JR四国・九州の地方交通線特例運賃表を引く
+    boost::optional<int> get_fare_country_table(const char * table,
+                                                company_id_t company,
+                                                int realkilo,
+                                                int fakekilo) const;
 
     /**
      * @~
