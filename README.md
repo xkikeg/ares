@@ -17,6 +17,7 @@ UbuntuなどDebian系OSでの環境の入れ方です。C++0xの機能のためg
 
  % sudo apt-get install omake
  % sudo apt-get install libsqlite3-dev sqlite3-doc
+ % sudo apt-get install libwxgtk2.8-dev wx2.8-i18n wx2.8-examples wx2.8-doc
  # examples and docs are not essential.
  % omake
 

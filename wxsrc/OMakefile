@@ -1,0 +1,17 @@
+TARGET = wxares
+
+WX_CONFIG = wx-config
+CXXFLAGS += $(shell $(WX_CONFIG) --cxxflags)
+LIBS += $(LIBARES_OPT)
+LDFLAGS += $(shell $(WX_CONFIG) --libs)
+
+PATH_HEADER = filepath.h
+
+$(PATH_HEADER):
+	echo "#define WXARES_DB_FILENAME \"$(absname $(ARES_DB_FILE))\"" > $@
+
+GENERATED = $(CGeneratedFiles $(PATH_HEADER))
+
+CXXFILES[] = $(removesuffix $(ls *.cpp))
+
+.DEFAULT: $(CXXProgram $(TARGET), $(CXXFILES))

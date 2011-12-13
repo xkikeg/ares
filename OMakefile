@@ -4,6 +4,7 @@ SRCDIR = $(dir src)
 OPTDIR = $(dir opt)
 TESTDIR = $(dir test)
 DEBUGDIR = $(dir debug)
+WXSRCDIR = $(dir wxsrc)
 GTESTDIR = $(dir googletest)
 
 LIBARES = libares
@@ -32,7 +33,7 @@ section
 section
 	CXXFLAGS += -O3
 	vmount($(SRCDIR), $(OPTDIR))
-	.SUBDIRS: $(OPTDIR)
+	.SUBDIRS: $(OPTDIR) $(WXSRCDIR)
 
 clean:
 	rm $(filter-proper-targets $(ls R, .))
