@@ -1,6 +1,16 @@
 .PHONY: clean
 
+SRCDIR = $(dir src)
+TESTDIR = $(dir test)
+GTESTDIR = $(dir googletest)
+
+LIBARES = $(file $(SRCDIR)/libares)
 ARES_DB_FILE = $(file ares.sqlite)
+
+CXXFLAGS += -std=c++0x -g -Wall -Wextra
+# ASFLAGS +=
+LDFLAGS += -lsqlite3
+INCLUDES += $(SRCDIR)
 
 .DEFAULT: $(ARES_DB_FILE)
 

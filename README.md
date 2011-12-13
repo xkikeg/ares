@@ -12,7 +12,13 @@ ARESはJRの運賃計算をするためのアプリケーションです。
 使用方法
 ------------
 未実装です。
-### インストール ###
+### ビルド ###
+
+ % sudo apt-get install omake
+ % sudo apt-get install libsqlite3-dev sqlite3-doc
+ # examples and docs are not essential.
+ % omake
+
 ### 実行 ###
 
 実装
