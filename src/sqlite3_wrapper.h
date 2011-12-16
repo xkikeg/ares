@@ -4,10 +4,20 @@
 #include <iostream>
 #include <stdexcept>
 #include <boost/utility.hpp>
+#include <boost/optional.hpp>
 #include <sqlite3.h>
 
 namespace sqlite3_wrapper
 {
+  /**
+   * SQLite全般の例外
+   */
+  class SQLiteException : std::runtime_error
+  {
+  public:
+    SQLiteException(const std::string & str) : std::runtime_error(str) {}
+  };
+
   /**
    * @~english
    * IO Error Exception.
@@ -16,10 +26,10 @@ namespace sqlite3_wrapper
    * @~japanese
    * IOエラー例外.
    */
-  class IOException : std::runtime_error
+  class IOException : SQLiteException
   {
   public:
-    IOException(const std::string & str) : std::runtime_error(str) {}
+    IOException(const std::string & str) : SQLiteException(str) {}
   };
 
   /**
@@ -284,7 +294,13 @@ namespace sqlite3_wrapper
      */
     int step()
     {
-      return sqlite3_step(stmt);
+      int rc = sqlite3_step(stmt);
+      if(rc != SQLITE_ROW && rc != SQLITE_DONE)
+      {
+        std::string err = db.errmsg();
+        throw SQLiteException(err);
+      }
+      return rc;
     }
 
     /**
@@ -295,25 +311,80 @@ namespace sqlite3_wrapper
       return sqlite3_reset(stmt);
     }
 
+    class iterator
+    {
+    private:
+      boost::optional<SQLiteStmt &> stmt;
+
+      void step()
+      {
+        if(!stmt)
+        {
+          throw SQLiteException("uninitialized iterator of SQLiteStmt");
+        }
+        int rc = stmt->step();
+        if(rc == SQLITE_DONE) { stmt = boost::none; }
+      }
+
+    public:
+      /**
+       * デフォルトコンストラクタ.
+       * 無効なイテレータを生成する.
+       */
+      iterator() {}
+
+      /**
+       * コンストラクタ.
+       * ステートメントに対するイテレータを生成する.
+       * @param[in] stmt 対応するSQLiteStmtオブジェクト.
+       */
+      explicit iterator(SQLiteStmt & stmt) : stmt(stmt) { step(); }
+
+      //! 一致演算子. イテレータが終端であるかどうかだけを比較する.
+      friend bool operator==(const iterator & a, const iterator & b)
+      {
+        return (a.stmt && b.stmt) || (!a.stmt && !b.stmt);
+      }
+
+      friend bool operator!=(const iterator & a, const iterator & b)
+      {
+        return !(a == b);
+      }
+
+      //! イテレータに対応するステートメントを実行し結果を更新する.
+      iterator & operator++() { step(); return *this; }
+
+      operator bool() { return static_cast<bool>(stmt); }
+
+      //! 指定されたカラムの値を取り出す.
+      SQLiteStmt::column_value operator[](int icol)
+      {
+        if(!stmt)
+        {
+          throw SQLiteException("uninitialized iterator of SQLiteStmt");
+        }
+        return stmt->column(icol);
+      }
+    };
+
+    iterator execute()
+    {
+      reset();
+      return iterator(*this);
+    }
+
     /**
      * Function to append icol's value to vec.
      * @param[in,out] vec    STL container to append icol's value.
      * @param[in]     icol   Index of the column to append.
      */
     template <class T>
-    bool fill_column(T & vec, int icol)
+    void fill_column(T & vec, int icol)
     {
-      int rc;
-      while((rc = this->step()) == SQLITE_ROW)
+      for(iterator itr=this->execute(); itr; ++itr)
       {
-        vec.push_back(this->column(icol));
+        vec.push_back(itr[icol]);
       }
-      if(rc != SQLITE_DONE)
-      {
-        std::cerr << db.errmsg() << std::endl;
-        return false;
-      }
-      return true;
     }
 
     /**
@@ -323,20 +394,13 @@ namespace sqlite3_wrapper
      * @param[in]     jcol   Index of the column to append as second.
      */
     template <class T>
-    bool fill_column(T & vec, int icol, int jcol)
+    void fill_column(T & vec, int icol, int jcol)
     {
-      int rc;
-      while((rc = this->step()) == SQLITE_ROW)
+      for(iterator itr=this->execute(); itr; ++itr)
       {
-        vec.push_back(std::make_pair(this->column(icol),
-                                     this->column(jcol)));
+        vec.push_back(std::make_pair(itr[icol],
+                                     itr[jcol]));
       }
-      if(rc != SQLITE_DONE)
-      {
-        std::cerr << db.errmsg() << std::endl;
-        return false;
-      }
-      return true;
     }
   };
 }
