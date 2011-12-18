@@ -27,7 +27,7 @@ protected:
     auto i=expected.begin(), j=actual.begin();
     for(; i != expected.end() && j != actual.end(); ++i, ++j)
     {
-      EXPECT_EQ(*i, *j);
+      EXPECT_EQ(*i, *j) << *i << "!=" << *j;
     }
   }
 

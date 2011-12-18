@@ -40,7 +40,8 @@ namespace ares
   class DoesNotExist : public std::logic_error
   {
   public:
-    DoesNotExist() : std::logic_error("Object does not exist.") {}
+    explicit DoesNotExist(const std::string & query)
+      : std::logic_error("Object does not exist: " + query) {}
   };
 
   /**
@@ -55,7 +56,7 @@ namespace ares
      * @param[in] query      Query string that raise multiple object error.
      * @param[in] num        The number of result returned to query.
      */
-    MultipleObjectReturned(const char * query, size_t num)
+    explicit MultipleObjectReturned(const char * query, size_t num)
       : std::logic_error(std::string("query '") + query + "' returned"
                            + boost::lexical_cast<std::string>(num) + " objects.") {}
   };
@@ -112,16 +113,16 @@ namespace ares
      * @param[in]  mode Specify searching mode.
      * @param[out] list vector to add found line id's.
      */
-    bool find_lineid(const char * name,
+    void find_lineid(const char * name,
                      const find_mode mode,
                      line_vector & list) const;
 
     //! Find lines from line name with kanji.
-    bool find_lineid_with_name(const char * name,
+    void find_lineid_with_name(const char * name,
                                const find_mode mode,
                                line_vector & list) const;
     //! Find lines from line name with yomi.
-    bool find_lineid_with_yomi(const char * name,
+    void find_lineid_with_yomi(const char * name,
                                const find_mode mode,
                                line_vector & list) const;
     //! Find lines from line name with alias.
@@ -139,19 +140,19 @@ namespace ares
                          const find_mode mode = FIND_EXACT) const;
 
     //! Find stations' id from station name.
-    bool find_stationid(const char * name,
+    void find_stationid(const char * name,
                         const find_mode mode,
                         station_vector & list) const;
     //! Find stations' id from station name with kanji.
-    bool find_stationid_with_name(const char * name,
+    void find_stationid_with_name(const char * name,
                                   const find_mode mode,
                                   station_vector & list) const;
     //! Find stations' id from station name with yomi.
-    bool find_stationid_with_yomi(const char * name,
+    void find_stationid_with_yomi(const char * name,
                                   const find_mode mode,
                                   station_vector & list) const;
     //! Find stations' id from station name with denryaku.
-    bool find_stationid_with_denryaku(const char * name,
+    void find_stationid_with_denryaku(const char * name,
                                       const find_mode mode,
                                       station_vector & list) const;
 
@@ -165,7 +166,7 @@ namespace ares
                                const find_mode mode = FIND_EXACT) const;
 
     //! Find lines' id connecting with.
-    bool find_connect_line(line_id_t line,
+    void find_connect_line(line_id_t line,
                            connect_vector & list) const;
 
     //! Get company id from company name.
