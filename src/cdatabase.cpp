@@ -9,6 +9,7 @@
 #include "cdatabase.h"
 #include "csegment.h"
 #include "ckilo.h"
+#include "cstation.h"
 
 namespace ares
 {
@@ -142,6 +143,29 @@ namespace ares
     const char sql[] = "SELECT lineid, linename FROM line ORDER BY lineyomi";
     SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.fill_column(result, 0, 1);
+  }
+
+  void CDatabase::get_stations_of_line(line_id_t line,
+                                       std::vector<CStation> &result) const
+  {
+    const char sql[] =
+      "SELECT station.stationid, station.stationname, station.stationyomi,"
+      "       station.stationdenryaku, kilo.kilo, line.is_main"
+      " FROM station NATURAL JOIN kilo NATURAL JOIN line"
+      " WHERE line.lineid = ?"
+      " ORDER BY kilo.kilo";
+    SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, line);
+    for(SQLiteStmt::iterator itr=stmt.execute(); itr; ++itr)
+    {
+      result.push_back(CStation(itr[0],
+                                std::string(itr[1]),
+                                std::string(itr[2]),
+                                std::string(itr[3]),
+                                itr[4],
+                                static_cast<int>(itr[5]) ? itr[4]
+                                : CKilo::real2fake(itr[4])));
+    }
   }
 
   void CDatabase::find_lineid(const char * name,

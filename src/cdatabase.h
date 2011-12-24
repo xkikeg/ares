@@ -28,6 +28,7 @@ namespace ares
 
   class CSegment;
   class CKiloValue;
+  class CStation;
 
   /**
    * @~english
@@ -113,6 +114,14 @@ namespace ares
      */
     void get_all_lines_name(std::vector<std::pair<
                               line_id_t, std::string> > &result) const;
+
+    /**
+     * 指定された路線の駅の集合を返す。
+     * @param[in]  line   結果を得たい路線ID.
+     * @param[out] result 結果を格納する配列.
+     */
+    void get_stations_of_line(line_id_t line,
+                              std::vector<CStation> &result) const;
 
     /**
      * Find lines' id from line name.
