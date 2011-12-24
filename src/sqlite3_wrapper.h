@@ -274,11 +274,6 @@ namespace sqlite3_wrapper
       {
         return reinterpret_cast<const char *>(sqlite3_column_text(t->stmt, _icol));
       }
-      //! cast operator to std::string.
-      operator std::string()
-      {
-        return std::string(reinterpret_cast<const char *>(sqlite3_column_text(t->stmt, _icol)));
-      }
     };
 
     /**
