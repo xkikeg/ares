@@ -115,7 +115,7 @@ TEST_F(CDatabaseTest, GetStationNameYomi) {
                            ares::FIND_PREFIX, "はっさむ");
 }
 
-TEST_F(CDatabaseTest, GetStationNameDenryaku) {
+TEST_F(CDatabaseTest, GetStationNameDenryakuExact) {
   u8vec_t mifu_exact = {
     "南下徳富",
     "南福島",
@@ -128,6 +128,20 @@ TEST_F(CDatabaseTest, GetStationNameDenryaku) {
   };
   checkGetStationName_denryaku(std::move(mifu_exact),
                                ares::FIND_EXACT, "ミフ");
+}
+
+TEST_F(CDatabaseTest, GetStationNameDenryakuPartial) {
+  u8vec_t ou_partial = {
+    "大中山",
+    "大志田",
+    "常陸太田",
+    "大口",
+    "相可",
+    "王子保",
+    "大内",
+  };
+  checkGetStationName_denryaku(std::move(ou_partial),
+                               ares::FIND_PARTIAL, "オウ");
 }
 
 TEST_F(CDatabaseTest, LineConnection) {
