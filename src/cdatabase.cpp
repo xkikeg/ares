@@ -6,6 +6,7 @@
 
 #include "util.hpp"
 #include "sqlite3_wrapper.h"
+#include "aresutil.h"
 #include "cdatabase.h"
 #include "csegment.h"
 #include "ckilo.h"
@@ -267,12 +268,11 @@ namespace ares
   {
     // SELECT id FROM station WHERE denryaku LIKE 'name%' OR denryaku LIKE '__name%';
     std::string name_(name);
+    const size_t query_length = ares::u8strlen(name_);
     name_ = add_percent(std::move(name_), mode);
     const char sql[] = "SELECT stationid FROM station WHERE stationdenryaku LIKE ?;";
     SQLiteStmt stmt(*db, sql, std::strlen(sql));
-    std::wstring wname_;
-    liquid::multi2wide(name_, wname_);
-    if(wname_.length() <= 2)
+    if(query_length <= 2)
     {
       std::string name_onlystation("__");
       name_onlystation += name_;
