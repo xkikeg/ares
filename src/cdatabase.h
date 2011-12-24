@@ -108,6 +108,13 @@ namespace ares
     std::string get_station_denryaku(station_id_t station) const;
 
     /**
+     * すべての路線名を返す.
+     * @param[out] 路線IDとUTF-8エンコードされた駅名.
+     */
+    void get_all_lines_name(std::vector<std::pair<
+                              line_id_t, std::string> > &result) const;
+
+    /**
      * Find lines' id from line name.
      * @param[in]  name Specify string to find.
      * @param[in]  mode Specify searching mode.

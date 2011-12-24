@@ -136,6 +136,14 @@ namespace ares
     return std::string(denryaku);
   }
 
+  void CDatabase::get_all_lines_name(std::vector<std::pair<
+                                       line_id_t, std::string> > & result) const
+  {
+    const char sql[] = "SELECT lineid, linename FROM line ORDER BY lineyomi";
+    SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.fill_column(result, 0, 1);
+  }
+
   void CDatabase::find_lineid(const char * name,
                               const find_mode mode,
                               line_vector & list) const
