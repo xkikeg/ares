@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sstream>
 #include <ostream>
 #include <stdexcept>
 #include <boost/optional.hpp>
@@ -107,6 +108,19 @@ namespace ares
 
     //! same as get_kilo() member.
     operator int() const { return $.get_kilo(); }
+
+    friend std::ostream & operator<<(std::ostream & ost,
+                                     const CHecto & hecto) {
+      ost << hecto.hecto / 10 << "." << hecto.hecto % 10;
+      return ost;
+    }
+
+    std::string to_str() const
+    {
+      std::stringstream ss;
+      ss << $;
+      return ss.str();
+    }
   };
 
   /**
