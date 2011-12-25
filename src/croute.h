@@ -22,12 +22,13 @@ namespace ares
   class CRoute
   {
   private:
+    typedef std::vector<CSegment> WayContainer;
     std::shared_ptr<CDatabase> db;
-    std::vector<CSegment> way;
+    WayContainer way;
 
   public:
-    typedef std::vector<CSegment>::iterator iterator;
-    typedef std::vector<CSegment>::const_iterator const_iterator;
+    typedef WayContainer::iterator iterator;
+    typedef WayContainer::const_iterator const_iterator;
 
     /**
      * Constructor.
@@ -115,6 +116,12 @@ namespace ares
      * Function to validate route.
      */
     bool is_valid() const;
+
+    /**
+     * 経路を正規化する.
+     * 経路がvalidであることを前提としている.
+     */
+    void canonicalize();
 
     //! Return kilo sumulation of the route.
     CKilo get_kilo() const;

@@ -66,12 +66,12 @@ TEST_F(CKiloTest, Dump) {
     "四国　: 幹線: 0.0 地方交通線: 0.0 \n";
   std::stringstream ss;
   ss << kilo;
-  EXPECT_EQ(result1, ss.str());
+  EXPECT_EQ(result1, ss.str()) << result1 << "====\n" << ss.str();
   ss.str("");
   kilo.set(ares::COMPANY_HONSHU, true, 0, 100);
   kilo.set(ares::COMPANY_HOKKAIDO, false, 0, 200);
   kilo.set(ares::COMPANY_KYUSHU, true, 0, 321);
   kilo.set(ares::COMPANY_KYUSHU, false, 0, 555);
   ss << kilo;
-  EXPECT_EQ(result2, ss.str());
+  EXPECT_EQ(result2, ss.str()) << result2 << "====\n" << ss.str();
 }

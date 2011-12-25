@@ -2,6 +2,7 @@
 #include "util.hpp"
 #include "croute.h"
 #include "cdatabase.h"
+#include "cfare.h"
 
 namespace ares
 {
@@ -21,16 +22,16 @@ namespace ares
              class LocalLineLookupFunction>
     int calc_fare_as_honshu(const CDatabase & db,
                             const CKilo & kilo,
-                            const boost::optional<COMPANY_TYPE> comp_type,
+                            const boost::optional<JR_COMPANY_TYPE> comp_type,
                             MainLineLookupFunction func_main,
                             LocalLineLookupFunction func_local)
     {
       const CHecto hecto_main  =
-        comp_type ? kilo.get(*comp_type, true ) : kilo.get_all(true);
+        comp_type ? kilo.get(*comp_type, true ) : kilo.get_all_JR(true);
       const CHecto hecto_local =
-        comp_type ? kilo.get(*comp_type, false) : kilo.get_all(false);
+        comp_type ? kilo.get(*comp_type, false) : kilo.get_all_JR(false);
       const CHecto hecto_local_fake = comp_type
-        ? kilo.get(*comp_type, false, false) : kilo.get_all(false, false);
+        ? kilo.get(*comp_type, false, false) : kilo.get_all_JR(false, false);
       // Main only
       if(hecto_local == 0)
       {
@@ -144,6 +145,33 @@ namespace ares
     return true;
   }
 
+  void CRoute::canonicalize()
+  {
+    WayContainer tmp;
+    for(auto curr=$.begin(); curr != $.end(); ++curr)
+    {
+      auto prev=tmp.rbegin();
+      // connecting prev & curr
+      if(!tmp.empty()
+         && prev->line == curr->line
+         && prev->end == curr->begin)
+      {
+        const auto range1 = $.db->get_range(prev->line,
+                                            prev->begin, prev->end);
+        const auto range2 = $.db->get_range(curr->line,
+                                            curr->begin, curr->end);
+        if((range1.first < range1.second && range2.first < range2.second) ||
+           (range1.first > range1.second && range2.first > range2.second))
+        {
+          prev->end = curr->end;
+          continue;
+        }
+      }
+      tmp.push_back(*curr);
+    }
+    $.way = std::move(tmp);
+  }
+
   class CKilo CRoute::get_kilo() const
   {
     CKilo kilo;
@@ -153,6 +181,22 @@ namespace ares
       bool is_main;
       DENSHA_SPECIAL_TYPE denshaid, circleid;
       result.clear();
+      boost::optional<std::pair<bool, int> > special
+        = $.db->get_special_fare(itr->line, itr->begin, itr->end);
+      if(special)
+      {
+        // is_add
+        if(special->first)
+        {
+          kilo.add_additional_fare_JR(special->second);
+        }
+        // ! is_add
+        else
+        {
+          kilo.add_fare_private(special->second);
+        }
+        continue;
+      }
       bool ret = $.db->get_company_and_kilo(itr->line,
                                             itr->begin,
                                             itr->end,
@@ -179,15 +223,23 @@ namespace ares
     using namespace std::placeholders;
     // Error checking, returning -1 is not good, boost::optional is better.
     if(!$.is_valid()) { return -1; }
+    // Canonicalize route.
+    $.canonicalize();
     // Rewrite Route: shinkansen / route-variant
     // Get Kilo: Additional fare should included in CKilo
-    const CKilo kilo($.get_kilo());
+    const CKilo kilo = $.get_kilo();
+    CFare fare(kilo);
+    if(!kilo.is_zero(COMPANY_KTR))
+    {
+      fare.other += $.db->get_fare_table("Z", COMPANY_KTR,
+                                         kilo.get(COMPANY_KTR, true));
+    }
     // 0キロ
-    if(kilo.is_all_zero()) { return 0; }
+    if(kilo.is_all_JR_zero()) { return fare; }
     // Get only company.
-    boost::optional<COMPANY_TYPE> only = kilo.get_only();
+    boost::optional<JR_COMPANY_TYPE> only = kilo.get_only_JR();
     // JR四国 or JR九州
-    if(only && (*only == COMPANY_KYUSHU || *only == COMPANY_SHIKOKU))
+    if(only && (*only == JR_COMPANY_KYUSHU || *only == JR_COMPANY_SHIKOKU))
     {
       const CHecto hecto_main  = kilo.get(*only, true );
       const CHecto hecto_local = kilo.get(*only, false);
@@ -195,15 +247,21 @@ namespace ares
       // only 幹線
       if(hecto_local == 0)
       {
-        return $.db->get_fare_table("C1", *only, hecto_main);
+        fare.JR += $.db->get_fare_table("C1", *only, hecto_main);
+        return fare;
       }
       // only 地方交通線
       else if(hecto_main == 0)
       {
         boost::optional<int> special_fare =
           $.db->get_fare_country_table("C2", *only, hecto_local, hecto_lfake);
-        if(special_fare) { return *special_fare; }
-        return $.db->get_fare_table("C1", *only, hecto_lfake);
+        if(special_fare)
+        {
+          fare.JR += *special_fare;
+          return fare;
+        }
+        fare.JR += $.db->get_fare_table("C1", *only, hecto_lfake);
+        return fare;
       }
       else
       {
@@ -211,19 +269,25 @@ namespace ares
           $.db->get_fare_country_table("C3", *only,
                                        hecto_main + hecto_local,
                                        hecto_main + hecto_lfake);
-        if(special_fare) { return *special_fare; }
-        return $.db->get_fare_table("C1", *only, hecto_main + hecto_lfake);
+        if(special_fare)
+        {
+          fare.JR += *special_fare;
+          return fare;
+        }
+        fare.JR += $.db->get_fare_table("C1", *only, hecto_main + hecto_lfake);
+        return fare;
       }
     }
     // JR北海道
-    else if(only && (*only == COMPANY_HOKKAIDO))
+    else if(only && (*only == JR_COMPANY_HOKKAIDO))
     {
-      return calc_fare_as_honshu(*db, kilo,
-                                 COMPANY_HOKKAIDO,
-                                 std::bind(&CDatabase::get_fare_table,
-                                           $.db, "C1", COMPANY_HOKKAIDO, _1),
-                                 std::bind(&CDatabase::get_fare_table,
-                                           $.db, "B1", COMPANY_HOKKAIDO, _1));
+      fare.JR += calc_fare_as_honshu(*db, kilo,
+                                     JR_COMPANY_HOKKAIDO,
+                                     std::bind(&CDatabase::get_fare_table,
+                                               $.db, "C1", COMPANY_HOKKAIDO, _1),
+                                     std::bind(&CDatabase::get_fare_table,
+                                               $.db, "B1", COMPANY_HOKKAIDO, _1));
+      return fare;
     }
     // 本州含み
     else
@@ -235,18 +299,19 @@ namespace ares
                             std::bind(&CDatabase::get_fare_table,
                                       $.db, "B1", COMPANY_HONSHU, _1));
       int add_fare = 0;
-      for(size_t i=COMPANY_HOKKAIDO; i < MAX_COMPANY_TYPE; ++i)
+      for(size_t i=JR_COMPANY_HOKKAIDO; i < MAX_JR_COMPANY_TYPE; ++i)
       {
         if(!kilo.is_zero(i))
           add_fare +=
             calc_fare_as_honshu(*db, kilo,
-                                COMPANY_TYPE(i),
+                                JR_COMPANY_TYPE(i),
                                 std::bind(&CDatabase::get_fare_table,
                                           $.db, "A2", i, _1),
                                 std::bind(&CDatabase::get_fare_table,
                                           $.db, "B2", i, _1));
       }
-      return base_fare + add_fare;
+      fare.JR += base_fare + add_fare;
+      return fare;
     }
   }
 

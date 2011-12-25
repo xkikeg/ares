@@ -15,13 +15,27 @@ namespace ares
 
   /**
    * @~
-   * 運賃体系上の会社の列挙体.
+   * 運賃体系上のJR会社の列挙体.
+   */
+  enum JR_COMPANY_TYPE {
+    JR_COMPANY_HONSHU,
+    JR_COMPANY_HOKKAIDO,
+    JR_COMPANY_KYUSHU,
+    JR_COMPANY_SHIKOKU,
+    MAX_JR_COMPANY_TYPE,
+  };
+
+  /**
+   * @~
+   * 運賃体系上の社線会社の列挙体.
    */
   enum COMPANY_TYPE {
-    COMPANY_HONSHU,
-    COMPANY_HOKKAIDO,
-    COMPANY_KYUSHU,
-    COMPANY_SHIKOKU,
+    COMPANY_HONSHU   = JR_COMPANY_HONSHU,
+    COMPANY_HOKKAIDO = JR_COMPANY_HOKKAIDO,
+    COMPANY_KYUSHU   = JR_COMPANY_KYUSHU,
+    COMPANY_SHIKOKU  = JR_COMPANY_SHIKOKU,
+    COMPANY_KTR,
+    COMPANY_OTHER,
     MAX_COMPANY_TYPE,
   };
 

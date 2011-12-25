@@ -21,7 +21,7 @@ namespace ares
       return (is_real) ? KILO_REAL : KILO_FAKE;
     }
 
-    const char * COMPANY_TYPE_LABEL[ares::MAX_COMPANY_TYPE] =
+    const char * JR_COMPANY_TYPE_LABEL[MAX_JR_COMPANY_TYPE] =
     {
       "本州　",
       "北海道",
@@ -29,7 +29,7 @@ namespace ares
       "四国　",
     };
 
-    const char * LINE_TYPE_LABEL[MAX_COMPANY_TYPE] =
+    const char * LINE_TYPE_LABEL[MAX_LINE_TYPE] =
     {
       "地方交通線",
       "幹線",
@@ -133,9 +133,9 @@ namespace ares
   class CKilo
   {
   private:
-
     int kilo[MAX_COMPANY_TYPE][MAX_LINE_TYPE][MAX_KILO_TYPE];
     boost::optional<DENSHA_SPECIAL_TYPE> denshaid, circleid;
+    int fare_private, additional_fare_JR;
 
     void check_boundary(size_t i) const {
       if(i >= MAX_COMPANY_TYPE)
@@ -151,7 +151,7 @@ namespace ares
     }
 
   public:
-    CKilo() : kilo({{{0}}}) {}
+    CKilo() : kilo({{{0}}}), fare_private(0), additional_fare_JR(0) {}
 
     /**
      * @~
@@ -195,14 +195,14 @@ namespace ares
 
     /**
      * @~
-     * ＪＲ区間すべての営業キロの10倍を取得する関数.
+     * JR区間すべての営業キロの10倍を取得する関数.
      * @param[in] is_main trueなら幹線, falseなら地方交通線
      * @param[in] is_real trueなら実キロ, falseなら擬制キロ
      * @return            営業キロ
      */
-    class CHecto get_all(bool is_main, bool is_real=true) const {
+    class CHecto get_all_JR(bool is_main, bool is_real=true) const {
       CHecto hecto;
-      for(size_t i=0; i<MAX_COMPANY_TYPE; ++i)
+      for(size_t i=0; i<MAX_JR_COMPANY_TYPE; ++i)
       {
         hecto += $.get(i, is_main, is_real);
       }
@@ -234,8 +234,8 @@ namespace ares
       return (kilo[i][0][0] == 0 && kilo[i][1][0] == 0);
     }
 
-    bool is_all_zero() const {
-      for(size_t i=0; i<MAX_COMPANY_TYPE; ++i)
+    bool is_all_JR_zero() const {
+      for(size_t i=0; i<MAX_JR_COMPANY_TYPE; ++i)
       {
         if(!is_zero(i)) { return false; }
       }
@@ -244,15 +244,15 @@ namespace ares
 
     /**
      * @~
-     * 指定された会社にだけ営業キロが設定されているかを調べる.
+     * 指定されたJR会社にだけ営業キロが設定されているかを調べる.
      * @note 指定された会社自体の営業キロが0でもtrueが返る.
      * @param[in] idx 会社を指定するindex
      * @retval true   指定された会社以外の営業キロが0.
      * @retval false  指定された会社以外の営業キロが非ゼロ.
      */
-    bool is_only(size_t idx) const {
+    bool is_only_JR(size_t idx) const {
       check_boundary(idx);
-      for(size_t i=0; i<MAX_COMPANY_TYPE; ++i)
+      for(size_t i=0; i<MAX_JR_COMPANY_TYPE; ++i)
       {
         if(i != idx && !is_zero(i)) { return false; }
       }
@@ -260,13 +260,13 @@ namespace ares
     }
 
     /**
-     * 全会社の中で唯一値のある会社IDを返す.
+     * JRの中で唯一値のある会社IDを返す.
      * @retval 会社ID その会社IDのみ営業キロが非ゼロ.
      * @retval 無効値 すべての会社のキロがゼロ, もしくは複数会社で非ゼロ.
      */
-    boost::optional<COMPANY_TYPE> get_only() const {
-      boost::optional<COMPANY_TYPE> ret;
-      for(size_t i=0; i < MAX_COMPANY_TYPE; ++i)
+    boost::optional<JR_COMPANY_TYPE> get_only_JR() const {
+      boost::optional<JR_COMPANY_TYPE> ret;
+      for(size_t i=0; i < MAX_JR_COMPANY_TYPE; ++i)
       {
         // i-th company exists.
         if(!is_zero(i))
@@ -274,7 +274,7 @@ namespace ares
           // already exists non-zero company.
           if(ret) { return boost::none; }
           // first non-zero company.
-          else { ret = COMPANY_TYPE(i); }
+          else { ret = JR_COMPANY_TYPE(i); }
         }
       }
       return ret;
@@ -326,14 +326,38 @@ namespace ares
       return $.circleid ? *$.circleid : DENSHA_SPECIAL_NONE;
     }
 
+    //! JRの加算運賃を加える.
+    void add_additional_fare_JR(int fare)
+    {
+      $.additional_fare_JR += fare;
+    }
+
+    //! JRの加算運賃を得る.
+    int get_additional_fare_JR() const
+    {
+      return $.additional_fare_JR;
+    }
+
+    //! 社線運賃を加える.
+    void add_fare_private(int fare)
+    {
+      $.fare_private += fare;
+    }
+
+    //! 社線運賃を得る.
+    int get_fare_private() const
+    {
+      return $.fare_private;
+    }
+
     /**
      * @~
      * ストリームへの出力関数.
      */
     friend std::ostream & operator<<(std::ostream & ost, const CKilo & kilo) {
-      for(int i=0; i != MAX_COMPANY_TYPE; ++i)
+      for(int i=0; i != MAX_JR_COMPANY_TYPE; ++i)
       {
-        ost << COMPANY_TYPE_LABEL[i] << ": ";
+        ost << JR_COMPANY_TYPE_LABEL[i] << ": ";
         for(int j=MAX_LINE_TYPE; j; )
         {
           --j;

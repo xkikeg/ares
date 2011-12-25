@@ -376,6 +376,25 @@ namespace ares
     return -1;
   }
 
+  boost::optional<
+    std::pair<bool,int> > CDatabase::get_special_fare(line_id_t line,
+                                                      station_id_t begin,
+                                                      station_id_t end) const
+  {
+    const char sql[] =
+      "SELECT is_add, fare FROM fare_special"
+      " WHERE lineid=?1 "
+      "  AND (beginstation=?2 AND endstation=?3 OR"
+      "       beginstation=?3 AND endstation=?2)";
+    SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, line);
+    stmt.bind(2, begin);
+    stmt.bind(3, end);
+    SQLiteStmt::iterator result = stmt.execute();
+    if(!result) return boost::none;
+    return std::pair<bool, int>(static_cast<int>(result[0]), result[1]);
+  }
+
   std::pair<int, int> CDatabase::get_range(const line_id_t line,
                                            const station_id_t begin,
                                            const station_id_t end) const

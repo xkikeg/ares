@@ -16,14 +16,15 @@ DEBUG_ALLROWS = False
 #DEBUG_ALLROWS = True
 TARGETS = (
     "company",
-    "fare",
-    "fare_country",
     "densha",
     "urban",
     "station",
     "line",
     "city",
-    "kilo"
+    "kilo",
+    "fare",
+    "fare_country",
+    "fare_special",
     )
 
 class CSVParseException(Exception):

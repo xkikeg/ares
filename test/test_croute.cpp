@@ -452,12 +452,10 @@ TEST_F(CRouteTest, FareShikokuMainShimanto)
   route.append_route(UTF8("土讃"), UTF8("窪川"));
   EXPECT_FARE_EQ(4030, route);
   // 社線のテスト
-  // route.append_route(UTF8("土佐くろしお"), UTF8("土佐佐賀"));
-  // EXPECT_FARE_EQ(4870, route);
-  // route.append_route(UTF8("土佐くろしお"), UTF8("中村"));
-  // EXPECT_FARE_EQ(5090, route);
-  // route.append_route(UTF8("土佐くろしお"), UTF8("宿毛"));
-  // EXPECT_FARE_EQ(5580, route);
+  route.append_route(UTF8("土佐くろしお"), UTF8("中村"));
+  EXPECT_FARE_EQ(5090, route);
+  route.append_route(UTF8("土佐くろしお"), UTF8("宿毛"));
+  EXPECT_FARE_EQ(5580, route);
 }
 
 class CRouteHonshibisanTest : public CRouteTest
@@ -497,4 +495,49 @@ TEST_F(CRouteHonshibisanTest, FareShikokuAndHonshuShiokaze)
   // 214.4km
   route.append_route(UTF8("予讃"), UTF8("松山"));
   EXPECT_FARE_EQ(3810, route);
+}
+
+TEST_F(CRouteTest, FareShasenHokutosei)
+{
+  route.append_route(UTF8("東北"), UTF8("上野"), UTF8("盛岡"));
+  EXPECT_FARE_EQ(8190, route);
+  route.append_route(UTF8("いわて銀河"), UTF8("目時"));
+  EXPECT_FARE_EQ(10490, route);
+  route.append_route(UTF8("青い森鉄道"), UTF8("青森"));
+  EXPECT_FARE_EQ(13520, route);
+}
+
+class CRouteOminatoTest : public CRouteTest
+{
+protected:
+  CRouteOminatoTest() : CRouteTest()
+  {
+    route.append_route(UTF8("大湊"), UTF8("大湊"), UTF8("野辺地"));
+  }
+};
+
+TEST_F(CRouteOminatoTest, FareShasenShimokitaAomori)
+{
+  route.append_route(UTF8("青い森鉄道"), UTF8("青森"));
+  EXPECT_FARE_EQ(2120, route);
+}
+
+TEST_F(CRouteOminatoTest, FareShasenShimokitaHachinohe)
+{
+  route.append_route(UTF8("青い森鉄道"), UTF8("八戸"));
+  EXPECT_FARE_EQ(2410, route);
+  route.append_route(UTF8("青い森鉄道"), UTF8("目時"));
+  EXPECT_FARE_EQ(2860, route);
+}
+
+TEST_F(CRouteTest, FareShasenKTRHashidate)
+{
+  route.append_route(UTF8("山陰"), UTF8("京都"), UTF8("福知山"));
+  EXPECT_FARE_EQ(1450, route);
+  route.append_route(UTF8("宮福(KTR)"), UTF8("宮津"));
+  EXPECT_FARE_EQ(2130, route);
+  route.append_route(UTF8("宮津(KTR)"), UTF8("天橋立"));
+  EXPECT_FARE_EQ(2200, route);
+  route.append_route(UTF8("宮津(KTR)"), UTF8("豊岡"));
+  EXPECT_FARE_EQ(3200, route);
 }

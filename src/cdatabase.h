@@ -199,6 +199,12 @@ namespace ares
                                                 int realkilo,
                                                 int fakekilo) const;
 
+    //! 加算運賃や社線運賃の表を引く
+    boost::optional<
+      std::pair<bool,int> > get_special_fare(line_id_t line,
+                                             station_id_t begin,
+                                             station_id_t end) const;
+
     /**
      * @~
      * 電車特定区間を調べる.
