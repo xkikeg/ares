@@ -154,7 +154,7 @@ def mktable_from_csv(db, tablename, filename = None):
             db.execute(sql, row)
         except:
             print >>sys.stderr, "== Error occurred =="
-            print >>sys.stderr, " @ ".join([str(i) for i in row])
+            print >>sys.stderr, " @ ".join([unicode(i) for i in row])
             raise
 
 
