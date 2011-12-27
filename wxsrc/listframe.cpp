@@ -76,8 +76,8 @@ namespace
     100,
     120,
     80,
-    60,
-    60,
+    65,
+    65,
   };
 }
 
@@ -93,7 +93,7 @@ AresStationListView::AresStationListView(wxWindow * parent,
   for(int i=0; i<MAX_ARES_STATION_LIST_COLUMN_TYPE; ++i)
   {
     this->InsertColumn(i,
-                       ARES_STATION_LIST_COLUMN_STR[i],
+                       wxGetTranslation(ARES_STATION_LIST_COLUMN_STR[i]),
                        ARES_STATION_LIST_COLUMN_FORMAT[i],
                        ARES_STATION_LIST_COLUMN_WIDTH[i]);
   }

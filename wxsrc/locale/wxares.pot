@@ -1,0 +1,54 @@
+msgid "&About...\tF1"
+msgstr ""
+
+msgid "&File"
+msgstr ""
+
+msgid "&Help"
+msgstr ""
+
+msgid "&Search"
+msgstr ""
+
+msgid "Choose line"
+msgstr ""
+
+#, c-format, boost-format
+msgid "Choose the line of %s"
+msgstr ""
+
+msgid "E&xit\tCtrl-Q"
+msgstr ""
+
+msgid "Search &Line\t?"
+msgstr ""
+
+msgid "Search &Station\t/"
+msgstr ""
+
+msgid "Search lines"
+msgstr ""
+
+msgid "Search stations"
+msgstr ""
+
+msgid "denryaku"
+msgstr ""
+
+msgid "fakekilo"
+msgstr ""
+
+msgid "realkilo"
+msgstr ""
+
+msgid "station"
+msgstr ""
+
+msgid "wxAres"
+msgstr ""
+
+msgid "wxAres for JR fare calculate"
+msgstr ""
+
+msgid "yomi"
+msgstr ""

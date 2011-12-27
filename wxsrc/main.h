@@ -1,4 +1,5 @@
 #include <wx/app.h>
+#include <wx/intl.h>
 #include <memory>
 
 namespace ares
@@ -15,6 +16,9 @@ public:
   virtual bool OnInit();
 
   std::shared_ptr<ares::CDatabase> getdb() const;
+
+protected:
+  wxLocale m_locale;
 
 private:
   std::shared_ptr<ares::CDatabase> m_aresdb;

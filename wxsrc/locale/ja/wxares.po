@@ -1,0 +1,97 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wxAres\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-01-03 21:44+0900\n"
+"PO-Revision-Date: 2012-01-03 21:53+0900\n"
+"Last-Translator: K. Ikegami <liquid@logos.ic.i.u-tokyo.ac.jp>\n"
+"Language-Team: liquid_amber\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Japanese\n"
+"X-Poedit-Country: JAPAN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: _\n"
+
+#: listframe.cpp:58
+msgid "station"
+msgstr "駅名"
+
+#: listframe.cpp:59
+msgid "yomi"
+msgstr "読み"
+
+#: listframe.cpp:60
+msgid "denryaku"
+msgstr "電略"
+
+#: listframe.cpp:61
+msgid "realkilo"
+msgstr "営業キロ"
+
+#: listframe.cpp:62
+msgid "fakekilo"
+msgstr "運賃キロ"
+
+#: listframe.cpp:253
+msgid "Search stations"
+msgstr "駅名検索"
+
+#: listframe.cpp:281
+#, c-format
+msgid "Choose the line of %s"
+msgstr ""
+
+#: listframe.cpp:283
+msgid "Choose line"
+msgstr ""
+
+#: listframe.cpp:310
+msgid "Search lines"
+msgstr ""
+
+#: listframe.cpp:339
+msgid "E&xit\tCtrl-Q"
+msgstr ""
+
+#: listframe.cpp:342
+msgid "Search &Station\t/"
+msgstr "駅検索(&S)\t/"
+
+#: listframe.cpp:343
+msgid "Search &Line\t?"
+msgstr "路線検索(&L)\t?"
+
+#: listframe.cpp:346
+msgid "&About...\tF1"
+msgstr ""
+
+#: listframe.cpp:349
+msgid "&File"
+msgstr ""
+
+#: listframe.cpp:350
+msgid "&Search"
+msgstr "検索 (&S)"
+
+#: listframe.cpp:351
+msgid "&Help"
+msgstr ""
+
+#: listframe.cpp:383
+msgid "wxAres for JR fare calculate"
+msgstr "JR運賃計算プログラムwxAres"
+
+#: main.cpp:14
+msgid "wxAres"
+msgstr ""
+
+#~ msgid "About wxAres"
+#~ msgstr "wxAresについて"

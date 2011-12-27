@@ -14,4 +14,11 @@ GENERATED = $(CGeneratedFiles $(PATH_HEADER))
 
 CXXFILES[] = $(removesuffix $(ls *.cpp))
 
+ALLSOURCES = $(glob *.h *.cpp)
+
 .DEFAULT: $(CXXProgram $(TARGET), $(CXXFILES))
+
+.SUBDIRS: locale
+	.DEFAULT: wxares.pot
+	wxares.pot: $(ALLSOURCES)
+		xgettext -o $@ --c++ --boost --keyword='_' --from-code=UTF-8 --sort-output --omit-header --no-location $(ALLSOURCES)
