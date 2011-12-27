@@ -12,10 +12,12 @@ namespace sqlite3_wrapper
   /**
    * SQLite全般の例外
    */
-  class SQLiteException : std::runtime_error
+  class SQLiteException : public std::runtime_error
   {
   public:
+    explicit
     SQLiteException(const std::string & str) : std::runtime_error(str) {}
+    virtual ~SQLiteException() throw() {}
   };
 
   /**
@@ -26,10 +28,12 @@ namespace sqlite3_wrapper
    * @~japanese
    * IOエラー例外.
    */
-  class IOException : SQLiteException
+  class IOException : public SQLiteException
   {
   public:
+    explicit
     IOException(const std::string & str) : SQLiteException(str) {}
+    virtual ~IOException() throw() {}
   };
 
   /**
