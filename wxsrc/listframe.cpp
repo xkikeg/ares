@@ -6,6 +6,7 @@
 #include <wx/msgdlg.h>
 #include <vector>
 #include <utility>
+#include <exception>
 #include "util.hpp"
 #include "cstation.h"
 #include "cdatabase.h"
@@ -193,7 +194,20 @@ void AresListFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void AresListFrame::OnLineListbox(wxCommandEvent& event)
 {
-  $.setLineId(m_lineList->get_lineid(event.GetInt()));
+  try
+  {
+    $.setLineId(m_lineList->get_lineid(event.GetInt()));
+  }
+  catch(const std::exception & e)
+  {
+    std::cerr << "Some Exception:" << e.what() << std::endl;
+    throw;
+  }
+  catch(...)
+  {
+    std::cerr << "Unknown Exception Throwed\n";
+    throw;
+  }
 }
 
 void AresListFrame::setLineId(ares::line_id_t lineid)
