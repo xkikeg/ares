@@ -162,7 +162,7 @@ namespace ares
       result.push_back(CStation(itr[0],
                                 std::string(itr[1]),
                                 std::string(itr[2]),
-                                std::string(itr[3]),
+                                std::string(itr[3].is_null() ? "" : itr[3]),
                                 itr[4],
                                 static_cast<int>(itr[5]) ? itr[4]
                                 : CKilo::real2fake(itr[4])));
