@@ -135,7 +135,6 @@ namespace ares
   private:
     int kilo[MAX_COMPANY_TYPE][MAX_LINE_TYPE][MAX_KILO_TYPE];
     boost::optional<DENSHA_SPECIAL_TYPE> denshaid, circleid;
-    int fare_private, additional_fare_JR;
 
     void check_boundary(size_t i) const {
       if(i >= MAX_COMPANY_TYPE)
@@ -151,7 +150,7 @@ namespace ares
     }
 
   public:
-    CKilo() : kilo({{{0}}}), fare_private(0), additional_fare_JR(0) {}
+    CKilo() : kilo({{{0}}}) {}
 
     /**
      * @~
@@ -326,30 +325,6 @@ namespace ares
       return $.circleid ? *$.circleid : DENSHA_SPECIAL_NONE;
     }
 
-    //! JRの加算運賃を加える.
-    void add_additional_fare_JR(int fare)
-    {
-      $.additional_fare_JR += fare;
-    }
-
-    //! JRの加算運賃を得る.
-    int get_additional_fare_JR() const
-    {
-      return $.additional_fare_JR;
-    }
-
-    //! 社線運賃を加える.
-    void add_fare_private(int fare)
-    {
-      $.fare_private += fare;
-    }
-
-    //! 社線運賃を得る.
-    int get_fare_private() const
-    {
-      return $.fare_private;
-    }
-
     /**
      * @~
      * ストリームへの出力関数.
@@ -368,9 +343,9 @@ namespace ares
         ost << '\n';
       }
       if(kilo.circleid && *(kilo.circleid) != DENSHA_SPECIAL_NONE)
-      { ost << DENSHA_TYPE_LABEL[*(kilo.circleid)] << '\n'; }
+      { ost << DENSHA_TYPE_LABEL[kilo.get_circleid()] << '\n'; }
       else if(kilo.denshaid && *(kilo.denshaid) != DENSHA_SPECIAL_NONE)
-      { ost << DENSHA_TYPE_LABEL[*(kilo.denshaid)] << '\n'; }
+      { ost << DENSHA_TYPE_LABEL[kilo.get_denshaid()] << '\n'; }
       return ost;
     }
   };

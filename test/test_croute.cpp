@@ -12,7 +12,7 @@
 #define EXPECT_FARE_EQ(expected, route)                   \
   ASSERT_TRUE(route.is_valid());                          \
   EXPECT_EQ(expected, route.calc_fare_inplace()) << route \
-  << "\n" << route.get_kilo()
+  << "\n" << route.accum().kilo
 
 class CRouteTest : public ::testing::Test
 {

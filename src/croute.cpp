@@ -172,9 +172,10 @@ namespace ares
     $.way = std::move(tmp);
   }
 
-  class CKilo CRoute::get_kilo() const
+  class CFare CRoute::accum() const
   {
-    CKilo kilo;
+    CFare fare;
+    CKilo & kilo = fare.kilo;
     std::vector<CKiloValue> result;
     for(auto itr=$.begin(); itr != $.end(); ++itr)
     {
@@ -186,15 +187,9 @@ namespace ares
       if(special)
       {
         // is_add
-        if(special->first)
-        {
-          kilo.add_additional_fare_JR(special->second);
-        }
+        if(special->first) { fare.JR += special->second; }
         // ! is_add
-        else
-        {
-          kilo.add_fare_private(special->second);
-        }
+        else { fare.other += special->second; }
         continue;
       }
       bool ret = $.db->get_company_and_kilo(itr->line,
@@ -204,14 +199,14 @@ namespace ares
                                             is_main,
                                             denshaid,
                                             circleid);
-      if(!ret) { return CKilo(); }
+      if(!ret) { return CFare(); }
       kilo.update_denshaid(denshaid, circleid);
       for(auto j=result.begin(); j != result.end(); ++j)
       {
         kilo.add(j->company, is_main, j->begin, j->end);
       }
     }
-    return std::move(kilo);
+    return fare;
   }
 
   /*
@@ -227,8 +222,8 @@ namespace ares
     $.canonicalize();
     // Rewrite Route: shinkansen / route-variant
     // Get Kilo: Additional fare should included in CKilo
-    const CKilo kilo = $.get_kilo();
-    CFare fare(kilo);
+    CFare fare = $.accum();
+    const CKilo & kilo = fare.kilo;
     if(!kilo.is_zero(COMPANY_KTR))
     {
       fare.other += $.db->get_fare_table("Z", COMPANY_KTR,

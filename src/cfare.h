@@ -19,12 +19,10 @@ namespace ares
    */
   struct CFare
   {
-    const CKilo & kilo;
+    CKilo kilo;
     int JR, other;
 
-    explicit CFare(const CKilo & kilo) : kilo(kilo),
-                                         JR(kilo.get_additional_fare_JR()),
-                                         other(kilo.get_fare_private()) {}
+    CFare() : JR(0), other(0) {}
 
     int get_fare(FARE_MODE = FARE_ADULT) const
     {

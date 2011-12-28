@@ -3,7 +3,7 @@
 #include <memory>
 #include "ares.h"
 #include "csegment.h"
-#include "ckilo.h"
+#include "cfare.h"
 
 namespace ares
 {
@@ -123,8 +123,8 @@ namespace ares
      */
     void canonicalize();
 
-    //! Return kilo sumulation of the route.
-    CKilo get_kilo() const;
+    //! 営業キロの集計と加算運賃・社線運賃の計算を行う.
+    CFare accum() const;
 
     /**
      * Function to calc fare of route.
