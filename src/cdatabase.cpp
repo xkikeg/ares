@@ -169,6 +169,21 @@ namespace ares
     }
   }
 
+  void CDatabase::get_lines_of_station(station_id_t station,
+                                       line_vector & result) const
+  {
+    const char sql[] =
+      "SELECT lineid"
+      " FROM jointkilo"
+      " WHERE stationid = ?";
+    SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, station);
+    for(SQLiteStmt::iterator itr=stmt.execute(); itr; ++itr)
+    {
+      result.push_back(itr[0]);
+    }
+  }
+
   void CDatabase::find_lineid(const char * name,
                               const find_mode mode,
                               line_vector & list) const

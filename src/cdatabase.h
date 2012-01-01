@@ -124,6 +124,14 @@ namespace ares
                               std::vector<CStation> &result) const;
 
     /**
+     * 指定された駅の所属する路線の集合を返す.
+     * @param[in]  station 結果を得たい駅ID.
+     * @param[out] result  結果を格納する配列.
+     */
+    void get_lines_of_station(station_id_t station,
+                              line_vector & result) const;
+
+    /**
      * Find lines' id from line name.
      * @param[in]  name Specify string to find.
      * @param[in]  mode Specify searching mode.
