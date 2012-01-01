@@ -181,9 +181,9 @@ namespace ares
     station_id_t get_stationid(const char * name,
                                const find_mode mode = FIND_EXACT) const;
 
-    //! Find lines' id connecting with.
-    void find_connect_line(line_id_t line,
-                           connect_vector & list) const;
+    //! Get lines' id connecting with.
+    void get_connect_line(line_id_t line,
+                          connect_vector & list) const;
 
     //! Get company id from company name.
     company_id_t get_company_id(const char * name) const;

@@ -31,7 +31,7 @@ void testdb(std::shared_ptr<ares::CDatabase> db)
   ares::connect_vector rresult;
   std::cout << "connect:鹿児島1\n";
   ares::line_id_t l = db->get_lineid("鹿児島1");
-  db->find_connect_line(l, rresult);
+  db->get_connect_line(l, rresult);
   BOOST_FOREACH(ares::station_fqdn_t & r, rresult)
   {
     std::cout << r.first << '\t'

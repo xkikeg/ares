@@ -72,7 +72,7 @@ protected:
     ares::line_id_t l;
     ares::connect_vector result;
     ASSERT_NO_THROW(l = db->get_lineid(linename));
-    db->find_connect_line(l, result);
+    db->get_connect_line(l, result);
     u8pvec_t actual(result.size());
     std::transform(result.begin(), result.end(), actual.begin(),
                    [&](ares::station_fqdn_t x) -> u8pair_t {
