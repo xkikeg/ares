@@ -71,7 +71,7 @@ namespace ares
   }
 
   CDatabase::CDatabase(const char * dbname)
-  : db(new SQLite(dbname, SQLITE_OPEN_READONLY))
+    : db(new SQLite(dbname, SQLITE_OPEN_READONLY))
   {
   }
 
@@ -139,7 +139,7 @@ namespace ares
   }
 
   void CDatabase::get_all_lines_name(std::vector<std::pair<
-                                       line_id_t, std::string> > & result) const
+                                     line_id_t, std::string> > & result) const
   {
     const char sql[] = "SELECT lineid, linename FROM line ORDER BY lineyomi";
     SQLiteStmt stmt(*db, sql, std::strlen(sql));
@@ -507,7 +507,7 @@ namespace ares
     if(kilo_main != 0) { result.push_back({comp_main, main[0], main[1]}); }
     if(kilo_sub  != 0) { result.push_back({comp_sub ,  sub[0] , sub[1]}); }
     return true;
-   }
+  }
 
   bool CDatabase::is_belong_to_line(line_id_t line, station_id_t station) const
   {

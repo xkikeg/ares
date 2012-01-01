@@ -59,7 +59,7 @@ namespace ares
      */
     explicit MultipleObjectReturned(const char * query, size_t num)
       : std::logic_error(std::string("query '") + query + "' returned"
-                           + boost::lexical_cast<std::string>(num) + " objects.") {}
+                         + boost::lexical_cast<std::string>(num) + " objects.") {}
   };
 
   /**
@@ -113,7 +113,7 @@ namespace ares
      * @param[out] 路線IDとUTF-8エンコードされた駅名.
      */
     void get_all_lines_name(std::vector<std::pair<
-                              line_id_t, std::string> > &result) const;
+                            line_id_t, std::string> > &result) const;
 
     /**
      * 指定された路線の駅の集合を返す。
