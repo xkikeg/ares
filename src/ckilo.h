@@ -109,12 +109,14 @@ namespace ares
     //! same as get_kilo() member.
     operator int() const { return $.get_kilo(); }
 
+    //! 出力演算子.
     friend std::ostream & operator<<(std::ostream & ost,
                                      const CHecto & hecto) {
       ost << hecto.hecto / 10 << "." << hecto.hecto % 10;
       return ost;
     }
 
+    //! 出力を利用して文字列化する.
     std::string to_str() const
     {
       std::stringstream ss;
@@ -150,8 +152,6 @@ namespace ares
     }
 
   public:
-    CKilo() : kilo({{{0}}}) {}
-
     /**
      * @~
      * 営業キロを加算する関数.
@@ -233,6 +233,12 @@ namespace ares
       return (kilo[i][0][0] == 0 && kilo[i][1][0] == 0);
     }
 
+    /**
+     * @~
+     * すべてのJRのキロ程が0であるかを調べる.
+     * @retval true  すべてのJR会社の営業キロが0である.
+     * @retval false いづれかのJR会社の営業キロが正の値を持つ.
+     */
     bool is_all_JR_zero() const {
       for(size_t i=0; i<MAX_JR_COMPANY_TYPE; ++i)
       {
@@ -279,6 +285,13 @@ namespace ares
       return ret;
     }
 
+    /**
+     * 電車特定区間ID, 環状線区間IDを更新する.
+     * それぞれについて以前の値と同じであれば更新しないが,
+     * 以前の値と異なる値であればデフォルト値（指定なし）に設定する.
+     * @param[in] new_denshaid 新しい区間の電車特定区間ID
+     * @param[in] new_circleid 新しい区間の環状線区間ID
+     */
     void update_denshaid(const DENSHA_SPECIAL_TYPE new_denshaid,
                          const DENSHA_SPECIAL_TYPE new_circleid)
     {
@@ -309,17 +322,30 @@ namespace ares
       return real2fake(realend) - real2fake(realbegin);
     }
 
+    /**
+     * 電車特定区間ID, 環状線区間IDのうち優先される方を返す.
+     * @retval 環状線区間ID   山手線内・大阪環状線内の場合.
+     * @retval 電車特定区間ID それ以外の場合.
+     */
     DENSHA_SPECIAL_TYPE get_densha_and_circleid() const
     {
       const DENSHA_SPECIAL_TYPE circle = $.get_circleid();
       return (circle != DENSHA_SPECIAL_NONE) ? circle : $.get_denshaid();
     }
 
+    /**
+     * 電車特定区間IDを返す.
+     * @return 電車特定区間ID.
+     */
     DENSHA_SPECIAL_TYPE get_denshaid() const
     {
       return $.denshaid ? *$.denshaid : DENSHA_SPECIAL_NONE;
     }
 
+    /**
+     * 電車特定区間IDを返す.
+     * @return 環状線区間ID.
+     */
     DENSHA_SPECIAL_TYPE get_circleid() const
     {
       return $.circleid ? *$.circleid : DENSHA_SPECIAL_NONE;
@@ -348,5 +374,8 @@ namespace ares
       { ost << DENSHA_TYPE_LABEL[kilo.get_denshaid()] << '\n'; }
       return ost;
     }
+
+    //! デフォルトコンストラクタ.
+    CKilo() : kilo({{{0}}}) {}
   };
 }

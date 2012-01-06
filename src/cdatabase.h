@@ -110,7 +110,7 @@ namespace ares
 
     /**
      * すべての路線名を返す.
-     * @param[out] 路線IDとUTF-8エンコードされた駅名.
+     * @param[in] result 路線IDとUTF-8エンコードされた駅名.
      */
     void get_all_lines_name(std::vector<std::pair<
                             line_id_t, std::string> > &result) const;

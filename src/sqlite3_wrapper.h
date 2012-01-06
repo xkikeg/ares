@@ -64,9 +64,9 @@ namespace sqlite3_wrapper
     /**
      * @~japanese
      * 通常のコンストラクタ.
-     * @param[in] データベースのファイル名.
-     * @param[in] データベースを開くときのオプション.
-     * @param[in] VFSモジュールのzVfs名を指定. SQLiteのドキュメント読め.
+     * @param[in] dbname データベースのファイル名.
+     * @param[in] flags  データベースを開くときのオプション.
+     * @param[in] zVfs   VFSモジュールのzVfs名を指定. SQLiteのドキュメント読め.
      */
     SQLite(const char * dbname,
 	   int flags=SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
@@ -97,6 +97,25 @@ namespace sqlite3_wrapper
     }
 
     friend class SQLiteStmt;
+
+    /**
+     * SQL文を実行する.
+     * @param[in]     sql      実行するSQL文.
+     * @param[in]     callback コールバック関数.
+                               第1引数は後に指定するarg1.
+                               第2引数はカラム数.
+                               第3引数はカラムのUTF-8文字列の配列.
+                               第4引数はカラム名のUTF-8文字列の配列.
+     * @param[in,out] arg1     コールバック関数に渡される第1引数.
+     * @param[out]    errmsg   エラーメッセージ. sqlite3_free()で解放すること.
+     */
+    int exec(const char * sql,
+             int (*callback)(void*, int, char**, char**),
+             void * arg1,
+             char **errmsg)
+    {
+      return sqlite3_exec(db, sql, callback, arg1, errmsg);
+    }
 
   private:
     /**
