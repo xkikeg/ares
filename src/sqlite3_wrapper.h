@@ -9,6 +9,11 @@
 
 namespace sqlite3_wrapper
 {
+  //! UTF-16文字の型.
+  typedef char16_t u16char_t;
+  //! UTF-16のstd::basic_stringを使用.
+  using std::u16string;
+
   /**
    * SQLite全般の例外
    */
@@ -167,10 +172,10 @@ namespace sqlite3_wrapper
     }
 
     /**
-     * Function to bind double value to place holder.
+     * Function to bind UTF-8 string to place holder.
      * @param[in] icol    Place holder's column index starting from 1.
-     * @param[in] value   Pointer to string binding to place holder.
-     * @param[in] vlength Length of the string.
+     * @param[in] value   Pointer to UTF-8 string to bind to the place holder.
+     * @param[in] vlength Byte length of the string.
      * @return            State of rare sqlite function.
      */
     int bind(int icol, const char * value, int vlength)
@@ -179,12 +184,12 @@ namespace sqlite3_wrapper
     }
 
     /**
-     * Function to bind double value to place holder.
+     * Function to bind UTF-8 string to place holder.
      * @param[in] icol       Place holder's column index starting from 1.
-     * @param[in] value      Pointer to string binding to place holder.
-     * @param[in] vlength    Length of the string.
+     * @param[in] value      Pointer to string to bind to the place holder.
+     * @param[in] vlength    Byte length of the string.
      * @param[in] destructor Deallocator for string called from SQLite API.
-     * @return            State of rare sqlite function.
+     * @return               State of rare sqlite function.
      */
     int bind(int icol, const char * value, int vlength, void (*destructor)(void*))
     {
@@ -192,14 +197,50 @@ namespace sqlite3_wrapper
     }
 
     /**
-     * Function to bind double value to place holder.
+     * Function to bind UTF-8 string to place holder.
      * @param[in] icol    Place holder's column index starting from 1.
-     * @param[in] value   Pointer to string binding to place holder.
+     * @param[in] value   Pointer to string to bind to the place holder.
      * @return            State of rare sqlite function.
      */
     int bind(int icol, const std::string & value)
     {
       return sqlite3_bind_text(stmt, icol, value.c_str(), value.size(), SQLITE_STATIC);
+    }
+
+    /**
+     * Function to bind UTF-16 string to place holder.
+     * @param[in] icol    Place holder's column index starting from 1.
+     * @param[in] value   Pointer to UTF-16 string to bind to the place holder.
+     * @param[in] vlength Byte length of the string.
+     * @return            State of rare sqlite function.
+     */
+    int bind(int icol, const u16char_t * value, int vlength)
+    {
+      return sqlite3_bind_text16(stmt, icol, value, vlength, SQLITE_STATIC);
+    }
+
+    /**
+     * Function to bind UTF-16 string to place holder.
+     * @param[in] icol       Place holder's column index starting from 1.
+     * @param[in] value      Pointer to string to bind to the place holder.
+     * @param[in] vlength    Byte length of the string.
+     * @param[in] destructor Deallocator for string called from SQLite API.
+     * @return               State of rare sqlite function.
+     */
+    int bind(int icol, const u16char_t * value, int vlength, void (*destructor)(void*))
+    {
+      return sqlite3_bind_text16(stmt, icol, value, vlength, destructor);
+    }
+
+    /**
+     * Function to bind UTF-16 string to place holder.
+     * @param[in] icol    Place holder's column index starting from 1.
+     * @param[in] value   Pointer to string to bind to the place holder.
+     * @return            State of rare sqlite function.
+     */
+    int bind(int icol, const u16string & value)
+    {
+      return sqlite3_bind_text16(stmt, icol, value.c_str(), value.size(), SQLITE_STATIC);
     }
 
     /**
@@ -273,15 +314,28 @@ namespace sqlite3_wrapper
       {
         return sqlite3_column_int64(t->stmt, _icol);
       }
-      //! cast operator to char *.
+      //! cast operator to UTF-8 encoded char *.
       operator const char *()
       {
         return reinterpret_cast<const char *>(sqlite3_column_text(t->stmt, _icol));
       }
+      //! cast operator to UTF-16 encoded char16_t *.
+      operator const u16char_t *()
+      {
+        return reinterpret_cast<const u16char_t *>(sqlite3_column_text16(t->stmt, _icol));
+      }
     };
 
     /**
+     * @~english
      * Function to get column value of specified index.
+     */
+    /**
+     * @~japanese
+     * @note 戻り値は遅延評価なので値を得る前にstep()とかすると値が得られない.
+     * 指定されたインデックスのカラムの値を取得する関数.
+     * @param[in] icol 0から始まるカラムのインデックス.
+     * @return         カラムの値に変換できるオブジェクト.
      */
     column_value column(int icol) const
     {
