@@ -196,6 +196,9 @@ namespace ares
     //! Get company id from company name.
     company_id_t get_company_id(const char * name) const;
 
+    //! 会社名をIDから取得する.
+    std::string get_company_name(const company_id_t id) const;
+
     //! Get fare value from table.
     int get_fare_table(const char * table,
                        company_id_t company,

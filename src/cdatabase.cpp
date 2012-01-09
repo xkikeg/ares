@@ -341,6 +341,19 @@ namespace ares
     return -1;
   }
 
+  std::string CDatabase::get_company_name(const company_id_t id) const
+  {
+    const char sql[] =
+      "SELECT companyname FROM company WHERE companyid = ?";
+    SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, id);
+    SQLiteStmt::iterator result = stmt.execute();
+    if (result) { return static_cast<const char *>(result[0]); }
+    std::stringstream ss;
+    ss << "Invalid company id: " << id;
+    throw std::out_of_range(ss.str());
+  }
+
   int CDatabase::get_fare_table(const char * table,
                                 company_id_t company,
                                 int kilo) const
@@ -355,6 +368,11 @@ namespace ares
     stmt.bind(3, kilo);
     SQLiteStmt::iterator result = stmt.execute();
     if (result) { return result[0]; }
+    std::stringstream ss;
+    ss << "Invalid fare table: " << table
+       << " company: " << $.get_company_name(company)
+       << " kilo: " << kilo;
+    throw std::invalid_argument(ss.str());
     return -1;
   }
 

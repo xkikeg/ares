@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <boost/utility.hpp>
 #include <boost/optional.hpp>
@@ -80,6 +80,7 @@ namespace sqlite3_wrapper
         sqlite3_close(db);
         throw IOException(err);
       }
+      extended_result_codes(true);
     }
 
     ~SQLite()
@@ -94,6 +95,14 @@ namespace sqlite3_wrapper
     const char * errmsg()
     {
       return sqlite3_errmsg(db);
+    }
+
+    /**
+     * Return sqlite3 error code.
+     */
+    int errcode()
+    {
+      return sqlite3_errcode(db);
     }
 
     friend class SQLiteStmt;
@@ -115,6 +124,14 @@ namespace sqlite3_wrapper
              char **errmsg)
     {
       return sqlite3_exec(db, sql, callback, arg1, errmsg);
+    }
+
+    /**
+     * Enable or Disable Extended Result Codes.
+     */
+    int extended_result_codes(bool onoff)
+    {
+      return sqlite3_extended_result_codes(db, onoff);
     }
 
   private:
@@ -369,8 +386,10 @@ namespace sqlite3_wrapper
       int rc = sqlite3_step(stmt);
       if(rc != SQLITE_ROW && rc != SQLITE_DONE)
       {
-        std::string err = db.errmsg();
-        throw SQLiteException(err);
+        std::stringstream errss;
+        errss << "CODE:" << db.errcode()
+              << " MSG:" << db.errmsg();
+        throw SQLiteException(errss.str());
       }
       return rc;
     }
