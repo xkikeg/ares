@@ -10,6 +10,8 @@
 #include "ares.h"
 #include "cstation.h"
 
+DECLARE_EVENT_TYPE(EVT_CONNECT_LIST_KILL_FOCUS, -1)
+
 class AresStationListView : public wxListView
 {
 public:
@@ -19,15 +21,13 @@ public:
                       const wxSize &size=wxDefaultSize);
   virtual ~AresStationListView() {}
 
-  void OnSelected(wxListEvent& event);
-  // void OnDeselected(wxListEvent& event);
-  // void OnListKeyDown(wxListEvent& event);
-  // void OnChar(wxKeyEvent& event);
-
   void setLineId(ares::line_id_t lineid);
 
   void setSelection(long item);
   void setSelectionWithId(ares::station_id_t idval);
+
+  ares::station_id_t getIdFromIndex(int index) const;
+  int getIndexFromId(ares::station_id_t idval) const;
 
 private:
   DECLARE_NO_COPY_CLASS(AresStationListView);
@@ -41,18 +41,55 @@ class AresLineListBox : public wxListBox
 {
 public:
   AresLineListBox(wxWindow * parent,
-                  const wxWindowID id);
-  virtual ~AresLineListBox() {}
+                  const wxWindowID id,
+                  const wxPoint & pos=wxDefaultPosition,
+                  const wxSize & size=wxDefaultSize)
+    : wxListBox(parent, id, pos, size,
+                0, NULL, wxLB_SINGLE) {}
+  virtual ~AresLineListBox();
+  virtual ares::line_id_t getLineId(int selected) const;
+  virtual ares::line_id_t getSelectedLineId() const;
+  virtual void setSelectionWithId(ares::line_id_t idval);
 
-  ares::line_id_t get_lineid(int selected) const;
-
-  ares::line_id_t get_selected_lineid() const;
-
-  void setSelectionWithId(ares::line_id_t idval);
+protected:
+  std::vector<ares::line_id_t> m_lineid_vec;
 
 private:
-  std::vector<ares::line_id_t> m_lineid_vec;
   DECLARE_NO_COPY_CLASS(AresLineListBox);
+  DECLARE_EVENT_TABLE();
+};
+
+class AresAllLineListBox : public AresLineListBox
+{
+public:
+  AresAllLineListBox(wxWindow * parent,
+                     const wxWindowID id);
+  virtual ~AresAllLineListBox();
+private:
+  DECLARE_NO_COPY_CLASS(AresAllLineListBox);
+  DECLARE_EVENT_TABLE();
+};
+
+class AresConnectLineListBox : public AresLineListBox
+{
+public:
+  AresConnectLineListBox(wxWindow * parent,
+                         const wxWindowID id)
+    : AresLineListBox(parent, id, wxDefaultPosition,
+                      wxSize(120, -1)) {}
+  virtual ~AresConnectLineListBox();
+  virtual ares::line_id_t getLineId(int selected) const;
+  virtual void setSelectionWithId(ares::line_id_t idval);
+  void setStation(const ares::station_id_t station);
+  void setLineId(const ares::line_id_t line);
+  void OnKillFocus(wxFocusEvent& event);
+
+private:
+  ares::station_id_t m_current_station;
+  std::map<ares::station_id_t,
+           std::pair<std::vector<ares::line_id_t>,
+                     wxArrayString> > m_connectLineMap;
+  DECLARE_NO_COPY_CLASS(AresConnectLineListBox);
   DECLARE_EVENT_TABLE();
 };
 
@@ -60,8 +97,8 @@ class AresSearchDialog : public wxDialog
 {
 public:
   AresSearchDialog(wxWindow * parent,
-                 const wxWindowID id,
-                 const wxString & title);
+                   const wxWindowID id,
+                   const wxString & title);
   virtual ~AresSearchDialog();
   void clearQueryText(wxCommandEvent & event);
   void focusResultList(wxCommandEvent & event);
@@ -136,7 +173,10 @@ public:
   void OnAbout(wxCommandEvent& event);
   void OnSearchStationDialog(wxCommandEvent& event);
   void OnSearchLineDialog(wxCommandEvent& event);
-  void OnLineListbox(wxCommandEvent& event);
+  void OnAllLineListBox(wxCommandEvent& event);
+  void OnConnectLineListBox(wxCommandEvent& event);
+  void OnKillFocusConnectList(wxCommandEvent& event);
+  void OnSelectStationListView(wxListEvent& event);
 
   DECLARE_NO_COPY_CLASS(AresListFrame);
   DECLARE_EVENT_TABLE();
@@ -145,17 +185,21 @@ private:
   wxPanel * m_panel;
   AresLineListBox * m_lineList;
   AresStationListView * m_stationList;
+  AresConnectLineListBox * m_connectList;
   ares::line_id_t m_lineid;
+  ares::station_id_t m_stationid;
 
   template<class SearchDialog>
   void OnSearchDialog();
-  void setLineId(ares::line_id_t lineid);
+  void setLineId(ares::line_id_t lineid,
+                 bool delay_connect_linebox=false);
 };
 
 enum
 {
-  LINE_LIST_BOX = 100,
+  ALL_LINE_LIST_BOX = 100,
   STATION_LIST_VIEW,
+  CONNECT_LINE_LIST_BOX,
   SEARCH_QUERY_TEXT_CTRL,
   SEARCH_RESULT_LIST_BOX,
   MENU_SEARCH_STATION,

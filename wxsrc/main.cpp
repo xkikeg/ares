@@ -23,12 +23,12 @@ bool AresApp::OnInit()
   m_aresdb.reset(new ares::CDatabase(WXARES_DB_FILENAME));
   AresListFrame * main_frame = new AresListFrame(_("wxAres"),
                                                  wxDefaultPosition,
-                                                 wxSize(600, 200));
+                                                 wxSize(720, 200));
   SetTopWindow(main_frame);
   return true;
 }
 
-std::shared_ptr<ares::CDatabase> AresApp::getdb() const
+const ares::CDatabase & AresApp::getdb() const
 {
-  return this->m_aresdb;
+  return *m_aresdb;
 }

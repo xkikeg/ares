@@ -15,7 +15,7 @@ public:
   //! セットアップ時の処理
   virtual bool OnInit();
 
-  std::shared_ptr<ares::CDatabase> getdb() const;
+  const ares::CDatabase & getdb() const;
 
 protected:
   wxLocale m_locale;

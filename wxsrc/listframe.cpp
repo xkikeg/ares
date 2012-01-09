@@ -12,19 +12,31 @@
 #include "util.hpp"
 #include "cdatabase.h"
 
+DEFINE_EVENT_TYPE(EVT_CONNECT_LIST_KILL_FOCUS)
+
 BEGIN_EVENT_TABLE(AresListFrame, wxFrame)
   EVT_MENU(MENU_ABOUT, AresListFrame::OnAbout)
   EVT_MENU(MENU_QUIT, AresListFrame::OnQuit)
   EVT_MENU(MENU_SEARCH_STATION, AresListFrame::OnSearchStationDialog)
   EVT_MENU(MENU_SEARCH_LINE, AresListFrame::OnSearchLineDialog)
-  EVT_LISTBOX(LINE_LIST_BOX, AresListFrame::OnLineListbox)
+  EVT_LISTBOX(ALL_LINE_LIST_BOX, AresListFrame::OnAllLineListBox)
+  EVT_LISTBOX(CONNECT_LINE_LIST_BOX, AresListFrame::OnConnectLineListBox)
+  EVT_COMMAND(CONNECT_LINE_LIST_BOX, EVT_CONNECT_LIST_KILL_FOCUS,
+              AresListFrame::OnKillFocusConnectList)
+  EVT_LIST_ITEM_SELECTED(STATION_LIST_VIEW, AresListFrame::OnSelectStationListView)
 END_EVENT_TABLE();
 
 BEGIN_EVENT_TABLE(AresStationListView, wxListView)
-  EVT_LIST_ITEM_SELECTED(STATION_LIST_VIEW, AresStationListView::OnSelected)
 END_EVENT_TABLE();
 
 BEGIN_EVENT_TABLE(AresLineListBox, wxListBox)
+END_EVENT_TABLE();
+
+BEGIN_EVENT_TABLE(AresAllLineListBox, wxListBox)
+END_EVENT_TABLE();
+
+BEGIN_EVENT_TABLE(AresConnectLineListBox, wxListBox)
+  EVT_KILL_FOCUS(AresConnectLineListBox::OnKillFocus)
 END_EVENT_TABLE();
 
 BEGIN_EVENT_TABLE(AresSearchDialog, wxDialog)
@@ -100,20 +112,13 @@ AresStationListView::AresStationListView(wxWindow * parent,
   }
 }
 
-void AresStationListView::OnSelected(wxListEvent& event)
-{
-  wxMessageBox(event.GetText(),
-               _T("test"),
-               wxICON_INFORMATION, this);
-}
-
 void AresStationListView::setLineId(ares::line_id_t lineid)
 {
   m_lineid = lineid;
   this->Hide();
   this->DeleteAllItems();
   m_stations.clear();
-  wxGetApp().getdb()->get_stations_of_line(lineid, m_stations);
+  wxGetApp().getdb().get_stations_of_line(lineid, m_stations);
   for(auto itr=m_stations.begin(); itr != m_stations.end(); ++itr)
   {
     const long tmp = this->InsertItem
@@ -135,20 +140,50 @@ void AresStationListView::setSelection(long item)
 
 void AresStationListView::setSelectionWithId(ares::station_id_t idval)
 {
+  $.setSelection($.getIndexFromId(idval));
+}
+
+ares::station_id_t AresStationListView::getIdFromIndex(int index) const
+{
+  return m_stations[index].id;
+}
+
+int AresStationListView::getIndexFromId(ares::station_id_t idval) const
+{
   auto itr = std::find_if(m_stations.begin(), m_stations.end(),
                           [idval](const ares::CStation & obj) -> bool
                           { return obj.id == idval; });
   assert(itr != m_stations.end());
-  $.setSelection(itr - m_stations.begin());
+  return itr - m_stations.begin();
 }
 
-AresLineListBox::AresLineListBox(wxWindow * parent,
-                                 const wxWindowID id)
-  : wxListBox(parent, id, wxDefaultPosition, wxDefaultSize,
-              0, NULL, wxLB_SINGLE)
+AresLineListBox::~AresLineListBox() {}
+
+ares::line_id_t AresLineListBox::getLineId(int selected) const
+{
+  return m_lineid_vec[selected];
+}
+
+ares::line_id_t AresLineListBox::getSelectedLineId() const
+{
+  int selected = this->GetSelection();
+  assert(selected != wxNOT_FOUND);
+  return $.getLineId(selected);
+}
+
+void AresLineListBox::setSelectionWithId(ares::line_id_t idval)
+{
+  auto itr = std::find(m_lineid_vec.begin(), m_lineid_vec.end(), idval);
+  assert(itr != m_lineid_vec.end());
+  $.SetSelection(itr - m_lineid_vec.begin());
+}
+
+AresAllLineListBox::AresAllLineListBox(wxWindow * parent,
+                                       const wxWindowID id)
+  : AresLineListBox::AresLineListBox(parent, id)
 {
   std::vector<std::pair<int, std::string> > u8lines;
-  wxGetApp().getdb()->get_all_lines_name(u8lines);
+  wxGetApp().getdb().get_all_lines_name(u8lines);
   for(auto itr=u8lines.begin(); itr != u8lines.end(); ++itr)
   {
     m_lineid_vec.push_back(itr->first);
@@ -157,23 +192,66 @@ AresLineListBox::AresLineListBox(wxWindow * parent,
   }
 }
 
-ares::line_id_t AresLineListBox::get_lineid(int selected) const
+AresAllLineListBox::~AresAllLineListBox() {}
+
+AresConnectLineListBox::~AresConnectLineListBox() {}
+
+ares::line_id_t AresConnectLineListBox::getLineId(int selected) const
 {
-  return m_lineid_vec[selected];
+  auto itr=m_connectLineMap.find(m_current_station);
+  if(itr == m_connectLineMap.end()) { return 0; }
+  return itr->second.first[selected];
 }
 
-ares::line_id_t AresLineListBox::get_selected_lineid() const
+void AresConnectLineListBox::setSelectionWithId(ares::line_id_t idval)
 {
-  int selected = this->GetSelection();
-  assert(selected != wxNOT_FOUND);
-  return $.get_lineid(selected);
+  auto itr=m_connectLineMap.find(m_current_station);
+  if(itr == m_connectLineMap.end()) { return; }
+  auto itr2=std::find(itr->second.first.begin(), itr->second.first.end(), idval);
+  assert(itr2 != itr->second.first.end());
+  $.SetSelection(itr2 - itr->second.first.end());
 }
 
-void AresLineListBox::setSelectionWithId(ares::line_id_t idval)
+void AresConnectLineListBox::setStation(const ares::station_id_t station)
 {
-  auto itr = std::find(m_lineid_vec.begin(), m_lineid_vec.end(), idval);
-  assert(itr != m_lineid_vec.end());
-  $.SetSelection(itr - m_lineid_vec.begin());
+  m_current_station = station;
+  auto itr=m_connectLineMap.find(station);
+  if(itr == m_connectLineMap.end())
+  {
+    $.Set(0, nullptr, nullptr);
+  }
+  else
+  {
+    $.Set(itr->second.second, nullptr);
+  }
+}
+
+void AresConnectLineListBox::setLineId(const ares::line_id_t line)
+{
+  m_connectLineMap.clear();
+  ares::connect_vector result;
+  wxGetApp().getdb().get_connect_line(line, result);
+  for(auto itr=result.begin(); itr != result.end(); ++itr)
+  {
+    if(m_connectLineMap[itr->second].first.empty())
+    {
+      m_connectLineMap[itr->second].first.push_back(line);
+      m_connectLineMap[itr->second].second.Add(
+        wxString::FromUTF8(wxGetApp().getdb().get_line_name(line).c_str()));
+    }
+    m_connectLineMap[itr->second].first.push_back(itr->first);
+    m_connectLineMap[itr->second].second.Add(
+      wxString::FromUTF8(wxGetApp().getdb().get_line_name(itr->first).c_str()));
+  }
+}
+
+void AresConnectLineListBox::OnKillFocus(wxFocusEvent& WXUNUSED(event))
+{
+  if($.GetParent())
+  {
+    wxCommandEvent newEvent(EVT_CONNECT_LIST_KILL_FOCUS, $.GetId());
+    $.GetParent()->ProcessEvent(newEvent);
+  }
 }
 
 AresSearchDialog::AresSearchDialog(wxWindow * parent,
@@ -271,13 +349,13 @@ void AresSearchStationDialog::OnOK(wxCommandEvent & WXUNUSED(event))
   if(m_selected_station)
   {
     ares::line_vector result;
-    wxGetApp().getdb()->get_lines_of_station(*m_selected_station,
+    wxGetApp().getdb().get_lines_of_station(*m_selected_station,
                                              result);
     wxArrayString lines;
     const wxString & station = $.getSelectedString();
     for(auto itr=result.begin(); itr != result.end(); ++itr)
     {
-      lines.Add(wxString::FromUTF8(wxGetApp().getdb()->get_line_name(*itr).c_str()));
+      lines.Add(wxString::FromUTF8(wxGetApp().getdb().get_line_name(*itr).c_str()));
     }
     assert(!lines.IsEmpty());
     if(lines.GetCount() == 1)
@@ -307,12 +385,12 @@ void AresSearchStationDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
 void AresSearchStationDialog::getQueryResult(const wxString & query,
                                              std::vector<int> &result)
 {
-  wxGetApp().getdb()->find_stationid(query.ToUTF8(), ares::FIND_PREFIX, result);
+  wxGetApp().getdb().find_stationid(query.ToUTF8(), ares::FIND_PREFIX, result);
 }
 
 wxString AresSearchStationDialog::getStringOfQueryId(const int id)
 {
-  return wxString::FromUTF8(wxGetApp().getdb()->get_station_name(id).c_str());
+  return wxString::FromUTF8(wxGetApp().getdb().get_station_name(id).c_str());
 }
 
 AresSearchLineDialog::AresSearchLineDialog(wxWindow * parent)
@@ -330,19 +408,20 @@ void AresSearchLineDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
 void AresSearchLineDialog::getQueryResult(const wxString & query,
                                              std::vector<int> &result)
 {
-  wxGetApp().getdb()->find_lineid(query.ToUTF8(), ares::FIND_PREFIX, result);
+  wxGetApp().getdb().find_lineid(query.ToUTF8(), ares::FIND_PREFIX, result);
 }
 
 wxString AresSearchLineDialog::getStringOfQueryId(const int id)
 {
-  return wxString::FromUTF8(wxGetApp().getdb()->get_line_name(id).c_str());
+  return wxString::FromUTF8(wxGetApp().getdb().get_line_name(id).c_str());
 }
 
 AresListFrame::AresListFrame(const wxString & title,
                              const wxPoint &pos,
                              const wxSize &size)
-  : wxFrame(NULL, wxID_ANY, title, pos, size),
-    m_panel(NULL), m_lineList(NULL), m_stationList(NULL)
+  : wxFrame(nullptr, wxID_ANY, title, pos, size),
+    m_panel(nullptr),
+    m_lineList(nullptr), m_stationList(nullptr), m_connectList(nullptr)
 {
   wxMenu *menuFile = new wxMenu;
   menuFile->Append(MENU_QUIT, _("E&xit\tCtrl-Q"));
@@ -362,8 +441,9 @@ AresListFrame::AresListFrame(const wxString & title,
 
   m_panel = new wxPanel(this, wxID_ANY);
 
+  m_lineList = new AresAllLineListBox(m_panel, ALL_LINE_LIST_BOX);
   m_stationList = new AresStationListView(m_panel, STATION_LIST_VIEW);
-  m_lineList = new AresLineListBox(m_panel, LINE_LIST_BOX);
+  m_connectList = new AresConnectLineListBox(m_panel, CONNECT_LINE_LIST_BOX);
 
   wxBoxSizer * leftsizer = new wxBoxSizer(wxVERTICAL);
   leftsizer->Add(m_lineList,
@@ -372,7 +452,10 @@ AresListFrame::AresListFrame(const wxString & title,
   mainsizer->Add(leftsizer,
                  wxSizerFlags().Expand().Border(wxALL, 8).Proportion(0));
   mainsizer->Add(m_stationList,
-                 wxSizerFlags().Expand().Border(wxALL, 8).Proportion(1));
+                 wxSizerFlags().Expand().Border(wxTOP
+                                                | wxBOTTOM, 8).Proportion(1));
+  mainsizer->Add(m_connectList,
+                 wxSizerFlags().Expand().Border(wxALL, 8).Proportion(0));
 
   m_panel->SetSizer(mainsizer);
   m_panel->SetFocus();
@@ -427,11 +510,11 @@ void AresListFrame::OnSearchLineDialog(wxCommandEvent& WXUNUSED(event))
   OnSearchDialog<AresSearchLineDialog>();
 }
 
-void AresListFrame::OnLineListbox(wxCommandEvent& event)
+void AresListFrame::OnAllLineListBox(wxCommandEvent& event)
 {
   try
   {
-    $.setLineId(m_lineList->get_lineid(event.GetInt()));
+    $.setLineId(m_lineList->getLineId(event.GetInt()));
   }
   catch(const std::exception & e)
   {
@@ -445,8 +528,41 @@ void AresListFrame::OnLineListbox(wxCommandEvent& event)
   }
 }
 
-void AresListFrame::setLineId(ares::line_id_t lineid)
+void AresListFrame::OnConnectLineListBox(wxCommandEvent& event)
+{
+  if(event.GetInt() == wxNOT_FOUND) { return; }
+  ares::line_id_t nlineid = m_connectList->getLineId(event.GetInt());
+  if(nlineid == m_lineid) { return; }
+  $.setLineId(nlineid, true);
+  m_lineList->setSelectionWithId(nlineid);
+}
+
+void AresListFrame::OnKillFocusConnectList(wxCommandEvent& WXUNUSED(event))
+{
+  m_stationList->setSelectionWithId(m_stationid);
+  m_connectList->setLineId(m_lineid);
+  m_connectList->setStation(m_stationid);
+  m_connectList->setSelectionWithId(m_lineid);
+}
+
+void AresListFrame::OnSelectStationListView(wxListEvent& event)
+{
+  m_stationid = m_stationList->getIdFromIndex(event.GetIndex());
+  m_connectList->setStation(m_stationid);
+  m_connectList->setSelectionWithId(m_lineid);
+}
+
+void AresListFrame::setLineId(ares::line_id_t lineid,
+                              bool delay_connect_linebox)
 {
   m_lineid = lineid;
   m_stationList->setLineId(lineid);
+  if(!delay_connect_linebox)
+  {
+    m_stationList->setSelection(0);
+    m_stationid = m_stationList->getIdFromIndex(0);
+    m_connectList->setLineId(lineid);
+    m_connectList->setStation(m_stationid);
+    m_connectList->setSelectionWithId(lineid);
+  }
 }
