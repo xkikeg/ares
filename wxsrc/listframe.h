@@ -64,6 +64,7 @@ public:
                  const wxString & title);
   virtual ~AresSearchDialog();
   void clearQueryText(wxCommandEvent & event);
+  void focusResultList(wxCommandEvent & event);
   void OnUpdateQuery(wxCommandEvent & event);
   virtual void OnSelected(wxCommandEvent & event) = 0;
   void OnDblSelected(wxCommandEvent & event);
@@ -155,6 +156,7 @@ enum
 {
   LINE_LIST_BOX = 100,
   STATION_LIST_VIEW,
+  SEARCH_QUERY_TEXT_CTRL,
   SEARCH_RESULT_LIST_BOX,
   MENU_SEARCH_STATION,
   MENU_SEARCH_LINE,

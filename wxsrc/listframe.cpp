@@ -28,10 +28,11 @@ BEGIN_EVENT_TABLE(AresLineListBox, wxListBox)
 END_EVENT_TABLE();
 
 BEGIN_EVENT_TABLE(AresSearchDialog, wxDialog)
-  EVT_TEXT(wxID_ANY, AresSearchDialog::OnUpdateQuery)
+  EVT_TEXT(SEARCH_QUERY_TEXT_CTRL, AresSearchDialog::OnUpdateQuery)
+  EVT_TEXT_ENTER(SEARCH_QUERY_TEXT_CTRL, AresSearchDialog::focusResultList)
+  EVT_SEARCHCTRL_CANCEL_BTN(SEARCH_QUERY_TEXT_CTRL, AresSearchDialog::clearQueryText)
   EVT_LISTBOX(SEARCH_RESULT_LIST_BOX, AresSearchDialog::OnSelected)
   EVT_LISTBOX_DCLICK(SEARCH_RESULT_LIST_BOX, AresSearchDialog::OnDblSelected)
-  EVT_SEARCHCTRL_CANCEL_BTN(wxID_ANY, AresSearchDialog::clearQueryText)
 END_EVENT_TABLE();
 
 BEGIN_EVENT_TABLE(AresSearchStationDialog, AresSearchDialog)
@@ -190,7 +191,9 @@ AresSearchDialog::AresSearchDialog(wxWindow * parent,
                    wxSizerFlags().Expand().Border(wxALL, 4).Proportion(0));
 
   wxBoxSizer * topsizer = new wxBoxSizer(wxVERTICAL);
-  m_query = new wxSearchCtrl(this, wxID_ANY);
+  m_query = new wxSearchCtrl(this, SEARCH_QUERY_TEXT_CTRL, _T(""),
+                             wxDefaultPosition, wxDefaultSize,
+                             wxTE_PROCESS_ENTER);
   m_query->ShowSearchButton(true);
   m_query->ShowCancelButton(true);
   // m_query->SetMenu();
@@ -210,6 +213,12 @@ AresSearchDialog::~AresSearchDialog() {}
 void AresSearchDialog::clearQueryText(wxCommandEvent& WXUNUSED(event))
 {
   m_query->SetValue(_T(""));
+}
+
+void AresSearchDialog::focusResultList(wxCommandEvent& WXUNUSED(event))
+{
+  m_result->SetFocus();
+  m_result->SetSelection(0);
 }
 
 void AresSearchDialog::OnUpdateQuery(wxCommandEvent& WXUNUSED(event))
@@ -397,10 +406,12 @@ void AresListFrame::OnSearchDialog()
     if(auto line = dlg.getLine())
     {
       m_lineList->setSelectionWithId(*line);
+      m_lineList->SetFocus();
       $.setLineId(*line);
       if(auto station = dlg.getStation())
       {
         m_stationList->setSelectionWithId(*station);
+        m_stationList->SetFocus();
       }
     }
   }
