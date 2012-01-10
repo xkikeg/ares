@@ -425,8 +425,12 @@ namespace ares
     if (result) { return std::make_pair(result[0], result[1]); }
     else
     {
-      std::cerr << "Invalid line & station\n";
-      return std::make_pair(-1, -1);
+      std::stringstream ss;
+      ss << "Invalid line & station in CDatabase::get_range: "
+         << "line: " << line
+         << "begin: " << begin
+         << "end: " << end;
+      throw std::invalid_argument(ss.str());
     }
   }
 
@@ -492,7 +496,7 @@ namespace ares
     }
     const int kilo_all = kilo_max - kilo_min;
     // Cannot get results. maybe line, begin, end are bad.
-    if(kilo_all == 0) { std::cerr << "Zero Kilo\n"; return false; }
+    if(kilo_all == 0) { return false; }
     // if kilo_main & kilo_sub exists, main[] is not correct.
     if(comp_main != -1 && comp_sub != -1)
     {

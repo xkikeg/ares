@@ -119,29 +119,32 @@ namespace ares
 
   bool CRoute::is_contains(station_id_t station) const
   {
-    for(auto itr = $.begin(); itr != $.end(); ++itr)
-    {
-      if($.db->is_contains(*itr, station)) return true;
-    }
-    return false;
+    return $.end() !=
+      std::find_if($.begin(), $.end(),
+                   [station, this](const CSegment & segment)
+                   { return $.db->is_contains(segment, station); });
   }
 
   bool CRoute::is_valid() const
   {
     // Connectivity: each segment tail = next segment head
-    for(auto itr=$.begin()+1; itr != $.end(); ++itr)
-    {
-      if((itr-1)->end != itr->begin){ return false; }
-    }
+    if($.end() !=
+       std::adjacent_find($.begin(), $.end(),
+                          [] (const CSegment & a, const CSegment & b)
+                          { return a.end != b.begin; }))
+    { return false; }
     // NoOverlap   : segments does not overlap
     std::map<line_id_t, liquid::UniqueIntervalTree<station_id_t> > checktree;
-    for(auto itr=$.begin(); itr != $.end(); ++itr)
-    {
-      if(!$.db->is_belong_to_line(itr->line, itr->begin) ||
-         !$.db->is_belong_to_line(itr->line, itr->end  ) ||
-         !checktree[itr->line].insert(
-           $.db->get_range(itr->line, itr->begin, itr->end))) { return false; }
-    }
+    if($.end() !=
+       std::find_if($.begin(), $.end(),
+                    [&checktree, this] (const CSegment & a)
+                    {
+                      return
+                        !$.db->is_belong_to_line(a.line, a.begin) ||
+                        !$.db->is_belong_to_line(a.line, a.end  ) ||
+                        !checktree[a.line].insert(
+                          $.db->get_range(a.line, a.begin, a.end));
+                    })) { return false; }
     return true;
   }
 
@@ -184,26 +187,27 @@ namespace ares
       result.clear();
       boost::optional<std::pair<bool, int> > special
         = $.db->get_special_fare(itr->line, itr->begin, itr->end);
-      if(special)
+      // ! is_add
+      if(special && !special->first)
+      {
+        fare.other += special->second;
+      }
+      else
       {
         // is_add
-        if(special->first) { fare.JR += special->second; }
-        // ! is_add
-        else { fare.other += special->second; }
-        continue;
-      }
-      bool ret = $.db->get_company_and_kilo(itr->line,
-                                            itr->begin,
-                                            itr->end,
-                                            result,
-                                            is_main,
-                                            denshaid,
-                                            circleid);
-      if(!ret) { return CFare(); }
-      kilo.update_denshaid(denshaid, circleid);
-      for(auto j=result.begin(); j != result.end(); ++j)
-      {
-        kilo.add(j->company, is_main, j->begin, j->end);
+        if(special && special->first) { fare.JR += special->second; }
+        bool ret = $.db->get_company_and_kilo(itr->line,
+                                              itr->begin,
+                                              itr->end,
+                                              result,
+                                              is_main,
+                                              denshaid,
+                                              circleid);
+        assert(ret);
+        kilo.update_denshaid(denshaid, circleid);
+        std::for_each(result.begin(), result.end(),
+                      [&kilo, is_main] (const CKiloValue & a)
+                      { kilo.add(a.company, is_main, a.begin, a.end); });
       }
     }
     return fare;
