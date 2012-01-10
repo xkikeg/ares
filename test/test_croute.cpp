@@ -23,8 +23,10 @@ protected:
   CRouteTest() : db(new ares::CDatabase(TEST_DB_FILENAME)),
                  route(db) {}
 
-  virtual ~CRouteTest(){ };
+  virtual ~CRouteTest();
 };
+
+CRouteTest::~CRouteTest() {}
 
 class CRouteTokaidoTest : public CRouteTest
 {
