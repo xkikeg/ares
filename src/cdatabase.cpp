@@ -321,10 +321,11 @@ namespace ares
                                    connect_vector & list) const
   {
     const char sql[] =
-      "SELECT kilo.lineid, kilo.stationid FROM kilo NATURAL JOIN station"
-      " WHERE kilo.stationid IN ("
-      "  SELECT kilo.stationid FROM kilo WHERE lineid = ?1"
-      " ) AND kilo.lineid != ?1";
+      "SELECT lineid, stationid FROM jointkilo"
+      " WHERE stationid IN ("
+      "  SELECT K2.stationid FROM kilo AS K2 WHERE lineid = ?1"
+      " ) AND lineid != ?1"
+      " ORDER BY stationid, linename";
     SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, line);
     stmt.fill_column(list, 0, 1);
