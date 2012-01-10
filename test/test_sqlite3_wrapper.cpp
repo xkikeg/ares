@@ -63,3 +63,47 @@ TEST_F(SQLiteTest, SingleSelectTest)
   }
   EXPECT_EQ(LENGTH(price), j);
 };
+
+class SQLiteBackupTest : public ::testing::Test
+{
+protected:
+  std::shared_ptr<SQLite> db1, db2;
+
+public:
+  SQLiteBackupTest()
+    : db1(new SQLite(":memory:"))
+    , db2(new SQLite(":memory:"))
+  {
+  }
+};
+
+TEST_F(SQLiteBackupTest, CompletionBackup)
+{
+  const size_t TESTCASE_SIZE = 3;
+  const int id[] = {0, 1, 2};
+  const char * name[] = {"John", "Tom", "Tamala"};
+  db1->exec("CREATE TABLE foo (id INTEGER PRIMARY KEY, name TEXT)");
+  db1->exec("INSERT INTO foo VALUES (0, 'John')");
+  db1->exec("INSERT INTO foo VALUES (1, 'Tom')");
+  db1->exec("INSERT INTO foo VALUES (2, 'Tamala')");
+  {
+    ASSERT_NO_THROW({
+        SQLiteBackup backup(*db2, "main",
+                            *db1, "main");
+        backup.step(-1);
+      });
+  }
+  SQLiteStmt stmt(*db2, "SELECT id, name FROM foo ORDER BY id;");
+  size_t j=0;
+  for(SQLiteStmt::iterator itr = stmt.execute();
+      itr && j < TESTCASE_SIZE; ++itr)
+  {
+    ASSERT_NO_THROW({
+        EXPECT_EQ(id[j], static_cast<int>(itr[0]));
+        EXPECT_STREQ(name[j], static_cast<const char *>(itr[1]))
+          << name[j] << " != "
+          << static_cast<const char *>(itr[1]);
+      }) << L"SQLiteStmt::step failed";
+    ++j;
+  }
+}

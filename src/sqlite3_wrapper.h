@@ -54,6 +54,9 @@ namespace sqlite3_wrapper
   private:
     sqlite3 * db;
   public:
+    friend class SQLiteStmt;
+    friend class SQLiteBackup;
+
     /**
      * @~english
      * Constructor with filname and options.
@@ -105,7 +108,16 @@ namespace sqlite3_wrapper
       return sqlite3_errcode(db);
     }
 
-    friend class SQLiteStmt;
+    /**
+     * Return sqlite3 error object.
+     */
+    SQLiteException createException()
+    {
+      std::stringstream errss;
+      errss << "CODE:" << this->errcode()
+            << " MSG:" << this->errmsg();
+      return SQLiteException(errss.str());
+    }
 
     /**
      * SQL文を実行する.
@@ -119,9 +131,9 @@ namespace sqlite3_wrapper
      * @param[out]    errmsg   エラーメッセージ. sqlite3_free()で解放すること.
      */
     int exec(const char * sql,
-             int (*callback)(void*, int, char**, char**),
-             void * arg1,
-             char **errmsg)
+             int (*callback)(void*, int, char**, char**)=nullptr,
+             void * arg1=nullptr,
+             char **errmsg=nullptr)
     {
       return sqlite3_exec(db, sql, callback, arg1, errmsg);
     }
@@ -143,6 +155,64 @@ namespace sqlite3_wrapper
     sqlite3 * ptr() const
     {
       return db;
+    }
+  };
+
+  /**
+   * @~english
+   * SQLite backup handler.
+   */
+  class SQLiteBackup
+  {
+  private:
+    sqlite3_backup * backup;
+    SQLite & dest;
+    const SQLite & source;
+
+  public:
+    SQLiteBackup(SQLite & dest,
+                 const char * destName,
+                 const SQLite & source,
+                 const char * sourceName)
+      : backup(nullptr), dest(dest), source(source)
+    {
+      backup = sqlite3_backup_init(dest.ptr(),
+                                   destName,
+                                   source.ptr(),
+                                   sourceName);
+      if(backup == nullptr)
+      {
+        throw dest.createException();
+      }
+    }
+
+    ~SQLiteBackup()
+    {
+      sqlite3_backup_finish(backup);
+    }
+
+    /**
+     * バックアップを進める.
+     * @param[in] nPage バックアップするページ数. 省略or負数なら残り全て.
+     * @retval true     バックアップが完了した.
+     * @retval false    まだバックアップすべきページが残っている.
+     */
+    bool step(int nPage=-1)
+    {
+      int ret = sqlite3_backup_step(backup, nPage);
+      if(ret == SQLITE_OK) return false;
+      if(ret == SQLITE_DONE) return true;
+      throw dest.createException();
+    }
+
+    int getRemainingPageCount()
+    {
+      return sqlite3_backup_remaining(backup);
+    }
+
+    int getTotalPageCount()
+    {
+      return sqlite3_backup_pagecount(backup);
     }
   };
 
@@ -386,10 +456,7 @@ namespace sqlite3_wrapper
       int rc = sqlite3_step(stmt);
       if(rc != SQLITE_ROW && rc != SQLITE_DONE)
       {
-        std::stringstream errss;
-        errss << "CODE:" << db.errcode()
-              << " MSG:" << db.errmsg();
-        throw SQLiteException(errss.str());
+        throw db.createException();
       }
       return rc;
     }
