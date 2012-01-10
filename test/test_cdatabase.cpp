@@ -20,7 +20,8 @@ protected:
 
   CDatabaseTest() : db(new ares::CDatabase(TEST_DB_FILENAME)) {}
 
-  void diffStringVector(u8vec_t expected, u8vec_t actual) {
+  template<class Container>
+  void diffVector(Container expected, Container actual) {
     EXPECT_EQ(expected.size(), actual.size());
     std::sort(expected.begin(), expected.end());
     std::sort(actual.begin()  , actual.end()  );
@@ -38,7 +39,7 @@ protected:
     u8vec_t result(idresult.size());
     std::transform(idresult.begin(), idresult.end(), result.begin(),
                    std::bind(F, std::ref(*db), _1));
-    diffStringVector(std::move(reference), std::move(result));
+    diffVector(std::move(reference), std::move(result));
   }
 
   void diffStationNameVector(u8vec_t reference,
@@ -171,7 +172,43 @@ TEST_F(CDatabaseTest, LineConnection) {
   checkLineConnection("鹿児島1", std::move(kagoshima1));
 }
 
-TEST_F(CDatabaseTest, BelongToLine) {
+TEST_F(CDatabaseTest, GetBelongToLineSingle) {
+  SCOPED_TRACE(L"Check get_belong_line with 巣鴨");
+  ares::line_vector actual, expected =
+  {
+    db->get_lineid("山手2"),
+  };
+  db->get_belong_line(db->get_stationid("巣鴨"), actual);
+  diffVector(expected, actual);
+}
+
+TEST_F(CDatabaseTest, GetBelongToLineTwo) {
+  SCOPED_TRACE("Check get_belong_line with 田端");
+  ares::line_vector actual, expected =
+  {
+    db->get_lineid("山手2"),
+    db->get_lineid("東北"),
+  };
+  db->get_belong_line(db->get_stationid("田端"), actual);
+  diffVector(expected, actual);
+}
+
+TEST_F(CDatabaseTest, GetBelongToLineMany) {
+  SCOPED_TRACE("Check get_belong_line with 東京");
+  ares::line_vector actual, expected =
+  {
+    db->get_lineid("東海道"),
+    db->get_lineid("東北"),
+    db->get_lineid("総武"),
+    db->get_lineid("京葉"),
+    db->get_lineid("新幹線"),
+    db->get_lineid("東北新幹線"),
+  };
+  db->get_belong_line(db->get_stationid("東京"), actual);
+  diffVector(expected, actual);
+}
+
+TEST_F(CDatabaseTest, IsBelongToLine) {
   EXPECT_TRUE(db->is_belong_to_line(db->get_lineid("鹿児島1"),
                                         db->get_stationid("鳥栖")));
   EXPECT_TRUE(db->is_belong_to_line(db->get_lineid("東海道"),

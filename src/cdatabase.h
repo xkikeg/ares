@@ -193,6 +193,14 @@ namespace ares
     void get_connect_line(line_id_t line,
                           connect_vector & list) const;
 
+    /**
+     * ある駅の所属する路線IDを取得する.
+     * @param[in]  station 指定する駅ID.
+     * @param[out] result  結果の路線IDの配列.
+     */
+    void get_belong_line(station_id_t station,
+                          line_vector & result) const;
+
     //! Get company id from company name.
     company_id_t get_company_id(const char * name) const;
 

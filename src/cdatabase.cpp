@@ -341,6 +341,17 @@ namespace ares
     stmt.fill_column(list, 0, 1);
   }
 
+  void CDatabase::get_belong_line(station_id_t station,
+                                  line_vector & result) const
+  {
+    const char sql[] =
+      "SELECT lineid FROM jointkilo"
+      " WHERE stationid = ? ORDER BY linename";
+    SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, station);
+    stmt.fill_column(result, 0);
+  }
+
   company_id_t CDatabase::get_company_id(const char * name) const
   {
     const char sql[] =
