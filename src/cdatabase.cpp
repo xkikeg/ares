@@ -70,9 +70,19 @@ namespace ares
     return std::make_pair(denshaid, circleid);
   }
 
-  CDatabase::CDatabase(const char * dbname)
+  CDatabase::CDatabase(const char * dbname, bool memcache)
     : db(new SQLite(dbname, SQLITE_OPEN_READONLY))
   {
+    if(memcache)
+    {
+      std::unique_ptr<SQLite> memdb(new SQLite(":memory:"));
+      {
+        sqlite3_wrapper::SQLiteBackup backup(*memdb, "main",
+                                             *db, "main");
+        backup.step(-1);
+      }
+      db = std::move(memdb);
+    }
   }
 
   std::string CDatabase::get_line_name(line_id_t line) const

@@ -78,7 +78,7 @@ namespace ares
      * Construct a CDatabase object with database filename.
      * @param[in] dbname The filename of SQLite database.
      */
-    CDatabase(const char * dbname);
+    CDatabase(const char * dbname, bool memcache=true);
 
     /**
      * Convert function from line id to name.
