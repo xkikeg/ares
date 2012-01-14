@@ -111,6 +111,39 @@ TEST_F(CRouteTokaidoTest, InvalidDuplicateShinkansen) {
   EXPECT_FALSE(route.is_valid());
 }
 
+TEST_F(CRouteTest, ValidCircle) {
+  route.append_route(UTF8("東北"), UTF8("神田"), UTF8("田端"));
+  route.append_route(UTF8("山手2"), UTF8("新宿"));
+  route.append_route(UTF8("中央東"), UTF8("神田"));
+  EXPECT_TRUE(route.is_valid());
+}
+
+TEST_F(CRouteTest, Valid6Style) {
+  route.append_route(UTF8("東北"), UTF8("東京"), UTF8("田端"));
+  route.append_route(UTF8("山手2"), UTF8("新宿"));
+  route.append_route(UTF8("中央東"), UTF8("神田"));
+  EXPECT_TRUE(route.is_valid());
+}
+
+TEST_F(CRouteTest, Invalid6Style) {
+  route.append_route(UTF8("東北"), UTF8("神田"), UTF8("田端"));
+  route.append_route(UTF8("山手2"), UTF8("新宿"));
+  route.append_route(UTF8("中央東"), UTF8("神田"));
+  EXPECT_TRUE(route.is_valid());
+  route.append_route(UTF8("東北"), UTF8("東京"));
+  EXPECT_FALSE(route.is_valid());
+}
+
+TEST_F(CRouteTest, Invalid8Style) {
+  route.append_route(UTF8("総武2"), UTF8("御茶ノ水"), UTF8("錦糸町"));
+  route.append_route(UTF8("総武"), UTF8("西船橋"));
+  route.append_route(UTF8("武蔵野"), UTF8("南浦和"));
+  route.append_route(UTF8("東北"), UTF8("神田"));
+  EXPECT_FALSE(route.is_valid());
+  route.append_route(UTF8("中央東"), UTF8("御茶ノ水"));
+  EXPECT_FALSE(route.is_valid());
+}
+
 TEST_F(CRouteTest, CalcHonshuMain) {
   using ares::CRoute;
   EXPECT_EQ(140, CRoute::calc_honshu_main(1));

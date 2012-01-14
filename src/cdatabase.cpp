@@ -179,6 +179,30 @@ namespace ares
     }
   }
 
+  size_t CDatabase::get_stations_of_segment(line_id_t line,
+                                            station_id_t begin,
+                                            station_id_t end,
+                                            station_vector & result) const
+  {
+    int kilo_begin=$.get_kilo(line, begin), kilo_end=$.get_kilo(line, end);
+    const char sql_[] =
+      "SELECT stationid FROM kilo"
+      " WHERE lineid = ? AND kilo BETWEEN ? AND ?"
+      " ORDER BY kilo";
+    std::string sql(sql_);
+    if(kilo_begin > kilo_end) { sql += " DESC"; }
+    SQLiteStmt stmt(*db, sql);
+    stmt.bind(1, line);
+    stmt.bind(2, std::min(kilo_begin, kilo_end));
+    stmt.bind(3, std::max(kilo_begin, kilo_end));
+    size_t size=0;
+    for(auto itr=stmt.execute(); itr; ++itr, ++size)
+    {
+      result.push_back(itr[0]);
+    }
+    return size;
+  }
+
   void CDatabase::get_lines_of_station(station_id_t station,
                                        line_vector & result) const
   {
@@ -350,6 +374,37 @@ namespace ares
     SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, station);
     stmt.fill_column(result, 0);
+  }
+
+  bool CDatabase::is_belong_to_line(line_id_t line, station_id_t station) const
+  {
+    const char sql[] =
+      "SELECT * FROM kilo WHERE lineid = ? AND stationid = ?";
+    SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, line);
+    stmt.bind(2, station);
+    SQLiteStmt::iterator result=stmt.execute();
+    return static_cast<bool>(result);
+  }
+
+  bool CDatabase::is_contains(const CSegment & range,
+                              const station_id_t station) const
+  {
+    const char sql[] =
+      "SELECT kilo FROM kilo WHERE lineid = ?1 AND stationid = ?2"
+      " AND kilo BETWEEN"
+      "  (SELECT min(kilo) FROM kilo"
+      "    WHERE lineid = ?1 AND stationid IN (?3, ?4))"
+      "  AND"
+      "  (SELECT max(kilo) FROM kilo"
+      "    WHERE lineid = ?1 AND stationid IN (?3, ?4))";
+    SQLiteStmt stmt(*db, sql, std::strlen(sql));
+    stmt.bind(1, range.line);
+    stmt.bind(2, station);
+    stmt.bind(3, range.begin);
+    stmt.bind(4, range.end);
+    SQLiteStmt::iterator result=stmt.execute();
+    return static_cast<bool>(result);
   }
 
   company_id_t CDatabase::get_company_id(const char * name) const
@@ -551,36 +606,5 @@ namespace ares
     if(kilo_main != 0) { result.push_back({comp_main, main[0], main[1]}); }
     if(kilo_sub  != 0) { result.push_back({comp_sub ,  sub[0] , sub[1]}); }
     return true;
-  }
-
-  bool CDatabase::is_belong_to_line(line_id_t line, station_id_t station) const
-  {
-    const char sql[] =
-      "SELECT * FROM kilo WHERE lineid = ? AND stationid = ?";
-    SQLiteStmt stmt(*db, sql, std::strlen(sql));
-    stmt.bind(1, line);
-    stmt.bind(2, station);
-    SQLiteStmt::iterator result=stmt.execute();
-    return static_cast<bool>(result);
-  }
-
-  bool CDatabase::is_contains(const CSegment & range,
-                              const station_id_t station) const
-  {
-    const char sql[] =
-      "SELECT kilo FROM kilo WHERE lineid = ?1 AND stationid = ?2"
-      " AND kilo BETWEEN"
-      "  (SELECT min(kilo) FROM kilo"
-      "    WHERE lineid = ?1 AND stationid IN (?3, ?4))"
-      "  AND"
-      "  (SELECT max(kilo) FROM kilo"
-      "    WHERE lineid = ?1 AND stationid IN (?3, ?4))";
-    SQLiteStmt stmt(*db, sql);
-    stmt.bind(1, range.line);
-    stmt.bind(2, station);
-    stmt.bind(3, range.begin);
-    stmt.bind(4, range.end);
-    SQLiteStmt::iterator result=stmt.execute();
-    return static_cast<bool>(result);
   }
 }

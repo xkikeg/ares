@@ -133,18 +133,20 @@ namespace ares
                           [] (const CSegment & a, const CSegment & b)
                           { return a.end != b.begin; }))
     { return false; }
-    // NoOverlap   : segments does not overlap
-    std::map<line_id_t, liquid::UniqueIntervalTree<station_id_t> > checktree;
-    if($.end() !=
-       std::find_if($.begin(), $.end(),
-                    [&checktree, this] (const CSegment & a)
-                    {
-                      return
-                        !$.db->is_belong_to_line(a.line, a.begin) ||
-                        !$.db->is_belong_to_line(a.line, a.end  ) ||
-                        !checktree[a.line].insert(
-                          $.db->get_range(a.line, a.begin, a.end));
-                    })) { return false; }
+    // No same station
+    station_vector stations;
+    for(const auto & segment : $)
+    {
+      size_t size = $.db->get_stations_of_segment(segment.line,
+                                                  segment.begin,
+                                                  segment.end,
+                                                  stations);
+      if(size != 0) { stations.pop_back(); }
+    }
+    std::sort(stations.begin(), stations.end());
+    if(stations.end() !=
+       std::adjacent_find(stations.begin(), stations.end()))
+    { return false; }
     return true;
   }
 

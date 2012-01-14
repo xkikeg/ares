@@ -48,5 +48,14 @@ namespace ares
       std::swap($.begin, $.end);
       return true;
     }
+
+    friend std::ostream & operator<<(std::ostream & ost,
+                                     const CSegment & segment)
+    {
+      ost << "[" << segment.begin
+          << "<" << segment.line
+          << ">" << segment.end << "]";
+      return ost;
+    }
   };
 }

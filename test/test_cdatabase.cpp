@@ -21,15 +21,20 @@ protected:
   CDatabaseTest() : db(new ares::CDatabase(TEST_DB_FILENAME)) {}
 
   template<class Container>
-  void diffVector(Container expected, Container actual) {
+  void diffVectorWithoutSort(const Container & expected, const Container & actual) {
     EXPECT_EQ(expected.size(), actual.size());
-    std::sort(expected.begin(), expected.end());
-    std::sort(actual.begin()  , actual.end()  );
     auto i=expected.begin(), j=actual.begin();
     for(; i != expected.end() && j != actual.end(); ++i, ++j)
     {
       EXPECT_EQ(*i, *j) << *i << "!=" << *j;
     }
+  }
+
+  template<class Container>
+  void diffVector(Container expected, Container actual) {
+    std::sort(expected.begin(), expected.end());
+    std::sort(actual.begin()  , actual.end()  );
+    diffVectorWithoutSort(expected, actual);
   }
 
   template<class Result, class Getter>
@@ -232,4 +237,32 @@ TEST_F(CDatabaseTest, Contains) {
   EXPECT_TRUE(db->is_contains(seg1, db->get_stationid("大阪")));
   EXPECT_FALSE(db->is_contains(seg1, db->get_stationid("神戸")));
   EXPECT_FALSE(db->is_contains(seg1, db->get_stationid("仙台")));
+}
+
+TEST_F(CDatabaseTest, GetStationsInSegment)
+{
+  SCOPED_TRACE(L"get stations with ascending kilo.");
+  ares::station_vector actual, expected=
+    {
+      db->get_stationid("東京"),
+      db->get_stationid("有楽町"),
+      db->get_stationid("新橋"),
+      db->get_stationid("浜松町"),
+      db->get_stationid("田町"),
+      db->get_stationid("品川"),
+    };
+  db->get_stations_of_segment(db->get_lineid("東海道"),
+                              db->get_stationid("東京"),
+                              db->get_stationid("品川"),
+                              actual);
+  diffVectorWithoutSort(expected, actual);
+
+  SCOPED_TRACE(L"get stations with descending kilo.");
+  std::reverse(expected.begin(), expected.end());
+  actual.clear();
+  db->get_stations_of_segment(db->get_lineid("東海道"),
+                              db->get_stationid("品川"),
+                              db->get_stationid("東京"),
+                              actual);
+  diffVectorWithoutSort(expected, actual);
 }

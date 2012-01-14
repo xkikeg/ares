@@ -116,12 +116,24 @@ namespace ares
                             line_id_t, std::string> > &result) const;
 
     /**
-     * 指定された路線の駅の集合を返す。
+     * 指定された路線の駅の集合を返す.
      * @param[in]  line   結果を得たい路線ID.
      * @param[out] result 結果を格納する配列.
      */
     void get_stations_of_line(line_id_t line,
                               std::vector<CStation> &result) const;
+
+    /**
+     * 区間を限定して指定された路線の駅の集合を返す.
+     * @param[in]  line   結果を得たい路線ID.
+     * @param[in]  begin  始点の駅ID.
+     * @param[in]  end    終点の駅ID.
+     * @param[out] result 結果を格納する配列.
+     */
+    size_t get_stations_of_segment(line_id_t line,
+                                   station_id_t begin,
+                                   station_id_t end,
+                                   station_vector & result) const;
 
     /**
      * 指定された駅の所属する路線の集合を返す.
@@ -201,6 +213,12 @@ namespace ares
     void get_belong_line(station_id_t station,
                           line_vector & result) const;
 
+    //! Check if the station is in the line.
+    bool is_belong_to_line(line_id_t line, station_id_t station) const;
+
+    //! Check station is in the segment.
+    bool is_contains(const CSegment & range, const station_id_t station) const;
+
     //! Get company id from company name.
     company_id_t get_company_id(const char * name) const;
 
@@ -240,7 +258,18 @@ namespace ares
     int get_kilo(const line_id_t line,
                  const station_id_t station) const;
 
-    //! Get kilo range of [begin, end] in line.
+    /**
+     * @~english
+     * Get kilo range of [begin, end] in line.
+     */
+    /**
+     * @~japanese
+     * 指定された区間のキロ程を返す.
+     * @param[in] line  路線ID.
+     * @param[in] begin 始点の駅ID.
+     * @param[in] end   終点の駅ID.
+     * @return キロ程の小さい値と大きい値のペア.
+     */
     std::pair<int, int> get_range(const line_id_t line,
                                   const station_id_t begin,
                                   const station_id_t end) const;
@@ -262,11 +291,5 @@ namespace ares
                               bool & is_main,
                               DENSHA_SPECIAL_TYPE & denshaid,
                               DENSHA_SPECIAL_TYPE & circleid) const;
-
-    //! Check if the station is in the line.
-    bool is_belong_to_line(line_id_t line, station_id_t station) const;
-
-    //! Check station is in the segment.
-    bool is_contains(const CSegment & range, const station_id_t station) const;
   };
 }
