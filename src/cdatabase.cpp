@@ -32,6 +32,25 @@ namespace ares
       default: return str;
       }
     }
+
+    /**
+     * check if a <= b. 等号がつくところに注意.
+     * @retval true  aが完全にbに内包されるとき(境界含む.)
+     * @retval false それ以外.
+     */
+    bool isRangeLess(const std::pair<int, int> a, const std::pair<int, int> b)
+    {
+      int a_max = std::max(a.first, a.second);
+      int a_min = std::min(a.first, a.second);
+      int b_max = std::max(b.first, b.second);
+      int b_min = std::min(b.first, b.second);
+      return b_min <= a_min && a_max <= b_max;
+    }
+
+    int getRangeLength(const std::pair<int, int> a)
+    {
+      return std::abs(a.first - a.second);
+    }
   }
 
   std::pair<DENSHA_SPECIAL_TYPE, DENSHA_SPECIAL_TYPE>
@@ -492,17 +511,27 @@ namespace ares
                                                       station_id_t end) const
   {
     const char sql[] =
-      "SELECT is_add, fare FROM fare_special"
-      " WHERE lineid=?1 "
-      "  AND (beginstation=?2 AND endstation=?3 OR"
-      "       beginstation=?3 AND endstation=?2)";
+      "SELECT is_add, fare, beginstation, endstation FROM fare_special"
+      " WHERE lineid=?1 ";
     SQLiteStmt stmt(*db, sql, std::strlen(sql));
     stmt.bind(1, line);
     stmt.bind(2, begin);
     stmt.bind(3, end);
-    SQLiteStmt::iterator result = stmt.execute();
-    if(!result) return boost::none;
-    return std::pair<bool, int>(static_cast<int>(result[0]), result[1]);
+    boost::optional<std::pair<bool,int> > ret;
+    int length=0;
+    std::pair<int, int> q_range = $.get_range(line, begin, end);
+    for(SQLiteStmt::iterator itr = stmt.execute(); itr; ++itr)
+    {
+      const station_id_t d_begin=itr[2], d_end=itr[3];
+      std::pair<bool, int> curr_fare(static_cast<int>(itr[0]), itr[1]);
+      // Just fit.
+      if((d_begin==begin && d_end==end) || (d_end==begin && d_begin==end))
+      { return curr_fare; }
+      std::pair<int, int> d_range = $.get_range(line, d_begin, d_end);
+      if(isRangeLess(d_range, q_range) && length < getRangeLength(d_range))
+      { ret = curr_fare; }
+    }
+    return ret;
   }
 
   std::pair<int, int> CDatabase::get_range(const line_id_t line,

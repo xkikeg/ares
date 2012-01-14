@@ -22,11 +22,7 @@ protected:
 
   CRouteTest() : db(new ares::CDatabase(TEST_DB_FILENAME)),
                  route(db) {}
-
-  virtual ~CRouteTest();
 };
-
-CRouteTest::~CRouteTest() {}
 
 class CRouteTokaidoTest : public CRouteTest
 {
@@ -190,6 +186,24 @@ TEST_F(CRouteTest, FareHonshuMain2Lines) {
   EXPECT_FARE_EQ(8190, route);
 }
 
+TEST_F(CRouteTest, FareHonshuAddFareKanku) {
+  // 6.9km
+  route.append_route(UTF8("関西空港"), UTF8("関西空港"), UTF8("りんくうタウン"));
+  EXPECT_FARE_EQ(350, route);
+  // 11.1km
+  route.append_route(UTF8("関西空港"), UTF8("日根野"));
+  EXPECT_FARE_EQ(440, route);
+  // 46.0km
+  route.append_route(UTF8("阪和"), UTF8("天王寺"));
+  EXPECT_FARE_EQ(1030, route);
+}
+
+TEST_F(CRouteTest, FareHonshuAddFareKanku2) {
+  // 4.2km
+  route.append_route(UTF8("関西空港"), UTF8("日根野"), UTF8("りんくうタウン"));
+  EXPECT_FARE_EQ(330, route);
+}
+
 TEST_F(CRouteTest, FareHonshuYamanote) {
   // 6.8km
   route.append_route(UTF8("東海道"), UTF8("品川"), UTF8("東京"));
@@ -300,6 +314,15 @@ TEST_F(CRouteTest, FareKyushuMainShinkansenSakura) {
   EXPECT_FARE_EQ(5360, route);
 }
 
+TEST_F(CRouteTest, FareKyushuMainAddFareNichirin) {
+  route.append_route(UTF8("宮崎空港"), UTF8("宮崎空港"), UTF8("田吉"));
+  EXPECT_FARE_EQ(280, route);
+  route.append_route(UTF8("日南"), UTF8("南宮崎"));
+  EXPECT_FARE_EQ(320, route);
+  route.append_route(UTF8("日豊"), UTF8("宮崎"));
+  EXPECT_FARE_EQ(340, route);
+}
+
 TEST_F(CRouteTest, FareKyushuLocal) {
   // 289.5km real
   // 318.5km fake
@@ -404,6 +427,18 @@ TEST_F(CRouteTest, FareHokkaidoMainOzora) {
   EXPECT_FARE_EQ(6090, route);
 }
 
+TEST_F(CRouteTest, FareHokkaidoMainAddFareAirport) {
+  // 2.6km
+  route.append_route(UTF8("千歳2"), UTF8("新千歳空港"), UTF8("南千歳"));
+  EXPECT_FARE_EQ(300, route);
+  // 40.8km
+  route.append_route(UTF8("千歳"), UTF8("（函）白石"));
+  EXPECT_FARE_EQ(950, route);
+  // 46.6km
+  route.append_route(UTF8("函館"), UTF8("札幌"));
+  EXPECT_FARE_EQ(1040, route);
+}
+
 TEST_F(CRouteTest, FareHokkaidoLocalSohya) {
   // 396.2km real
   // 422.1km fake
@@ -491,6 +526,56 @@ TEST_F(CRouteTest, FareShikokuMainShimanto)
   EXPECT_FARE_EQ(5090, route);
   route.append_route(UTF8("土佐くろしお"), UTF8("宿毛"));
   EXPECT_FARE_EQ(5580, route);
+}
+
+TEST_F(CRouteTest, FareShikokuAndHonshuSpecialFare1)
+{
+  route.append_route(UTF8("本四備讃"), UTF8("児島"), UTF8("宇多津"));
+  EXPECT_FARE_EQ(410, route);
+  route.append_route(UTF8("予讃"), UTF8("丸亀"));
+  EXPECT_FARE_EQ(510, route);
+  route.append_route(UTF8("予讃"), UTF8("讃岐塩屋"));
+  EXPECT_FARE_EQ(510, route);
+  route.append_route(UTF8("予讃"), UTF8("多度津"));
+  EXPECT_FARE_EQ(510, route);
+  route.append_route(UTF8("予讃"), UTF8("海岸寺"));
+  EXPECT_FARE_EQ(620, route);
+}
+
+TEST_F(CRouteTest, FareShikokuAndHonshuSpecialFare2)
+{
+  route.append_route(UTF8("本四備讃"), UTF8("児島"), UTF8("宇多津"));
+  route.append_route(UTF8("予讃"), UTF8("多度津"));
+  route.append_route(UTF8("土讃"), UTF8("金蔵寺"));
+  EXPECT_FARE_EQ(620, route);
+}
+
+TEST_F(CRouteTest, FareShikokuAndHonshuSpecialFare3)
+{
+  route.append_route(UTF8("本四備讃"), UTF8("児島"), UTF8("宇多津"));
+  route.append_route(UTF8("予讃"), UTF8("坂出"));
+  EXPECT_FARE_EQ(510, route);
+  route.append_route(UTF8("予讃"), UTF8("八十場"));
+  EXPECT_FARE_EQ(620, route);
+  route.append_route(UTF8("予讃"), UTF8("鴨川"));
+  EXPECT_FARE_EQ(620, route);
+  route.append_route(UTF8("予讃"), UTF8("讃岐府中"));
+  EXPECT_FARE_EQ(620, route);
+}
+
+TEST_F(CRouteTest, FareShikokuAndHonshuSpecialFare4)
+{
+  route.append_route(UTF8("本四備讃"), UTF8("上の町"), UTF8("宇多津"));
+  EXPECT_FARE_EQ(510, route);
+  route.append_route(UTF8("予讃"), UTF8("丸亀"));
+  EXPECT_FARE_EQ(510, route);
+}
+
+TEST_F(CRouteTest, FareShikokuAndHonshuSpecialFare5)
+{
+  route.append_route(UTF8("本四備讃"), UTF8("上の町"), UTF8("宇多津"));
+  route.append_route(UTF8("予讃"), UTF8("八十場"));
+  EXPECT_FARE_EQ(620, route);
 }
 
 class CRouteHonshibisanTest : public CRouteTest
