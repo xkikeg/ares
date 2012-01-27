@@ -107,3 +107,38 @@ class Route{
 *使用するSELECT文
 あまりにも複雑なのでメモする。
 SELECT * FROM kilo,station,line,company where line.id=kilo.line AND kilo.station = station.id AND (line.company = company.id AND line.company != 0 OR line.company=0 AND kilo.company=company.id);
+
+*経路特定に対処する方法
+下と似ている。複数区間の経路を探すことが出来れば、それを本来のものに置き換えるだけだ。
+ただし、特定運賃と違って途中に挟まっているだけでも検出する必要がある。
+
+*特定運賃に対処する方法
+テーブルを具体的に考える。
+|id|発駅|着駅|
+| 1|東京|千葉|
+...
+
+|id|区間発駅|区間着駅|区間路線|
+| 1|東京    |千葉    |総武    |
+
+これを結合するテーブルを作る。
+ただし、区間テーブルに発駅と着駅を定めるのは汚い気がする。
+でもそこから着発駅を除くのも難しい。
+まずは汚い手を使うしかないかな。
+
+*wxAresの実装
+こっちは運賃をちゃんと計算できるように早くなろう。
+運賃を計算するハンドラクラス。
+あとあとMARS互換の発駅・着駅・経路指定のハンドラもいるので区別できる名前を.
+class AresCalculator
+{
+protected:
+  AresCalculator() = default;
+public:
+  virtual ares::CFare calcFare() = 0;
+  virtual void addSegment(ares::line_id_t, ares::station_id_t, ares::station_id_t) = 0;
+  virtual void addSegment(ares::line_id_t) = 0;
+
+};
+class AresたどるCalculator : public AresCalculator;
+class Ares決められたCalculator : public AresCalculator;
