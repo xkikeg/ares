@@ -2,9 +2,9 @@
 
 # .SUBDIRS:
 
-MAIN = test
+MAIN = ares
 LIB  = $(LIBARES)
-MAINSRC = $(MAIN)
+MAINSRC = aresmain
 
 CXXFILES[] = $(filter-out $(MAINSRC), $(removesuffix $(ls *.cpp)))
 
