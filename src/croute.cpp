@@ -95,7 +95,7 @@ namespace ares
   void CRoute::init(station_id_t station)
   {
     $.init();
-    $.push_back();
+    $.way.push_back(station);
   }
 
   bool CRoute::append_route(line_id_t line, station_id_t station)

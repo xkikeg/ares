@@ -72,6 +72,6 @@ namespace ares
     MAX_DENSHA_SPECIAL_TYPE,
   };
 
-  constexpr line_id_t INVALID_LINE_ID;
-  constexpr station_id_t INVALID_STATION_ID;
+  constexpr line_id_t INVALID_LINE_ID = 0;
+  constexpr station_id_t INVALID_STATION_ID = 0;
 }
