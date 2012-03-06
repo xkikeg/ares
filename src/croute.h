@@ -49,17 +49,27 @@ namespace ares
     const_iterator begin() const { return way.begin(); }
     const_iterator end() const{ return way.end(); }
 
-    // /**
-    //  * Set begin station. (does it fail with non-empty way?)
-    //  */
-    // bool set_begin(station_id_t station);
+    /**
+     * Initialize without any route.
+     */
+    void init();
+
+    /**
+     * Initialize with begin station.
+     * @param[in] station begin station id of the route
+     */
+    void init(station_id_t station);
 
     /**
      * Function to append a new part to the route.
+     * This function fails when the only one segment of route is complete
+     * or there is no segments in the route.
      * @param[in] line    line id of route
      * @param[in] station station id of route
+     * @retval true  Succeed to append route
+     * @retval false Failed to append route because the line is invalid
      */
-    void append_route(line_id_t line, station_id_t station);
+    bool append_route(line_id_t line, station_id_t station);
 
     /**
      * @~english

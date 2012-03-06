@@ -71,4 +71,7 @@ namespace ares
     DENSHA_SPECIAL_OSAKAKANJO,
     MAX_DENSHA_SPECIAL_TYPE,
   };
+
+  constexpr line_id_t INVALID_LINE_ID;
+  constexpr station_id_t INVALID_STATION_ID;
 }

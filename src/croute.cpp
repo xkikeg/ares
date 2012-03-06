@@ -87,16 +87,32 @@ namespace ares
     return a.way == b.way;
   }
 
-  void CRoute::append_route(line_id_t line, station_id_t station)
+  void CRoute::init()
   {
+    $.way.clear();
+  }
+
+  void CRoute::init(station_id_t station)
+  {
+    $.init();
+    $.push_back();
+  }
+
+  bool CRoute::append_route(line_id_t line, station_id_t station)
+  {
+    if(way.empty()){ return false; }
     if(way.back().is_begin())
     {
+      if(true
+         && way.back().line == INVALID_LINE_ID
+         && way.back().end == INVALID_STATION_ID) { return false; }
       way.back().line = line;
       way.back().end = station;
     }
     else {
       way.push_back(CSegment(way.back().end, line, station));
     }
+    return true;
   }
 
   void CRoute::append_route(const char * line, const char * station)

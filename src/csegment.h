@@ -16,8 +16,8 @@ namespace ares
 
     CSegment(station_id_t begin)
       : begin(begin),
-        end(0),
-        line(0) {}
+        end(INVALID_STATION_ID),
+        line(INVALID_LINE_ID) {}
 
     CSegment(station_id_t begin,
              line_id_t line,
@@ -35,7 +35,7 @@ namespace ares
      * 最初のセグメントかどうかを判定する.
      */
     bool is_begin() const {
-      return line == 0 && end == 0;
+      return line == INVALID_STATION_ID && end == INVALID_LINE_ID;
     }
 
     bool operator==(const CSegment & b) const {
