@@ -111,6 +111,8 @@ public:
   virtual wxString getStringOfQueryId(const int id) = 0;
   boost::optional<ares::line_id_t> getLine();
   boost::optional<ares::station_id_t> getStation();
+  virtual void setSelection(long item);
+  virtual void updateSelection() = 0;
 
 private:
   wxSearchCtrl * m_query;
@@ -138,6 +140,7 @@ public:
   virtual ~AresSearchStationDialog();
   void OnOK(wxCommandEvent & event);
   virtual void OnSelected(wxCommandEvent& event);
+  virtual void updateSelection();
   virtual void getQueryResult(const wxString & query,
                               std::vector<int> &result);
   virtual wxString getStringOfQueryId(const int id);
@@ -152,6 +155,7 @@ public:
   explicit AresSearchLineDialog(wxWindow * parent);
   virtual ~AresSearchLineDialog();
   virtual void OnSelected(wxCommandEvent& event);
+  virtual void updateSelection();
   virtual void getQueryResult(const wxString & query,
                               std::vector<int> &result);
   virtual wxString getStringOfQueryId(const int id);

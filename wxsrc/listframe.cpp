@@ -12,6 +12,23 @@
 #include "util.hpp"
 #include "cdatabase.h"
 
+#define ENABLE_DEBUG_PRINTING 0
+
+#if ENABLE_DEBUG_PRINTING
+#define DEBUG_PRT std::cerr
+#else
+struct NullOutputStream : public std::streambuf
+{
+} DEBUG_PRT;
+
+template <class T>
+inline NullOutputStream & operator<<(NullOutputStream & stream,
+                              const T)
+{
+  return stream;
+}
+#endif
+
 DEFINE_EVENT_TYPE(EVT_CONNECT_LIST_KILL_FOCUS)
 
 BEGIN_EVENT_TABLE(AresListFrame, wxFrame)
@@ -296,7 +313,7 @@ void AresSearchDialog::clearQueryText(wxCommandEvent& WXUNUSED(event))
 void AresSearchDialog::focusResultList(wxCommandEvent& WXUNUSED(event))
 {
   m_result->SetFocus();
-  m_result->SetSelection(0);
+  $.setSelection(0);
 }
 
 void AresSearchDialog::OnUpdateQuery(wxCommandEvent& WXUNUSED(event))
@@ -336,6 +353,12 @@ boost::optional<ares::station_id_t> AresSearchDialog::getStation()
   return m_selected_station;
 }
 
+void AresSearchDialog::setSelection(long item)
+{
+  m_result->SetSelection(item);
+  $.updateSelection();
+}
+
 AresSearchStationDialog::AresSearchStationDialog(wxWindow * parent)
   : AresSearchDialog(parent, wxID_ANY, _("Search stations"))
 {
@@ -346,6 +369,8 @@ AresSearchStationDialog::~AresSearchStationDialog() {}
 void AresSearchStationDialog::OnOK(wxCommandEvent & WXUNUSED(event))
 {
   // OK
+  DEBUG_PRT << "search station: station is already set: "
+            << PRT(m_selected_station) << "\n";
   if(m_selected_station)
   {
     ares::line_vector result;
@@ -360,6 +385,7 @@ void AresSearchStationDialog::OnOK(wxCommandEvent & WXUNUSED(event))
     assert(!lines.IsEmpty());
     if(lines.GetCount() == 1)
     {
+      DEBUG_PRT << "station search only find " << PRT(result[0]) << "\n";
       m_selected_line = result[0];
     }
     else
@@ -377,9 +403,15 @@ void AresSearchStationDialog::OnOK(wxCommandEvent & WXUNUSED(event))
   $.EndModal(wxID_OK);
 }
 
-void AresSearchStationDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
+void AresSearchStationDialog::updateSelection()
 {
   m_selected_station = $.getID();
+  DEBUG_PRT << "station selected " << *m_selected_station << "\n";
+}
+
+void AresSearchStationDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
+{
+  $.updateSelection();
 }
 
 void AresSearchStationDialog::getQueryResult(const wxString & query,
@@ -400,9 +432,14 @@ AresSearchLineDialog::AresSearchLineDialog(wxWindow * parent)
 
 AresSearchLineDialog::~AresSearchLineDialog() {}
 
-void AresSearchLineDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
+void AresSearchLineDialog::updateSelection()
 {
   m_selected_line = $.getID();
+}
+
+void AresSearchLineDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
+{
+  $.updateSelection();
 }
 
 void AresSearchLineDialog::getQueryResult(const wxString & query,
@@ -486,6 +523,10 @@ void AresListFrame::OnSearchDialog()
   DialogType dlg(this);
   if(wxID_OK == dlg.ShowModal())
   {
+    DEBUG_PRT << PRT(dlg.getLine())
+              << PRT(dlg.getStation()) << "\n";
+    DEBUG_PRT << PRT(boost::optional<int>())
+              << PRT(boost::optional<int>(123)) << "\n";
     if(auto line = dlg.getLine())
     {
       m_lineList->setSelectionWithId(*line);
@@ -497,6 +538,10 @@ void AresListFrame::OnSearchDialog()
         m_stationList->SetFocus();
       }
     }
+  }
+  else
+  {
+    DEBUG_PRT << PRT(wxID_OK) << "\n";
   }
 }
 
@@ -518,12 +563,12 @@ void AresListFrame::OnAllLineListBox(wxCommandEvent& event)
   }
   catch(const std::exception & e)
   {
-    std::cerr << "Some Exception:" << e.what() << std::endl;
+    DEBUG_PRT << "Some Exception:" << e.what() << "\n";
     throw;
   }
   catch(...)
   {
-    std::cerr << "Unknown Exception Throwed\n";
+    DEBUG_PRT << "Unknown Exception Throwed\n";
     throw;
   }
 }
