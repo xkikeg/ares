@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: wxAres\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-01-03 21:44+0900\n"
-"PO-Revision-Date: 2012-01-03 21:53+0900\n"
+"PO-Revision-Date: 2012-03-21 09:01+0900\n"
 "Last-Translator: K. Ikegami <liquid@logos.ic.i.u-tokyo.ac.jp>\n"
 "Language-Team: liquid_amber\n"
 "Language: \n"
@@ -47,15 +47,15 @@ msgstr "駅名検索"
 #: listframe.cpp:281
 #, c-format
 msgid "Choose the line of %s"
-msgstr ""
+msgstr "%sを経由する路線から1つを選択してください"
 
 #: listframe.cpp:283
 msgid "Choose line"
-msgstr ""
+msgstr "路線選択"
 
 #: listframe.cpp:310
 msgid "Search lines"
-msgstr ""
+msgstr "路線名検索"
 
 #: listframe.cpp:339
 msgid "E&xit\tCtrl-Q"
