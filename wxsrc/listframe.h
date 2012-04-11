@@ -103,7 +103,7 @@ public:
   void clearQueryText(wxCommandEvent & event);
   void focusResultList(wxCommandEvent & event);
   void OnUpdateQuery(wxCommandEvent & event);
-  virtual void OnSelected(wxCommandEvent & event) = 0;
+  void OnSelected(wxCommandEvent & event);
   void OnDblSelected(wxCommandEvent & event);
   virtual void getQueryResult(const wxString & query,
                               std::vector<int> &result) = 0;
@@ -139,7 +139,6 @@ public:
   explicit AresSearchStationDialog(wxWindow * parent);
   virtual ~AresSearchStationDialog();
   void OnOK(wxCommandEvent & event);
-  virtual void OnSelected(wxCommandEvent& event);
   virtual void updateSelection();
   virtual void getQueryResult(const wxString & query,
                               std::vector<int> &result);
@@ -154,7 +153,6 @@ class AresSearchLineDialog : public AresSearchDialog
 public:
   explicit AresSearchLineDialog(wxWindow * parent);
   virtual ~AresSearchLineDialog();
-  virtual void OnSelected(wxCommandEvent& event);
   virtual void updateSelection();
   virtual void getQueryResult(const wxString & query,
                               std::vector<int> &result);

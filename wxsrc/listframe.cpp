@@ -359,6 +359,11 @@ void AresSearchDialog::setSelection(long item)
   $.updateSelection();
 }
 
+void AresSearchDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
+{
+  $.updateSelection();
+}
+
 AresSearchStationDialog::AresSearchStationDialog(wxWindow * parent)
   : AresSearchDialog(parent, wxID_ANY, _("Search stations"))
 {
@@ -409,11 +414,6 @@ void AresSearchStationDialog::updateSelection()
   DEBUG_PRT << "station selected " << *m_selected_station << "\n";
 }
 
-void AresSearchStationDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
-{
-  $.updateSelection();
-}
-
 void AresSearchStationDialog::getQueryResult(const wxString & query,
                                              std::vector<int> &result)
 {
@@ -435,11 +435,6 @@ AresSearchLineDialog::~AresSearchLineDialog() {}
 void AresSearchLineDialog::updateSelection()
 {
   m_selected_line = $.getID();
-}
-
-void AresSearchLineDialog::OnSelected(wxCommandEvent& WXUNUSED(event))
-{
-  $.updateSelection();
 }
 
 void AresSearchLineDialog::getQueryResult(const wxString & query,
