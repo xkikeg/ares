@@ -100,12 +100,9 @@ namespace ares
 
   bool CRoute::append_route(line_id_t line, station_id_t station)
   {
-    if(way.empty()){ return false; }
+    if(way.empty()){ std::cerr << "2-arg toward empty route\n"; return false; }
     if(way.back().is_begin())
     {
-      if(true
-         && way.back().line == INVALID_LINE_ID
-         && way.back().end == INVALID_STATION_ID) { return false; }
       way.back().line = line;
       way.back().end = station;
     }
@@ -125,10 +122,7 @@ namespace ares
   {
     if(true
        && !way.empty()
-       && way.back().is_begin()
-       && (false
-           || way.back().line == INVALID_LINE_ID
-           || way.back().end == INVALID_STATION_ID))
+       && way.back().is_begin())
     { return false; }
     way.push_back(CSegment(begin, line, end));
     return true;

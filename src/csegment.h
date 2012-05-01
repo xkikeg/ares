@@ -35,7 +35,7 @@ namespace ares
      * 最初のセグメントかどうかを判定する.
      */
     bool is_begin() const {
-      return line == INVALID_STATION_ID && end == INVALID_LINE_ID;
+      return line == INVALID_LINE_ID && end == INVALID_STATION_ID;
     }
 
     bool operator==(const CSegment & b) const {
