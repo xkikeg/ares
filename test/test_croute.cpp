@@ -34,8 +34,8 @@ protected:
 
   ares::CRoute createRoute2argsTokaidoSannyo() {
     ares::CRoute route(db, db->get_stationid("東京"));
-    route.append_route(UTF8("東海道"), UTF8("神戸"));
-    route.append_route(UTF8("山陽"),   UTF8("岡山"));
+    EXPECT_TRUE(route.append_route(UTF8("東海道"), UTF8("神戸")));
+    EXPECT_TRUE(route.append_route(UTF8("山陽"),   UTF8("岡山")));
     return std::move(route);
   }
 

@@ -76,14 +76,18 @@ namespace ares
      * Function to append a new part to the route.
      * @param[in] line    UTF-8 line name of route
      * @param[in] station UTF-8 station name of route
+     * @retval true  Succeed to append route
+     * @retval false Failed to append route because the line is invalid
      */
     /**
      * @~japanese
      * 新しい経路の区間を加える関数.
      * @param[in] line    UTF-8でエンコードされた路線名
      * @param[in] station UTF-8でエンコードされた駅名
+     * @retval true       追加に成功した
+     * @retval false      (2argと3argの混用や誤った指定により)追加に失敗した
      */
-    void append_route(const char * line, const char * station);
+    bool append_route(const char * line, const char * station);
 
     /**
      * @~english
@@ -91,6 +95,8 @@ namespace ares
      * @param[in] line    line id of route
      * @param[in] begin   begin station id of route
      * @param[in] end     end station id of route
+     * @retval true  Succeed to append route
+     * @retval false Failed to append route because the line is invalid
      */
     /**
      * @~japanese
@@ -98,8 +104,10 @@ namespace ares
      * @param[in] line    路線ID
      * @param[in] begin   始点の駅名ID
      * @param[in] end     終点の駅名ID
+     * @retval true       追加に成功した
+     * @retval false      (2argと3argの混用や誤った指定により)追加に失敗した
      */
-    void append_route(line_id_t line, station_id_t begin, station_id_t end);
+    bool append_route(line_id_t line, station_id_t begin, station_id_t end);
 
     /**
      * @~english
@@ -107,6 +115,8 @@ namespace ares
      * @param[in] line    UTF-8 line name of route
      * @param[in] begin   UTF-8 begin station name of route
      * @param[in] end     UTF-8 end station name of route
+     * @retval true  Succeed to append route
+     * @retval false Failed to append route because the line is invalid
      */
     /**
      * @~japanese
@@ -114,8 +124,10 @@ namespace ares
      * @param[in] line    UTF-8でエンコードされた路線名
      * @param[in] begin   UTF-8でエンコードされた始点の駅名
      * @param[in] end     UTF-8でエンコードされた終点の駅名
+     * @retval true       追加に成功した
+     * @retval false      (2argと3argの混用や誤った指定により)追加に失敗した
      */
-    void append_route(const char * line, const char * begin, const char * end);
+    bool append_route(const char * line, const char * begin, const char * end);
 
     /**
      * Function to check contains.

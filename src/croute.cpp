@@ -95,7 +95,7 @@ namespace ares
   void CRoute::init(station_id_t station)
   {
     $.init();
-    $.way.push_back(station);
+    $.way.push_back(CSegment{station});
   }
 
   bool CRoute::append_route(line_id_t line, station_id_t station)
@@ -115,22 +115,30 @@ namespace ares
     return true;
   }
 
-  void CRoute::append_route(const char * line, const char * station)
+  bool CRoute::append_route(const char * line, const char * station)
   {
-    $.append_route(db->get_lineid(line),
-                   db->get_stationid(station));
+    return $.append_route(db->get_lineid(line),
+                          db->get_stationid(station));
   }
 
-  void CRoute::append_route(line_id_t line, station_id_t begin, station_id_t end)
+  bool CRoute::append_route(line_id_t line, station_id_t begin, station_id_t end)
   {
+    if(true
+       && !way.empty()
+       && way.back().is_begin()
+       && (false
+           || way.back().line == INVALID_LINE_ID
+           || way.back().end == INVALID_STATION_ID))
+    { return false; }
     way.push_back(CSegment(begin, line, end));
+    return true;
   }
 
-  void CRoute::append_route(const char * line, const char * begin, const char * end)
+  bool CRoute::append_route(const char * line, const char * begin, const char * end)
   {
-    $.append_route(db->get_lineid(line),
-                   db->get_stationid(begin),
-                   db->get_stationid(end));
+    return $.append_route(db->get_lineid(line),
+                          db->get_stationid(begin),
+                          db->get_stationid(end));
   }
 
   bool CRoute::is_contains(station_id_t station) const
