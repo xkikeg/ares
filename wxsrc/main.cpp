@@ -15,7 +15,7 @@ bool AresApp::OnInit()
   m_locale.AddCatalog(_T("wxares"));
 #ifdef __LINUX__
   {
-    wxLogNull noLog;
+    //wxLogNull noLog;
     m_locale.AddCatalog(_T("fileutils"));
   }
 #endif
