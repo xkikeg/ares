@@ -71,8 +71,16 @@ END_EVENT_TABLE();
 BEGIN_EVENT_TABLE(AresSearchLineDialog, AresSearchDialog)
 END_EVENT_TABLE();
 
+#define LENGTH(x) (sizeof(x)/sizeof(x[0]))
+
 namespace
 {
+  struct LISTVIEW_COLUMN_VALUES
+  {
+    wxString label;
+    int format, width;
+  };
+
   enum ARES_STATION_LIST_COLUMN_TYPE
   {
     ARES_STATION_LIST_COLUMN_NAME,
@@ -83,31 +91,13 @@ namespace
     MAX_ARES_STATION_LIST_COLUMN_TYPE,
   };
 
-  wxString ARES_STATION_LIST_COLUMN_STR[] =
+  LISTVIEW_COLUMN_VALUES ARES_STATION_LIST_COLUMN[] =
   {
-    _("station"),
-    _("yomi"),
-    _("denryaku"),
-    _("realkilo"),
-    _("fakekilo"),
-  };
-
-  int ARES_STATION_LIST_COLUMN_FORMAT[] =
-  {
-    wxLIST_FORMAT_LEFT,
-    wxLIST_FORMAT_LEFT,
-    wxLIST_FORMAT_LEFT,
-    wxLIST_FORMAT_RIGHT,
-    wxLIST_FORMAT_RIGHT,
-  };
-
-  int ARES_STATION_LIST_COLUMN_WIDTH[] =
-  {
-    100,
-    120,
-    80,
-    65,
-    65,
+    {_("station") , wxLIST_FORMAT_LEFT , 100},
+    {_("yomi")    , wxLIST_FORMAT_LEFT , 120},
+    {_("denryaku"), wxLIST_FORMAT_LEFT ,  80},
+    {_("realkilo"), wxLIST_FORMAT_RIGHT,  65},
+    {_("fakekilo"), wxLIST_FORMAT_RIGHT,  65},
   };
 }
 
@@ -120,12 +110,12 @@ AresStationListView::AresStationListView(wxWindow * parent,
 {
   wxListItem itemCol;
 
-  for(int i=0; i<MAX_ARES_STATION_LIST_COLUMN_TYPE; ++i)
+  for(int i=0; i < LENGTH(ARES_STATION_LIST_COLUMN); ++i)
   {
     this->InsertColumn(i,
-                       wxGetTranslation(ARES_STATION_LIST_COLUMN_STR[i]),
-                       ARES_STATION_LIST_COLUMN_FORMAT[i],
-                       ARES_STATION_LIST_COLUMN_WIDTH[i]);
+                       wxGetTranslation(ARES_STATION_LIST_COLUMN[i].label),
+                       ARES_STATION_LIST_COLUMN[i].format,
+                       ARES_STATION_LIST_COLUMN[i].width);
   }
 }
 
