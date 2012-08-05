@@ -106,11 +106,12 @@ AresStationListView::AresStationListView(wxWindow * parent,
                                          const wxPoint &pos,
                                          const wxSize &size)
   : wxListView(parent, id, pos, size,
-               wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_HRULES | wxLC_VRULES)
+               wxLC_REPORT | wxLC_VIRTUAL | wxLC_SINGLE_SEL
+               | wxLC_HRULES | wxLC_VRULES)
 {
   wxListItem itemCol;
 
-  for(int i=0; i < LENGTH(ARES_STATION_LIST_COLUMN); ++i)
+  for(size_t i=0; i < LENGTH(ARES_STATION_LIST_COLUMN); ++i)
   {
     this->InsertColumn(i,
                        wxGetTranslation(ARES_STATION_LIST_COLUMN[i].label),
@@ -122,21 +123,9 @@ AresStationListView::AresStationListView(wxWindow * parent,
 void AresStationListView::setLineId(ares::line_id_t lineid)
 {
   m_lineid = lineid;
-  this->Hide();
-  this->DeleteAllItems();
   m_stations.clear();
   wxGetApp().getdb().get_stations_of_line(lineid, m_stations);
-  for(auto itr=m_stations.begin(); itr != m_stations.end(); ++itr)
-  {
-    const long tmp = this->InsertItem
-      (itr-m_stations.begin(), wxString::FromUTF8(itr->name.c_str()), 0);
-    this->SetItemData(tmp, 0);
-    this->SetItem(tmp, 1, wxString::FromUTF8(itr->yomi.c_str()));
-    this->SetItem(tmp, 2, wxString::FromUTF8(itr->denryaku.c_str()));
-    this->SetItem(tmp, 3, wxString::FromAscii(itr->realkilo.to_str().c_str()));
-    this->SetItem(tmp, 4, wxString::FromAscii(itr->fakekilo.to_str().c_str()));
-  }
-  this->Show();
+  SetItemCount(m_stations.size());
 }
 
 void AresStationListView::setSelection(long item)
@@ -162,6 +151,26 @@ int AresStationListView::getIndexFromId(ares::station_id_t idval) const
                           { return obj.id == idval; });
   assert(itr != m_stations.end());
   return itr - m_stations.begin();
+}
+
+wxString AresStationListView::OnGetItemText(long item, long column) const
+{
+  assert(item >= 0 && static_cast<size_t>(item) < m_stations.size());
+  switch(static_cast<ARES_STATION_LIST_COLUMN_TYPE>(column))
+  {
+  case ARES_STATION_LIST_COLUMN_NAME:
+    return wxString::FromUTF8(m_stations[item].name.c_str());
+  case ARES_STATION_LIST_COLUMN_YOMI:
+    return wxString::FromUTF8(m_stations[item].yomi.c_str());
+  case ARES_STATION_LIST_COLUMN_DENRYAKU:
+    return wxString::FromUTF8(m_stations[item].denryaku.c_str());
+  case ARES_STATION_LIST_COLUMN_REALKILO:
+    return wxString::FromAscii(m_stations[item].realkilo.to_str().c_str());
+  case ARES_STATION_LIST_COLUMN_FAKEKILO:
+    return wxString::FromAscii(m_stations[item].fakekilo.to_str().c_str());
+  default:
+    throw std::runtime_error("no such column\n");
+  }
 }
 
 AresLineListBox::~AresLineListBox() {}

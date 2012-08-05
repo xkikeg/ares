@@ -29,6 +29,8 @@ public:
   ares::station_id_t getIdFromIndex(int index) const;
   int getIndexFromId(ares::station_id_t idval) const;
 
+  virtual wxString OnGetItemText(long item, long column) const;
+
 private:
   DECLARE_NO_COPY_CLASS(AresStationListView);
   DECLARE_EVENT_TABLE();
