@@ -1,4 +1,7 @@
 "stationname:text:u","stationyomi:text","stationdenryaku:text:u","urbanid:integer::urban[urbanname]","cityid:integer","yamanote:integer","denshaid:integer::densha[denshaname]","denshacircleid:integer::densha[denshaname]","comment:trash"
+#@INDEX,stationname,UNIQUE,stationname
+#@INDEX,stationyomi,,stationyomi
+#@INDEX,stationdenryaku,UNIQUE,stationdenryaku
 "江差","えさし","セカエシ",,,,,,"江差"
 "上ノ国","かみのくに","セカカニ",,,,,,
 "中須田","なかすだ","セカスタ",,,,,,

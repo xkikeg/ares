@@ -7,6 +7,7 @@ import string
 import sqlite3
 from optparse import OptionParser
 
+
 DATA_DIR = "data/"
 #DB_NAME = ":memory:"
 DB_NAME = "ares.sqlite"
@@ -27,8 +28,10 @@ TARGETS = (
     "fare_special",
     )
 
+
 class CSVParseException(Exception):
     pass
+
 
 def typechange(x, typestring, isnull):
     null = "NULL" if isnull else 0
@@ -67,6 +70,20 @@ def parse_header(line):
     return (names, types, constraint, foreignkey, primarykey, options)
 
 
+def parse_pragmas(db, table, pname, pargs):
+    pname = pname.lower()
+    if False: return None
+    elif pname.lower() == "index":
+        # index name : pargs[0]
+        # is_unique  : pargs[1]
+        # columns    : pargs[2:]
+        query = "CREATE %s INDEX %s ON %s (%s)" % (
+            pargs[1], pargs[0], table, ''.join(pargs[2:]))
+        return query
+    else:
+        return None
+
+
 def mktable_from_csv(db, tablename, filename = None):
     if DEBUG: print "Start Table: ", tablename
     if filename is None: filename = DATA_DIR + tablename + ".csv"
@@ -84,9 +101,13 @@ def mktable_from_csv(db, tablename, filename = None):
     # Read rows.
     rawrows = []
     rows = []
+    queries = []
     for row in csvfile:
         rawrows.append(row)
         if row[0] == "": continue
+        if row[0].find("#@") == 0:
+            queries.append(parse_pragmas(db, tablename, row[0][2:], row[1:]))
+            continue
         cols = []
         for i, col in enumerate(row):
             if foreignkey[i] is None:
@@ -143,6 +164,12 @@ def mktable_from_csv(db, tablename, filename = None):
     if DEBUG: print sql
     db.execute(sql)
 
+    #execute queries
+    for q in queries:
+        if q is None: continue
+        if DEBUG: print q
+        db.execute(q)
+
     # Insert data.
     sql = ("INSERT INTO %s (%s) values (%s)" %
            (tablename,
@@ -157,6 +184,7 @@ def mktable_from_csv(db, tablename, filename = None):
             print >>sys.stderr, "== Error occurred =="
             print >>sys.stderr, " @ ".join([unicode(i) for i in row])
             raise
+    return
 
 
 def create_view(db):

@@ -1,4 +1,7 @@
 "linename:text:u","lineyomi:text:u","linecode:integer:u","is_main:integer","linecompanyid:integer::company[companyname]","comment:trash"
+#@INDEX,linename,UNIQUE,linename
+#@INDEX,lineyomi,UNIQUE,lineyomi
+#@INDEX,linecode,UNIQUE,linecode
 "東北新幹線","とうほくしんかんせん",35,1,"本州",
 "上越新幹線","じょうえつしんかんせん",50,1,"本州",
 "北陸新幹線","ほくりくしんかんせん",4,1,"本州",
