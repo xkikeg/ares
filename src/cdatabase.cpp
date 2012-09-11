@@ -21,13 +21,13 @@ namespace ares
     {
       switch(mode)
       {
-      case FIND_PARTIAL: return std::move("%" + str + "%");
+      case FIND_PARTIAL: return "%" + str + "%";
 
-      case FIND_PREFIX: return std::move(str + "%");
+      case FIND_PREFIX: return str + "%";
 
-      case FIND_SUFFIX: return std::move("%" + str);
+      case FIND_SUFFIX: return "%" + str;
 
-      case FIND_EXACT: return std::move(str);
+      case FIND_EXACT: return str;
 
       default: return str;
       }
