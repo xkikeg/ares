@@ -162,7 +162,7 @@ namespace ares
                                const find_mode mode,
                                line_vector & list) const;
     //! Find lines from line name with alias.
-    bool find_lineid_with_alias(const char * name,
+    void find_lineid_with_alias(const char * name,
                                 const find_mode mode,
                                 line_vector & list) const;
 

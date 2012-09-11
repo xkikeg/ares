@@ -270,11 +270,10 @@ namespace ares
     stmt.fill_column(list, 0);
   }
 
-  bool CDatabase::find_lineid_with_alias(const char * name,
-                                         const find_mode mode,
-                                         line_vector & list) const
+  void CDatabase::find_lineid_with_alias(const char *,
+                                         const find_mode,
+                                         line_vector &) const
   {
-    return true;
   }
 
   line_id_t CDatabase::get_lineid(const char * name,
