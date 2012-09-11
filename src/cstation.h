@@ -12,18 +12,24 @@ namespace ares
 
     CStation() = default;
 
+    template<class S>
     CStation(const station_id_t id,
-             const std::string & name,
-             const std::string & yomi,
-             const std::string & denryaku,
+             S && name,
+             S && yomi,
+             S && denryaku,
              const int realkilo,
              const int fakekilo)
       : id(id),
-        name(name),
-        yomi(yomi),
-        denryaku(denryaku),
+        name(std::forward<S>(name)),
+        yomi(std::forward<S>(yomi)),
+        denryaku(std::forward<S>(denryaku)),
         realkilo(CHecto(realkilo)),
         fakekilo(CHecto(fakekilo)) {}
-  };
 
+    CStation(const CStation &) = default;
+    CStation(CStation &&) = default;
+
+    CStation & operator=(const CStation &) = default;
+    CStation & operator=(CStation &&) = default;
+  };
 }
