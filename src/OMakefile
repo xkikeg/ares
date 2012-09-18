@@ -6,7 +6,9 @@ MAIN = ares
 LIB  = $(LIBARES)
 MAINSRC = aresmain
 
-CXXFILES[] = $(filter-out $(MAINSRC), $(removesuffix $(ls *.cpp)))
+ALLCXXFILES[] = $(removesuffix $(basename $(ls $(SRCDIR)/*.cpp)))
+
+CXXFILES[] = $(filter-out $(MAINSRC), $(ALLCXXFILES))
 
 .DEFAULT: $(CXXProgram $(MAIN), $(CXXFILES) $(MAINSRC)) \
 $(StaticCXXLibrary $(LIB), $(CXXFILES))

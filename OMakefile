@@ -1,23 +1,38 @@
 .PHONY: clean
 
 SRCDIR = $(dir src)
+OPTDIR = $(dir opt)
 TESTDIR = $(dir test)
+DEBUGDIR = $(dir debug)
 GTESTDIR = $(dir googletest)
 
-LIBARES = $(file $(SRCDIR)/libares)
+LIBARES = libares
+LIBARES_OPT = $(file $(OPTDIR)/$(LIBARES))
+LIBARES_DEBUG = $(file $(DEBUGDIR)/$(LIBARES))
 ARES_DB_FILE = $(file ares.sqlite)
 
-CXXFLAGS += -std=c++0x -g -Wall -Wextra
+CXXFLAGS += -std=c++0x -Wall -Wextra
 # ASFLAGS +=
 LDFLAGS += -lsqlite3
 INCLUDES += $(SRCDIR)
+
+mkdir(-p debug)
+mkdir(-p opt)
 
 .DEFAULT: $(ARES_DB_FILE)
 
 $(ARES_DB_FILE): mksql.py $(glob data/*.csv)
 	./mksql.py
 
-.SUBDIRS: $(SRCDIR) $(TESTDIR)
+section
+	CXXFLAGS += -g
+	vmount($(SRCDIR), $(DEBUGDIR))
+	.SUBDIRS: $(DEBUGDIR) $(TESTDIR)
+
+section
+	CXXFLAGS += -O3
+	vmount($(SRCDIR), $(OPTDIR))
+	.SUBDIRS: $(OPTDIR)
 
 clean:
 	rm $(filter-proper-targets $(ls R, .))
