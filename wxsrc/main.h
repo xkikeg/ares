@@ -7,11 +7,13 @@ namespace ares
   class CDatabase;
 }
 
+class IncrementFareHandler;
+
 class AresApp : public ::wxApp
 {
 public:
   //! コンストラクタ
-  AresApp() {};
+  AresApp();
   //! セットアップ時の処理
   virtual bool OnInit();
 
@@ -22,6 +24,7 @@ protected:
 
 private:
   std::shared_ptr<ares::CDatabase> m_aresdb;
+  std::unique_ptr<IncrementFareHandler> m_pIncrementFareHandler;
   DECLARE_NO_COPY_CLASS(AresApp);
 };
 
