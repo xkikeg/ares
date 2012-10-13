@@ -1,8 +1,9 @@
-#include <wx/log.h>
-#include "cdatabase.h"
-#include "sqlite3_wrapper.h"
-
 #include "main.h"
+
+#include <wx/log.h>
+#include <cdatabase.h>
+#include <sqlite3_wrapper.h>
+
 #include "listframe.h"
 #include "filepath.h"
 
