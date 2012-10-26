@@ -57,7 +57,7 @@ namespace ares
      * @param[in] query      Query string that raise multiple object error.
      * @param[in] num        The number of result returned to query.
      */
-    explicit MultipleObjectReturned(const char * query, size_t num)
+    MultipleObjectReturned(const char * query, size_t num)
       : std::logic_error(std::string("query '") + query + "' returned"
                          + boost::lexical_cast<std::string>(num) + " objects.") {}
   };
