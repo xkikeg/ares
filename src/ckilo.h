@@ -376,6 +376,6 @@ namespace ares
     }
 
     //! デフォルトコンストラクタ.
-    CKilo() : kilo({{{0}}}) {}
+    CKilo() : kilo{{{0}}} {}
   };
 }
