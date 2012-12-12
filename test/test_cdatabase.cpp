@@ -64,7 +64,8 @@ protected:
                                               ares::find_mode mode,     \
                                               const char * query) {     \
     ares::station_vector sidresult;                                     \
-    SCOPED_TRACE("check get station name with "BOOST_PP_STRINGIZE(col));\
+    SCOPED_TRACE("check get station name with "                         \
+                 BOOST_PP_STRINGIZE(col));                              \
     db->BOOST_PP_CAT(find_stationid_with_,col)(query, mode, sidresult); \
     diffStationNameVector(std::move(reference), sidresult);             \
   }
