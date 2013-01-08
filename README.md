@@ -15,11 +15,9 @@ ARESはJRの運賃計算をするためのアプリケーションです。
 ### ビルド ###
 UbuntuなどDebian系OSでの環境の入れ方です。C++0xの機能のためgccはなるべく新しいバージョンを推奨します。開発者は4.6を使用しています。
 
- % sudo apt-get install omake
- % sudo apt-get install libsqlite3-dev sqlite3-doc
- % sudo apt-get install libwxgtk2.8-dev wx2.8-i18n wx2.8-examples wx2.8-doc
- # examples and docs are not essential.
- % omake
+    % sudo apt-get install omake
+    % sudo apt-get install libsqlite3-dev sqlite3-doc
+    % sudo apt-get install libwxgtk2.8-dev wx2.8-i18n wx2.8-examples wx2.8-doc
 
 ### 実行 ###
 

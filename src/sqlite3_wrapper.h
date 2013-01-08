@@ -554,10 +554,12 @@ namespace sqlite3_wrapper
     template <class T>
     void fill_column(T & vec, int icol, int jcol)
     {
+      typedef typename T::value_type::first_type T1;
+      typedef typename T::value_type::second_type T2;
       for(iterator itr=this->execute(); itr; ++itr)
       {
-        vec.push_back(std::make_pair(itr[icol],
-                                     itr[jcol]));
+        vec.push_back(std::make_pair(static_cast<T1>(itr[icol]),
+                                     static_cast<T2>(itr[jcol])));
       }
     }
   };

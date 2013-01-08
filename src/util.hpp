@@ -133,8 +133,8 @@ namespace liquid
      * @retval true     When point is in ranges (including boudary.)
      * @retval false    When point is out of ranges
      */
-    bool query(T point) {
-      iterator itr = tree.upper_bound(point);
+    bool query(T point) const {
+      const_iterator itr = tree.upper_bound(point);
       if(itr == tree.begin()) return false;
       --itr;
       return itr->first <= point && point <= itr->second;
