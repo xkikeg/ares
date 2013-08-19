@@ -1,0 +1,8 @@
+language: c++
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq sqlite3 libsqlite3-dev omake libboost-all-dev
+install:
+    - omake
+script:
+    - ./test/test
