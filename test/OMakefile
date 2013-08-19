@@ -28,6 +28,7 @@ GTEST_LIB = $(StaticCXXLibrary libgtest, gtest-all)
 GTEST_MAIN = $(StaticCXXLibrary libgtest_main, gtest_main)
 
 LIBS += libgtest libgtest_main
+LDFLAGS += -lpthread
 
 TEST = $(CXXProgram test, $(CXXFILES))
 
